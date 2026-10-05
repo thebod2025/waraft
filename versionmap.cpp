@@ -51,13 +51,13 @@ static void render() {
     char buf[4096];
     int off = 0;
 
-    // Title
+    // 标题
     off += sprintf(buf + off, "╔══════════════════════════════════════════════════════════╗\n");
     off += sprintf(buf + off, "║              版本星图 (Version Star Map)                 ║\n");
     off += sprintf(buf + off, "╚══════════════════════════════════════════════════════════╝\n");
     off += sprintf(buf + off, "\n");
 
-    // Version nodes
+    // 版本节点
     off += sprintf(buf + off, "  版本节点:\n");
     int nodeWidth = 18;
     int cols = (width - 2) / nodeWidth;
@@ -76,7 +76,7 @@ static void render() {
     }
     off += sprintf(buf + off, "\n");
 
-    // Change descriptions
+    // 变更说明
     if (versionCount > 0) {
         int idx = (curNode >= 0 && curNode < versionCount) ? curNode : 0;
         int build = versions[idx].build;

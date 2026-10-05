@@ -16,7 +16,7 @@ namespace WaraftLauncher
         static List<VersionInfo> Versions = new List<VersionInfo>();
         static string VersionsDir;
 
-        // Settings
+        // 设置
         static int LoadingDurationMs = 800;
         static ConsoleColor LoadingColor = ConsoleColor.Cyan;
         static bool UseSpinner = false;
@@ -73,7 +73,7 @@ namespace WaraftLauncher
             zh.Add("LoadMode", "加载方式");
             zh.Add("LanguageLabel", "语言");
             zh.Add("CloseAfterLaunchLabel", "启动后关闭启动器");
-            zh.Add("Spinner", "|-/ spinner");
+            zh.Add("Spinner", "|/- spinner");
             zh.Add("Blocks", "填方块 ███");
             zh.Add("BlobUrl", "blob URL");
             zh.Add("DirectFile", "直接 file://");
@@ -118,7 +118,7 @@ namespace WaraftLauncher
             en.Add("LoadMode", "Load Mode");
             en.Add("LanguageLabel", "Language");
             en.Add("CloseAfterLaunchLabel", "Close After Launch");
-            en.Add("Spinner", "|-/ spinner");
+            en.Add("Spinner", "|/- spinner");
             en.Add("Blocks", "Blocks ███");
             en.Add("BlobUrl", "blob URL");
             en.Add("DirectFile", "Direct file://");
@@ -384,7 +384,7 @@ namespace WaraftLauncher
                 string[] items = BuildSettingsItems();
                 for (int i = 0; i < items.Length; i++)
                 {
-                    if (i == sel) { Console.ForegroundColor = LoadingColor; Console.WriteLine("  >> " + items[i]); Console.ResetColor(); }
+                    if (i == sel) { Console.ForeGROUND_COLOR = LoadingColor; Console.WriteLine("  >> " + items[i]); Console.ResetColor(); }
                     else Console.WriteLine("     " + items[i]);
                 }
                 Console.WriteLine("------------------------------------------------------");
@@ -445,7 +445,7 @@ namespace WaraftLauncher
 
             switch (idx)
             {
-                case 0: // LoadingDurationMs - number input
+                case 0: // LoadingDurationMs - 数字输入
                     Console.Write(T("EnterNumber"));
                     int newDuration = ReadNumberInput();
                     if (newDuration >= 100 && newDuration <= 5000)
@@ -458,7 +458,7 @@ namespace WaraftLauncher
                         Thread.Sleep(1000);
                     }
                     break;
-                case 1: // LoadingColor - cycle colors
+                case 1: // LoadingColor - 循环颜色
                     var colors = Enum.GetValues(typeof(ConsoleColor));
                     int ci = Array.IndexOf(colors, LoadingColor);
                     ci = (ci + 1) % colors.Length;
@@ -473,7 +473,7 @@ namespace WaraftLauncher
                 case 4: // Language
                     Language = Language == "zh" ? "en" : "zh";
                     break;
-                case 5: // CloseAfterLaunch - boolean input
+                case 5: // CloseAfterLaunch - 布尔输入
                     Console.Write(T("EnterBool"));
                     bool? newBool = ReadBoolInput();
                     if (newBool.HasValue)
@@ -602,8 +602,7 @@ namespace WaraftLauncher
         {
             try
             {
-                var lines = new[]
-                {
+                var lines = new[] {
                     "LoadingDurationMs=" + LoadingDurationMs,
                     "LoadingColor=" + LoadingColor,
                     "UseSpinner=" + UseSpinner,

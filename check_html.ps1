@@ -1,6 +1,6 @@
-$path = 'd:\\OneDrive\\Desktop\\game\\1\\waraft\\versions\\V0.05.00-B0013\\V0.05.00-B0013.html'
+$path = 'd:\OneDrive\Desktop\game\1\waraft\versions\V0.05.00-B0013\V0.05.00-B0013.html'
 $content = Get-Content $path -Raw
-$lines = $content -split "\`r?`n"
+$lines = $content -split "`r?`n"
 $hasNonAscii = $false
 $lineNo = 0
 for ($i = 0; $i -lt $lines.Length; $i++) {

@@ -1,6 +1,6 @@
 # 领土征服 (Waraft) - C++ 启动器
 
-> **重要提示**：当前环境中未检测到 g++/cl/gcc 编译器，因此**跳过了编译步骤**。
+> ⚠️ **重要提示**：当前环境中未检测到 g++/cl/gcc 编译器，因此**跳过了编译步骤**。
 
 ## 已创建的文件
 
@@ -13,6 +13,7 @@
 ```bash
 g++ -o waraft.exe waraft_launcher.cpp -lshell32
 ```
+
 ### 使用 Visual Studio 编译器 (cl.exe)
 ```bash
 cl waraft_launcher.cpp
