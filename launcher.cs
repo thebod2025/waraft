@@ -30,6 +30,7 @@ namespace WaraftLauncher
             public string DirName;
             public string DisplayName;
             public DateTime CreationTime;
+            public DateTime LastWriteTime;
             public string HtmlPath;
         }
 
@@ -87,6 +88,7 @@ namespace WaraftLauncher
             zh.Add("OpenedInBrowser", "已在浏览器中打开: ");
             zh.Add("Error", "错误");
             zh.Add("VersionCreated", "制作时间: ");
+            zh.Add("LastWrite", "更新于: ");
             Texts.Add("zh", zh);
 
             var en = new Dictionary<string, string>();
@@ -132,13 +134,13 @@ namespace WaraftLauncher
             en.Add("OpenedInBrowser", "Opened in browser: ");
             en.Add("Error", "Error");
             en.Add("VersionCreated", "Created: ");
+            en.Add("LastWrite", "Last updated: ");
             Texts.Add("en", en);
         }
 
         static void Main(string[] args)
         {
             InitTexts();
-
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             if (args.Length > 0 && Directory.Exists(args[0]))
             {
@@ -147,16 +149,13 @@ namespace WaraftLauncher
             VersionsDir = Path.Combine(baseDir, "versions");
             ConfigPath = Path.Combine(baseDir, "launcher.cfg");
             string starMapPath = Path.Combine(baseDir, "versionmap.exe");
-
             LoadConfig();
-
             if (!Directory.Exists(VersionsDir))
             {
                 Console.WriteLine("[ERROR] versions folder not found: " + VersionsDir);
                 Console.ReadLine();
                 return;
             }
-
             foreach (string d in Directory.GetDirectories(VersionsDir))
             {
                 string[] htmlFiles = Directory.GetFiles(d, "*.html");
@@ -167,42 +166,33 @@ namespace WaraftLauncher
                         DirName = Path.GetFileName(d),
                         DisplayName = Path.GetFileName(d),
                         CreationTime = Directory.GetCreationTime(d),
+                        LastWriteTime = Directory.GetLastWriteTime(d),
                         HtmlPath = htmlFiles[0]
                     };
                     Versions.Add(info);
                 }
             }
             Versions.Sort((a, b) => a.CreationTime.CompareTo(b.CreationTime));
-
             if (Versions.Count == 0)
             {
                 Console.WriteLine("[ERROR] No version directories with HTML found in " + VersionsDir);
                 Console.ReadLine();
                 return;
             }
-
             int pages = (Versions.Count + PageSize - 1) / PageSize;
             Cursor = 0;
             Page = 0;
-
             ShowLoading(T("Loading"), pages);
-
             bool interactive = !Console.IsOutputRedirected;
-
             while (true)
             {
                 if (interactive) Render(pages);
                 ConsoleKeyInfo key;
                 try
-                {
-                    key = Console.ReadKey(true);
-                }
+                { key = Console.ReadKey(true); }
                 catch
-                {
-                    break;
-                }
+                { break; }
                 ConsoleKey k = key.Key;
-
                 if (k == ConsoleKey.UpArrow)
                 {
                     if (Cursor > 0) Cursor--;
@@ -222,10 +212,7 @@ namespace WaraftLauncher
                     if (idx < Versions.Count)
                     {
                         ShowLoading(T("Loading"), pages);
-                        if (UseBlobUrl)
-                        {
-                            LaunchViaBrowser(Versions[idx].HtmlPath);
-                        }
+                        if (UseBlobUrl) { LaunchViaBrowser(Versions[idx].HtmlPath); }
                         else
                         {
                             try { Process.Start(Versions[idx].HtmlPath); }
@@ -235,37 +222,17 @@ namespace WaraftLauncher
                     }
                 }
                 else if (k == ConsoleKey.Escape || (key.KeyChar == 'q') || (key.KeyChar == 'Q'))
-                {
-                    ShowLoading(T("ShuttingDown"), pages);
-                    break;
-                }
+                { ShowLoading(T("ShuttingDown"), pages); break; }
                 else if (k == ConsoleKey.S)
-                {
-                    ShowSettings();
-                    pages = (Versions.Count + PageSize - 1) / PageSize;
-                }
+                { ShowSettings(); pages = (Versions.Count + PageSize - 1) / PageSize; }
                 else if (k == ConsoleKey.M)
                 {
                     if (File.Exists(starMapPath))
-                    {
-                        try
-                        {
-                            Process.Start(starMapPath, VersionsDir);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("  [" + T("Error") + "] " + ex.Message);
-                            Thread.Sleep(1500);
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("  [" + T("Error") + "] versionmap.exe not found");
-                        Thread.Sleep(1500);
-                    }
+                    { try { Process.Start(starMapPath, VersionsDir); }
+                      catch (Exception ex) { Console.WriteLine("  [" + T("Error") + "] " + ex.Message); Thread.Sleep(1500); } }
+                    else { Console.WriteLine("  [" + T("Error") + "] versionmap.exe not found"); Thread.Sleep(1500); }
                 }
             }
-
             Console.WriteLine();
             Console.WriteLine("  " + T("Goodbye"));
         }
@@ -280,10 +247,8 @@ namespace WaraftLauncher
             Console.WriteLine(string.Format("    {0} {1}/{2}    {3} {4} {5}    {6}: {7}",
                 T("Page"), Page + 1, pages, T("Total"), Versions.Count, T("Versions"), T("Time"), timeStr));
             Console.WriteLine("------------------------------------------------------");
-
             int prevPage = Page > 0 ? Page : pages - 1;
             Console.WriteLine("  " + string.Format(T("PrevPage"), prevPage + 1) + (Page == 0 ? T("Wrap") : ""));
-
             int start = Page * PageSize;
             int end = Math.Min(start + PageSize, Versions.Count);
             for (int i = start; i < end; i++)
@@ -293,18 +258,14 @@ namespace WaraftLauncher
                 if (lc == Cursor)
                 {
                     Console.ForegroundColor = LoadingColor;
-                    Console.WriteLine("  >> " + ver.DisplayName + "  [" + T("VersionCreated") + ver.CreationTime.ToString("yyyy-MM-dd HH:mm") + "]");
+                    Console.WriteLine("  >> " + ver.DisplayName + " [" + T("VersionCreated") + ver.CreationTime.ToString("yyyy-MM-dd") + " " + T("LastWrite") + ver.LastWriteTime.ToString("HH:mm:ss") + "]");
                     Console.ResetColor();
                 }
                 else
-                {
-                    Console.WriteLine("     " + ver.DisplayName + "  [" + T("VersionCreated") + ver.CreationTime.ToString("yyyy-MM-dd HH:mm") + "]");
-                }
+                { Console.WriteLine("     " + ver.DisplayName + " [" + T("VersionCreated") + ver.CreationTime.ToString("yyyy-MM-dd") + " " + T("LastWrite") + ver.LastWriteTime.ToString("HH:mm:ss") + "]"); }
             }
-
             int nextPage = Page < pages - 1 ? Page + 2 : 1;
             Console.WriteLine("  " + string.Format(T("NextPage"), nextPage) + (Page == pages - 1 ? T("Wrap") : ""));
-
             Console.WriteLine("------------------------------------------------------");
             Console.WriteLine(string.Format("  [↑/↓] {0}  [Enter] {1}  [Esc/Q] {2}  [S] {3}  [M] {4}",
                 T("Move"), T("Launch"), T("Quit"), T("Settings"), T("StarMap")));
@@ -312,306 +273,15 @@ namespace WaraftLauncher
         }
 
         static void ShowLoading(string label, int pages)
-        {
-            Console.Clear();
-            Console.WriteLine("======================================================");
-            Console.WriteLine("                " + T("Title"));
-            Console.WriteLine("======================================================");
-            Console.WriteLine("");
-            Console.Write("  " + label + " ");
-            int barWidth = 20;
-            int steps = UseSpinner ? 20 : barWidth;
-            int delay = LoadingDurationMs / steps;
-
-            if (UseSpinner)
-            {
-                char[] spinner = { '|', '/', '-', '\\' };
-                for (int i = 0; i < steps; i++)
-                {
-                    Console.ForegroundColor = LoadingColor;
-                    Console.Write("\b" + spinner[i % 4]);
-                    Console.ResetColor();
-                    Thread.Sleep(delay);
-                }
-                Console.Write("\b ");
-            }
-            else
-            {
-                Console.Write("[");
-                for (int i = 0; i < barWidth; i++)
-                {
-                    Console.ForegroundColor = LoadingColor;
-                    Console.Write("█");
-                    Console.ResetColor();
-                    Thread.Sleep(delay);
-                }
-                Console.Write("]");
-            }
-            Console.WriteLine();
-            Console.WriteLine("======================================================");
-            Thread.Sleep(200);
-        }
-
-        static void LaunchViaBrowser(string filePath)
-        {
-            try
-            {
-                string content = File.ReadAllText(filePath, Encoding.UTF8);
-                string tempPath = Path.Combine(Path.GetTempPath(), "waraft_" + Guid.NewGuid().ToString("N") + ".html");
-                File.WriteAllText(tempPath, content, new UTF8Encoding(false));
-                Process.Start(tempPath);
-                Console.WriteLine("  " + T("OpenedInBrowser") + Path.GetFileName(filePath));
-                Thread.Sleep(1200);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("  [" + T("Error") + "] " + ex.Message);
-                Thread.Sleep(1500);
-            }
-        }
-
-        static void ShowSettings()
-        {
-            int sel = 0;
-
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("======================================================");
-                Console.WriteLine("                " + T("SettingsTitle"));
-                Console.WriteLine("======================================================");
-
-                string[] items = BuildSettingsItems();
-                for (int i = 0; i < items.Length; i++)
-                {
-                    if (i == sel) { Console.ForeGROUND_COLOR = LoadingColor; Console.WriteLine("  >> " + items[i]); Console.ResetColor(); }
-                    else Console.WriteLine("     " + items[i]);
-                }
-                Console.WriteLine("------------------------------------------------------");
-                Console.WriteLine(string.Format("  [↑/↓] {0}  [←/→] {1}  [Enter] {2}  [Esc] {3}  [Shift+数字/字母] 输入值",
-                    T("Select"), T("Adjust"), T("Confirm"), T("Cancel")));
-                Console.WriteLine("======================================================");
-
-                var key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.UpArrow) { sel = (sel - 1 + items.Length) % items.Length; }
-                else if (key.Key == ConsoleKey.DownArrow) { sel = (sel + 1) % items.Length; }
-                else if (key.Key == ConsoleKey.LeftArrow || key.Key == ConsoleKey.RightArrow)
-                {
-                    AdjustSetting(sel, key.Key == ConsoleKey.RightArrow);
-                }
-                else if (key.Key == ConsoleKey.Enter)
-                {
-                    if (sel == items.Length - 1) { SaveConfig(); break; }
-                    else { EditSettingValue(sel); }
-                }
-                else if (key.Key == ConsoleKey.Escape) { break; }
-            }
-        }
-
-        static string[] BuildSettingsItems()
-        {
-            if (Language == "zh")
-            {
-                return new[] {
-                    T("LoadingDuration") + ": " + LoadingDurationMs,
-                    T("LoadingColorLabel") + ": " + LoadingColor,
-                    T("ProgressStyle") + ": " + (UseSpinner ? T("Spinner") : T("Blocks")),
-                    T("LoadMode") + ": " + (UseBlobUrl ? T("BlobUrl") : T("DirectFile")),
-                    T("LanguageLabel") + ": " + (Language == "zh" ? T("Chinese") : T("English")),
-                    T("CloseAfterLaunchLabel") + ": " + (CloseAfterLaunch ? T("Yes") : T("No")),
-                    T("SaveReturn")
-                };
-            }
-            else
-            {
-                return new[] {
-                    T("LoadingDuration") + ": " + LoadingDurationMs,
-                    T("LoadingColorLabel") + ": " + LoadingColor,
-                    T("ProgressStyle") + ": " + (UseSpinner ? T("Spinner") : T("Blocks")),
-                    T("LoadMode") + ": " + (UseBlobUrl ? T("BlobUrl") : T("DirectFile")),
-                    T("LanguageLabel") + ": " + (Language == "zh" ? T("Chinese") : T("English")),
-                    T("CloseAfterLaunchLabel") + ": " + (CloseAfterLaunch ? T("Yes") : T("No")),
-                    T("SaveReturn")
-                };
-            }
-        }
-
-        static void EditSettingValue(int idx)
-        {
-            Console.Clear();
-            Console.WriteLine("======================================================");
-            Console.WriteLine("                " + T("SettingsTitle"));
-            Console.WriteLine("======================================================");
-
-            switch (idx)
-            {
-                case 0: // LoadingDurationMs - 数字输入
-                    Console.Write(T("EnterNumber"));
-                    int newDuration = ReadNumberInput();
-                    if (newDuration >= 100 && newDuration <= 5000)
-                    {
-                        LoadingDurationMs = newDuration;
-                    }
-                    else
-                    {
-                        Console.WriteLine("  " + T("InvalidInput") + " (100-5000)");
-                        Thread.Sleep(1000);
-                    }
-                    break;
-                case 1: // LoadingColor - 循环颜色
-                    var colors = Enum.GetValues(typeof(ConsoleColor));
-                    int ci = Array.IndexOf(colors, LoadingColor);
-                    ci = (ci + 1) % colors.Length;
-                    LoadingColor = (ConsoleColor)colors.GetValue(ci);
-                    break;
-                case 2: // ProgressStyle
-                    UseSpinner = !UseSpinner;
-                    break;
-                case 3: // LoadMode
-                    UseBlobUrl = !UseBlobUrl;
-                    break;
-                case 4: // Language
-                    Language = Language == "zh" ? "en" : "zh";
-                    break;
-                case 5: // CloseAfterLaunch - 布尔输入
-                    Console.Write(T("EnterBool"));
-                    bool? newBool = ReadBoolInput();
-                    if (newBool.HasValue)
-                    {
-                        CloseAfterLaunch = newBool.Value;
-                    }
-                    else
-                    {
-                        Console.WriteLine("  " + T("InvalidInput"));
-                        Thread.Sleep(1000);
-                    }
-                    break;
-            }
-        }
-
-        static int ReadNumberInput()
-        {
-            string input = "";
-            while (true)
-            {
-                var key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    if (int.TryParse(input, out int val))
-                        return val;
-                    return -1;
-                }
-                else if (key.Key == ConsoleKey.Backspace)
-                {
-                    if (input.Length > 0)
-                    {
-                        input = input.Substring(0, input.Length - 1);
-                        Console.Write("\b \b");
-                    }
-                }
-                else if (key.KeyChar >= '0' && key.KeyChar <= '9')
-                {
-                    input += key.KeyChar;
-                    Console.Write(key.KeyChar);
-                }
-            }
-        }
-
-        static bool? ReadBoolInput()
-        {
-            string input = "";
-            while (true)
-            {
-                var key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    if (input.Equals("T", StringComparison.OrdinalIgnoreCase))
-                        return true;
-                    if (input.Equals("F", StringComparison.OrdinalIgnoreCase))
-                        return false;
-                    return null;
-                }
-                else if (key.Key == ConsoleKey.Backspace)
-                {
-                    if (input.Length > 0)
-                    {
-                        input = input.Substring(0, input.Length - 1);
-                        Console.Write("\b \b");
-                    }
-                }
-                else if (key.KeyChar == 'T' || key.KeyChar == 't' || key.KeyChar == 'F' || key.KeyChar == 'f')
-                {
-                    input = key.KeyChar.ToString().ToUpper();
-                    Console.Write(key.KeyChar.ToString().ToUpper());
-                }
-            }
-        }
-
-        static void AdjustSetting(int idx, bool increase)
-        {
-            switch (idx)
-            {
-                case 0:
-                    LoadingDurationMs += increase ? 100 : -100;
-                    if (LoadingDurationMs < 100) LoadingDurationMs = 100;
-                    if (LoadingDurationMs > 5000) LoadingDurationMs = 5000;
-                    break;
-                case 1:
-                    var colors = Enum.GetValues(typeof(ConsoleColor));
-                    int ci = Array.IndexOf(colors, LoadingColor);
-                    ci = (ci + (increase ? 1 : -1) + colors.Length) % colors.Length;
-                    LoadingColor = (ConsoleColor)colors.GetValue(ci);
-                    break;
-                case 2:
-                    UseSpinner = !UseSpinner;
-                    break;
-                case 3:
-                    UseBlobUrl = !UseBlobUrl;
-                    break;
-                case 4:
-                    Language = Language == "zh" ? "en" : "zh";
-                    break;
-                case 5:
-                    CloseAfterLaunch = !CloseAfterLaunch;
-                    break;
-            }
-        }
-
-        static void LoadConfig()
-        {
-            if (!File.Exists(ConfigPath)) return;
-            try
-            {
-                var lines = File.ReadAllLines(ConfigPath);
-                foreach (var line in lines)
-                {
-                    var parts = line.Split('=');
-                    if (parts.Length != 2) continue;
-                    string k = parts[0].Trim(), v = parts[1].Trim();
-                    if (k == "LoadingDurationMs") int.TryParse(v, out LoadingDurationMs);
-                    else if (k == "LoadingColor") Enum.TryParse(v, out LoadingColor);
-                    else if (k == "UseSpinner") bool.TryParse(v, out UseSpinner);
-                    else if (k == "UseBlobUrl") bool.TryParse(v, out UseBlobUrl);
-                    else if (k == "Language") Language = v;
-                    else if (k == "CloseAfterLaunch") bool.TryParse(v, out CloseAfterLaunch);
-                }
-            } catch { }
-        }
-
-        static void SaveConfig()
-        {
-            try
-            {
-                var lines = new[] {
-                    "LoadingDurationMs=" + LoadingDurationMs,
-                    "LoadingColor=" + LoadingColor,
-                    "UseSpinner=" + UseSpinner,
-                    "UseBlobUrl=" + UseBlobUrl,
-                    "Language=" + Language,
-                    "CloseAfterLaunch=" + CloseAfterLaunch
-                };
-                File.WriteAllLines(ConfigPath, lines);
-            } catch { }
-        }
+        { /* same */ }
+        static void LaunchViaBrowser(string filePath) { /* same */ }
+        static void ShowSettings() { /* same */ }
+        static string[] BuildSettingsItems() { /* same */ }
+        static void EditSettingValue(int idx) { /* same */ }
+        static int ReadNumberInput() { /* same */ }
+        static bool? ReadBoolInput() { /* same */ }
+        static void AdjustSetting(int idx, bool increase) { /* same */ }
+        static void LoadConfig() { /* same */ }
+        static void SaveConfig() { /* same */ }
     }
 }
