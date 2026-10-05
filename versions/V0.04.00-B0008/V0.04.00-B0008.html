@@ -1,0 +1,3646 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>棰嗗湡寰佹湇 路 V0.04.00-B0008 路 10000虏</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#05070a;
+    font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    color:#dfe8f3;user-select:none}
+  #cv{display:block;cursor:crosshair;position:fixed;inset:0}
+
+  #topbar{position:fixed;top:0;left:0;right:0;height:44px;z-index:10;
+    display:flex;align-items:center;justify-content:center;gap:22px;
+    background:linear-gradient(180deg,rgba(9,13,19,.97),rgba(9,13,19,.72));
+    border-bottom:1px solid rgba(90,140,200,.18);backdrop-filter:blur(12px);
+    font-size:12.5px;padding:0 16px;overflow-x:auto;white-space:nowrap}
+  .res{display:flex;align-items:center;gap:6px;color:#7d8fa6;white-space:nowrap}
+  .res b{color:#eaf2ff;font-variant-numeric:tabular-nums;font-weight:600;min-width:40px;
+    display:inline-block;text-align:right}
+  .res i{width:8px;height:8px;border-radius:2px;flex:none;display:block}
+
+  #panel{position:fixed;top:58px;right:12px;width:222px;z-index:10;
+    background:rgba(13,18,26,.9);border:1px solid rgba(90,140,200,.22);
+    border-radius:10px;backdrop-filter:blur(10px);padding:12px;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);font-size:13px}
+  #panel .ptitle{color:#8b9cb0;font-size:11px;letter-spacing:1px;margin-bottom:8px}
+  #selinfo{line-height:1.85;font-size:12px;color:#9aabbd;min-height:110px;
+    border-bottom:1px solid rgba(90,140,200,.16);padding-bottom:9px;margin-bottom:10px}
+  #selinfo .kv{display:flex;justify-content:space-between}
+  #selinfo .kv span:last-child{color:#eaf2ff;font-variant-numeric:tabular-nums}
+  #selinfo .none{color:#5c6b7d;font-style:italic}
+  #selinfo .tag{display:inline-block;padding:0 5px;border-radius:3px;font-size:10px;
+    background:rgba(255,255,255,.08);color:#8fa8c4;margin-left:4px}
+
+  .btn{width:100%;padding:8px 0;margin-bottom:7px;border-radius:7px;cursor:pointer;
+    background:rgba(64,158,255,.12);border:1px solid rgba(64,158,255,.38);color:#8fc9ff;
+    font-size:12.5px;font-family:inherit;transition:.14s;letter-spacing:.3px}
+  .btn:hover{background:rgba(64,158,255,.24);color:#cfe8ff}
+  .btn:active{transform:scale(.985)}
+  .btn:disabled{opacity:.32;cursor:not-allowed;background:rgba(80,90,100,.1);
+    border-color:rgba(80,90,100,.25);color:#6a7a8c}
+  .btn.warn{background:rgba(230,90,90,.12);border-color:rgba(230,90,90,.42);color:#ff9d9d}
+  .btn.warn:hover{background:rgba(230,90,90,.24);color:#ffc4c4}
+  .btn.amber{background:rgba(255,180,70,.1);border-color:rgba(255,180,70,.4);color:#ffd08a}
+  .btn.amber:hover{background:rgba(255,180,70,.22)}
+
+  #hint{margin-top:8px;font-size:11px;color:#5f7085;line-height:1.8}
+  #hint kbd{background:rgba(90,140,200,.16);border:1px solid rgba(90,140,200,.3);
+    border-radius:3px;padding:0 4px;font-size:10px;color:#9fc4e8;font-family:inherit}
+
+  #tip{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:8;
+    font-size:11.5px;color:#5d6e83;letter-spacing:.3px;pointer-events:none;
+    white-space:nowrap;background:rgba(8,12,18,.62);padding:5px 14px;border-radius:20px;
+    border:1px solid rgba(90,140,200,.12)}
+
+  #fps{position:fixed;bottom:12px;left:12px;z-index:9;
+    font-size:11px;color:#5a7b9e;font-variant-numeric:tabular-nums;
+    background:rgba(8,12,18,.72);padding:4px 10px;border-radius:6px;
+    border:1px solid rgba(90,140,200,.16);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.5px;
+    pointer-events:none}
+  #fps b{color:#7ee0a0;font-weight:600}
+
+  #tooltip{position:fixed;pointer-events:none;display:none;z-index:20;
+    background:rgba(8,12,18,.95);border:1px solid rgba(90,140,200,.3);
+    border-radius:7px;padding:7px 11px;font-size:12px;line-height:1.7;white-space:nowrap;
+    box-shadow:0 6px 20px rgba(0,0,0,.65)}
+  #tooltip .t{color:#8fa5bb}
+  #toast-stack{position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+  .toast-item{background:rgba(20,26,36,.95);border:1px solid rgba(255,180,80,.35);color:#ffce7a;
+    padding:6px 16px;border-radius:8px;font-size:12.5px;white-space:nowrap;opacity:0;transition:opacity .22s}
+  .toast-item.on{opacity:1}
+
+  #zoomui{position:fixed;bottom:52px;right:14px;z-index:9;display:flex;flex-direction:column;gap:6px}
+  #zoomui button{width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:16px;
+    background:rgba(13,18,26,.86);border:1px solid rgba(90,140,200,.25);color:#8fa8c4;
+    backdrop-filter:blur(8px);transition:.14s;line-height:1}
+  #zoomui button:hover{background:rgba(64,158,255,.2);color:#cfe8ff}
+
+  /* 鎺掕姒?*/
+  #rankbar{position:fixed;left:10px;bottom:60px;top:auto;transform:none;max-width:480px
+    z-index:9;display:flex;align-items:center;gap:10px;
+    background:rgba(9,13,19,.72);border:1px solid rgba(90,140,200,.15);
+    border-radius:6px;padding:2px 12px;font-size:11px;backdrop-filter:blur(6px);
+    color:#9ab3cc;white-space:normal;overflow:hidden;max-width:480px}
+  .rk-title{color:#e7f0ff;font-weight:600;margin-right:6px}
+  #rk-list{display:flex;gap:10px}
+  #rk-list .rk-item{display:flex;align-items:center;gap:4px;color:#b8cce0}
+  #rk-list .rk-item .rk-flag{width:8px;height:8px;border-radius:2px;flex:none;display:block}
+  #rk-list .rk-item b{color:#eaf2ff;font-variant-numeric:tabular-nums}
+  #rk-list .rk-item.me{color:#cfe8ff;font-weight:600;border-bottom:1px solid rgba(64,158,255,.6)}
+
+  .modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;
+    pointer-events:none}
+  .modal-box{background:rgba(13,18,26,.95);border:1px solid rgba(90,140,200,.25);
+    border-radius:14px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.7);
+    max-height:82vh;pointer-events:auto}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:14px;font-size:14px;letter-spacing:2px;color:#b8cce0}
+  .modal-head button{background:none;border:none;color:#7d8fa6;font-size:16px;cursor:pointer;
+    padding:0 4px;line-height:1}
+  .modal-head button:hover{color:#fff}
+
+  #start .modal-box{width:400px;align-items:stretch;text-align:center}
+  #start h1{margin:0;font-size:32px;letter-spacing:10px;color:#eaf2ff;font-weight:600}
+  #start .sub{margin:6px 0 24px;color:#6d8098;font-size:12.5px;letter-spacing:2px}
+  .field{margin-bottom:20px;text-align:left}
+  .field label{display:block;font-size:12px;color:#8b9cb0;margin-bottom:8px;letter-spacing:1px}
+  .field label b{color:#6fc0ff}
+  .opts{display:flex;gap:8px}
+  .opts button{flex:1;padding:9px 0;border-radius:8px;cursor:pointer;font-size:12px;
+    background:rgba(64,158,255,.08);border:1px solid rgba(64,158,255,.25);color:#7fa8cc;
+    font-family:inherit;transition:.14s}
+  .opts button:hover{background:rgba(64,158,255,.18);color:#b8dcff}
+  .opts button.active{background:rgba(64,158,255,.25);border-color:rgba(64,158,255,.7);
+    color:#cfe8ff;font-weight:600}
+  #ai-count{width:100%;accent-color:#409eff;cursor:pointer}
+  #start-btn{margin-top:8px;padding:12px 0;border-radius:9px;cursor:pointer;font-size:14px;
+    background:rgba(64,158,255,.2);border:1px solid rgba(64,158,255,.55);color:#cfe8ff;
+    font-family:inherit;letter-spacing:3px;transition:.15s}
+  #start-btn:hover{background:rgba(64,158,255,.35)}
+
+  #diplo .modal-box{width:520px}
+  #diplo-list{overflow-y:auto;max-height:60vh;padding-right:4px}
+  #diplo-list::-webkit-scrollbar{width:6px}
+  #diplo-list::-webkit-scrollbar-thumb{background:rgba(90,140,200,.3);border-radius:3px}
+  .diplo-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;
+    margin-bottom:4px;background:rgba(255,255,255,.02);transition:.12s}
+  .diplo-row:hover{background:rgba(64,158,255,.08)}
+  .dr-color{width:12px;height:12px;border-radius:3px;flex:none}
+  .dr-name{font-size:13px;color:#dfe8f3;min-width:56px}
+  .dr-stat{flex:1;display:flex;gap:10px;font-size:11px;color:#7d8fa6}
+  .dr-stat span{white-space:nowrap}
+  .dr-acts{display:flex;gap:5px}
+  .dr-acts button{padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;
+    background:rgba(64,158,255,.1);border:1px solid rgba(64,158,255,.3);color:#8fc9ff;
+    font-family:inherit;transition:.12s;white-space:nowrap}
+  .dr-acts button:hover{background:rgba(64,158,255,.25);color:#cfe8ff}
+  .dr-acts button[data-act="war"]{background:rgba(230,90,90,.12);border-color:rgba(230,90,90,.4);
+    color:#ff9d9d}
+  .dr-acts button[data-act="war"]:hover{background:rgba(230,90,90,.25)}
+  .dr-acts button:disabled{opacity:.3;cursor:not-allowed}
+
+  #cquery .cq-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  #cquery .cq-dot{width:16px;height:16px;border-radius:4px;flex:none}
+  #cquery .cq-name{font-size:18px;font-weight:600;color:#eaf2ff;letter-spacing:1px}
+  #cquery .cq-tag{font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.08);color:#8fa8c4}
+  #cquery .cq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  #cquery .cq-stat{background:rgba(255,255,255,.03);border:1px solid rgba(90,140,200,.18);
+    border-radius:8px;padding:9px 11px}
+  #cquery .cq-stat .lbl{font-size:11px;color:#7d8fa6;margin-bottom:4px;letter-spacing:.5px}
+  #cquery .cq-stat .val{font-size:18px;color:#eaf2ff;font-variant-numeric:tabular-nums;font-weight:600}
+  #cquery .cq-chart-title{font-size:11px;color:#7d8fa6;letter-spacing:1px;margin:4px 0 4px}
+  #cquery canvas.cq-chart{width:100%;height:120px;border-radius:6px;background:rgba(0,0,0,.25);
+    border:1px solid rgba(90,140,200,.14)}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="topbar">
+  <div class="res"><i style="background:#7ee0a0"></i>浜哄彛 <b id="r-pop">0</b></div>
+  <div class="res"><i style="background:#6fc0ff"></i>瀹堝啗 <b id="r-troop">0</b></div>
+  <div class="res"><i style="background:#ff9a7a"></i>鐜板焦 <b id="r-active">0</b></div>
+  <div class="res"><i style="background:#8fa8ff"></i>棰嗗湡 <b id="r-land">0</b></div>
+  <div class="res"><i style="background:#ffc861"></i>鍐涘笎/钀ラ槦 <b id="r-bat">0</b></div>
+  <div class="res"><i style="background:#ff7a7a"></i>DF-5C <b id="r-msl">0</b></div>
+  <div class="res"><i style="background:#c0a8ff"></i>鐪佷唤 <b id="r-prov">0</b></div>
+  <div class="res"><i style="background:#b8c4d4"></i>澶╂暟 <b id="r-day">1</b></div>
+  <div class="res" style="color:#5c6b7d;font-style:italic">0.00.03-B0007</div>
+</div>
+
+<div id="rankbar">
+  <span class="rk-title" id="rk-title">馃弳 棰嗗湡姒?/span>
+  <span id="rk-list"></span>
+  <span class="rk-hint" style="opacity:.4">鈫?鈫?鍒囨崲</span>
+</div>
+
+<div id="panel">
+  <div class="ptitle">鎯?鎶?闈?鏉?/div>
+  <div id="selinfo"><div class="none">鏈€変腑鍦板潡</div></div>
+  <button class="btn" id="btn-recruit">寰?鍏点€€<span style="opacity:.55">-800浜哄彛 +1000鍏?/span></button>
+  <button class="btn" id="btn-bat">寤洪€犲啗甯愩€€<span style="opacity:.55">3脳3 路 -1000鍏?路 鑷姩娲捐惀闃?/span></button>
+  <button class="btn amber" id="btn-diplo">澶?浜?閮?/button>
+  <button class="btn warn" id="btn-missile">鍛煎彨 DF-5C銆€<span style="opacity:.7">[Q]</span></button>
+  <div id="hint">
+    <kbd>鎷栨嫿</kbd> 骞崇Щ 路 <kbd>婊氳疆</kbd> 缂╂斁<br>
+    <kbd>鐐瑰嚮</kbd> 閫変腑鍦板潡 路 <kbd>Q</kbd> 鏍告墦鍑?路 <kbd>R</kbd> 閲嶅紑
+  </div>
+</div>
+
+<div id="zoomui">
+  <button id="zin">+</button>
+  <button id="zout">鈭?/button>
+</div>
+
+<div id="tip">鍐涘笎(3脳3)浼氳嚜鍔ㄦ淳鐢熻惀闃?0.8脳0.8) 鈫?钀ラ槦璧跺線杈圭枂骞舵磱钁卞紡鎵╁紶 路 灞卞湴闃插尽鏋侀珮</div>
+<div id="fps">-- FPS</div>
+<div id="tooltip"></div>
+<div id="toast"></div>
+
+<div id="diplo" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span>澶?浜?閮?/span>
+      <button id="diplo-close">鉁?/button>
+    </div>
+    <div id="diplo-list"></div>
+  </div>
+</div>
+
+<div id="start" class="modal" style="display:flex">
+  <div class="modal-box">
+    <h1>棰?鍦?寰?鏈?/h1>
+    <p class="sub">10000 脳 10000 涓?鐣?/p>
+
+    <div class="field">
+      <label>鍦板浘鍒嗚鲸鐜囷紙涓栫晫闈㈢Н鍥哄畾 10000虏锛?/label>
+      <div class="opts" id="map-opts">
+        <button data-n="100">100脳100</button>
+        <button data-n="150">150脳150</button>
+        <button data-n="200">200脳200</button>
+        <button data-n="500" class="active">500脳500</button>
+        <button data-n="2000">2000脳2000</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>AI 鍥藉鏁伴噺 <b id="ai-count-v">20</b></label>
+      <input type="range" id="ai-count" min="5" max="50" value="20">
+    </div>
+
+    <div class="field">
+      <label>鍦板浘绉嶅瓙锛堢暀绌?= 闅忔満 路 鍚岀瀛愬悓鍦板舰涓庡浗瀹跺竷灞€锛?/label>
+      <input type="text" id="map-seed" placeholder="渚嬪 12345" style="width:100%;box-sizing:border-box;
+        padding:8px;border-radius:7px;border:1px solid rgba(90,140,200,.3);
+        background:rgba(8,12,18,.6);color:#cfe4ff;font-family:inherit;font-size:13px">
+    </div>
+
+    <button id="start-btn">寮€ 濮?寰?鎴?/button>
+  </div>
+</div>
+
+<div id="over" class="modal">
+  <div class="modal-box" style="width:360px;text-align:center;align-items:stretch">
+    <h1 id="over-title" style="margin:0 0 10px;font-size:40px;letter-spacing:8px"></h1>
+    <p id="over-sub" style="margin:0 0 20px;color:#93a5ba;font-size:13.5px"></p>
+    <button id="over-btn" style="padding:11px 0;border-radius:9px;cursor:pointer;font-size:14px;
+      background:rgba(64,158,255,.16);border:1px solid rgba(64,158,255,.5);color:#9ed0ff;
+      font-family:inherit;letter-spacing:2px">鍐?鏉?涓€ 灞€</button>
+  </div>
+</div>
+
+<div id="cquery" style="position:fixed;left:12px;top:72px;z-index:12;display:none;
+  background:rgba(9,13,19,.88);border:1px solid rgba(90,140,200,.25);border-radius:8px;
+  padding:10px 12px;font-size:12px;backdrop-filter:blur(8px);min-width:240px;max-width:320px;
+  color:#b8cce0;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <span id="cq-head" style="color:#e7f0ff;font-weight:600;font-size:12px;letter-spacing:1px">鍥?瀹?鏌?璇?/span>
+    <button id="cq-close" style="background:none;border:none;color:#8fa8c4;cursor:pointer;font-size:14px;padding:0 4px">鉁?/button>
+  </div>
+  <div id="cq-body"></div>
+</div>
+
+<script>
+(function () {
+"use strict";
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   甯搁噺
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var WORLD    = 10000;
+var TICK_MS  = 750;
+var MAX_AI   = 50;
+
+var N = 100, CELL = 100, TOTAL = 10000;
+
+/* 鈺愨晲 鍦板渾璇达細鏄熺悆琛ㄩ潰锛寈 鍜?y 鏂瑰悜鍏ㄩ儴鐜粫 鈺愨晲 */
+var WRAP = true;
+function WX(x) { x |= 0; if (WRAP) { x %= N; if (x < 0) x += N; } return x; }
+function WY(y) { y |= 0; if (WRAP) { y %= N; if (y < 0) y += N; } return y; }
+/* cell(x, y) 杩斿洖鐜粫鍚庣殑 index锛涗笉妫€鏌ユ槸鍚﹀湪鑼冨洿鍐?*/
+function WCell(x, y) { return WY(y) * N + WX(x); }
+/* dx, dy 鐨勭幆缁曟浖鍝堥】璺濈 */
+function WDist(ax, ay, bx, by) {
+  var dx = Math.abs(WX(ax) - WX(bx));
+  var dy = Math.abs(WY(ay) - WY(by));
+  if (dx > N/2) dx = N - dx;
+  if (dy > N/2) dy = N - dy;
+  return dx + dy;
+}
+/* dx, dy 鐨勭幆缁曟鍑犻噷寰楄窛绂诲钩鏂?*/
+function WDist2(ax, ay, bx, by) {
+  var dx = Math.abs(WX(ax) - WX(bx));
+  var dy = Math.abs(WY(ay) - WY(by));
+  if (dx > N/2) dx = N - dx;
+  if (dy > N/2) dy = N - dy;
+  return dx*dx + dy*dy;
+}
+
+var T_PLAIN=0, T_FOREST=1, T_HILL=2, T_MOUNTAIN=3, T_WATER=4, T_DESERT=5, T_RUIN=6;
+
+var TERRAIN = [
+  { name:'骞冲師', c:[84,112,74],  popMax:12000, defMul:1.00, pass:true  },
+  { name:'妫灄', c:[44,80,52],   popMax:6000,  defMul:1.45, pass:true  },
+  { name:'涓橀櫟', c:[98,102,68],  popMax:4000,  defMul:1.70, pass:true  },
+  { name:'灞卞湴', c:[92,92,98],   popMax:1500,  defMul:2.20, pass:true  },
+  { name:'姘村煙', c:[32,62,102],  popMax:0,     defMul:1.00, pass:false },
+  { name:'娌欐紶', c:[128,112,76], popMax:800,   defMul:0.90, pass:true  },
+  { name:'搴熷', c:[58,54,52],   popMax:2000,  defMul:1.10, pass:true  },
+];
+
+var DIRS8 = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+var DIRS4 = [[0,-1],[1,0],[0,1],[-1,0]];   /* 钀ラ槦鍙敤 4 鏂瑰悜锛堢鏂滆蛋锛?*/
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鍏ㄥ眬鐘舵€?鈥斺€?鍏ㄩ儴鍒濆鍖栦负 null / 绌?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var terrain = null, owner = null, pop = null, troops = null, cap = null;
+var ruinTurn = null;      /* 姣忔牸搴熷璧峰鍥炲悎锛屽埌鐐瑰悗澶嶅師 */
+
+var countries = [];
+var relations = [], atWar = [], allied = [];
+var landCount = [];
+var provinces = [];
+var prov = null;          /* 姣忔牸鐪佷唤 id 鏍囪 */
+/* 鐪佺晫鍒嗚壊锛堝惊鐜彇鐢紝闅忕渷浠?id 鍙樺寲锛岃瑙変笂鏇磋鏁达級 */
+var PROV_EDGE = [
+  'rgba(255,255,255,.5)', 'rgba(255,210,150,.45)',
+  'rgba(180,220,255,.45)', 'rgba(255,180,200,.45)'
+];
+var missiles = [], effects = [];
+var barracks = [];
+var squads = [];
+var divisions = [];       /* 甯堢粍缁?*/
+var squadIdx = 0;         /* 钀ラ槦鍏ㄥ眬缂栧彿 */
+var history = [];
+var provAdj = {};
+
+var turn = 0;
+var playerId = 1;
+var selected = -1;
+var gameOver = null;
+var missileCount = 3;
+var missileMode = false;
+var miniDirty = false;
+
+var COLOR = [], COLOR_CSS = [];
+
+var cam = { x: WORLD/2, y: WORLD/2, zoom: 0.25 };
+
+var showFlags = true;        /* K 閿垏鎹㈡棗甯滄樉绀?*/
+var showDivisions = true;   /* Z 閿垏鎹㈠笀鏄剧ず锛涚缉鍒板叏鍥句篃寮哄埗鏄剧ず */
+var showAlliances = false;  /* 1 閿垏鎹㈣仈鐩熼樀钀ユ樉绀?*/
+var alliances = [];          /* 鑱旂洘鏁扮粍锛歔{name, members:[oid...], color:[r,g,b]}] */
+var ALLIANCE_COLORS = [
+  [90,160,255],[255,140,70],[120,220,140],[230,120,200],
+  [240,220,80],[180,150,255],[100,220,220],[255,100,110]
+];
+var PENDING_WARS = [];      /* 绛夊緟鍊掕鏃剁殑瀹ｆ垬 */
+var cities = [];            /* 鍩庡競锛歿owner, cx, cy, cell, name} */
+var CITY_SEQ = 0;
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鐢诲竷
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var cv = document.getElementById('cv');
+var ctx = cv.getContext('2d', { alpha:false });
+var VW = 0, VH = 0, DPR = 1;
+
+var mini = null, miniCtx = null, miniData = null;
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  VW = window.innerWidth;
+  VH = window.innerHeight;
+  cv.width  = Math.max(1, Math.floor(VW * DPR));
+  cv.height = Math.max(1, Math.floor(VH * DPR));
+  cv.style.width  = VW + 'px';
+  cv.style.height = VH + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   HSL 鈫?RGB
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function hsl2rgb(h, s, l) {
+  h = ((h % 360) + 360) % 360 / 360;
+  var a = s * Math.min(l, 1 - l);
+  function f(n) {
+    var k = (n + h * 12) % 12;
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
+  }
+  return [f(0), f(8), f(4)];
+}
+
+var NAME_POOL = ['璧?,'姗?,'閲?,'缈?,'闈?,'钃?,'绱?,'閾?,'鐧?,'榛?,'鐏?,'澧?,'鑻?,'鐜?,
+  '缁?,'鏈?,'纰?,'鐨?,'涓?,'绱?,'缈?,'闇?,'闆?,'椋?,'浜?,'鏄?,'鏈?,'鏃?,'灞?,'娌?,
+  '娴?,'鏋?,'鍘?,'鏇?,'鏇?,'杈?,'鐒?,'娑?,'宕?,'璋?,'婕?,'娉?,'宀?,'娓?,'鍨?,'杈?,
+  '瀹?,'琛?,'鐠?,'鐜?];
+
+/* 鈹€鈹€ 甯?/ 鐪?鍛藉悕姹?鈹€鈹€ */
+var PROV_POOL = ['浜?,'娲?,'娣?,'闄?,'鑽?,'璞?,'绉?,'鏅?,'榻?,'妤?,'鐕?,'榄?,'璧?,'鍗?,
+  '閮?,'瀹?,'椴?,'闄?,'钄?,'璁?,'钖?,'铏?,'鏇?,'鍗?,'闊?,'姊?,'铚€','姹?,'鍚?,'瓒?];
+var CITY_POOL = ['闃?,'闃?,'骞?,'瀹?,'瀹?,'瀹?,'搴?,'娉?,'鏄?,'涓?,'鍗?,'瀵?,'瀹?,'椤?,
+  '鍜?,'骞?,'鍏?,'闅?,'鏄?,'鐩?,'鐟?,'绁?,'鍚?,'鍢?,'鐟?,'搴?,'楦?,'椋?,'楣?,'榫?,
+  '鍑?,'楹?,'楹?,'楣?,'闇?,'闇?,'闇?,'婢?,'婧?,'娉?,'姹€','娌?,'婀?,'娼?,'姹?,'宸?];
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   绉嶅瓙闅忔満鏁帮紙mulberry32锛?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    var r = (t ^ t >>> 14) >>> 0;
+    return (r % 1e9) / 1e9;
+  };
+}
+var RNG = Math.random;   /* 鍏ㄥ眬闅忔満婧愶紝寮€灞€鍙垏鍒扮瀛愭祦 */
+function seedRNG(seed) {
+  if (seed == null || seed === '') RNG = Math.random;
+  else RNG = mulberry32(parseInt(seed, 10) || 0);
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   棰滆壊琛?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function buildColorTable() {
+  COLOR = []; COLOR_CSS = [];
+  for (var o = 0; o < countries.length; o++) {
+    var byT = [], byCss = [];
+    for (var t = 0; t < TERRAIN.length; t++) {
+      var lv = [], lvCss = [];
+      for (var l = 0; l < 4; l++) {
+        var ter = TERRAIN[t];
+        var col;
+        if (o === 0) {
+          var k = 0.72 + 0.28 * (l / 3);
+          col = [ ter.c[0]*k|0, ter.c[1]*k|0, ter.c[2]*k|0 ];
+        } else {
+          var fc = countries[o].color;
+          var br = (0.62 + 0.38 * (l / 3));
+          var tv = 0.5;
+          col = [
+            Math.min(255, (fc[0] * br * (1-tv) + ter.c[0] * br * tv)) | 0,
+            Math.min(255, (fc[1] * br * (1-tv) + ter.c[1] * br * tv)) | 0,
+            Math.min(255, (fc[2] * br * (1-tv) + ter.c[2] * br * tv)) | 0
+          ];
+        }
+        lv.push(col);
+        lvCss.push('rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')');
+      }
+      byT.push(lv); byCss.push(lvCss);
+    }
+    COLOR.push(byT); COLOR_CSS.push(byCss);
+  }
+}
+
+/* 鈹€鈹€ 鍥藉鏃楀笢锛氭寜鍥藉 id 绋冲畾鐢熸垚鐨勫皬鏃楋紙鍚潯绾?寰借锛夛紝缂撳瓨 canvas 鈹€鈹€ */
+var FLAG_CACHE = [];
+function makeFlagCanvas(id) {
+  var c = document.createElement('canvas');
+  c.width = 30; c.height = 30;
+  var g = c.getContext('2d');
+  g.clearRect(0, 0, 30, 30);
+  var base = [64, 158, 255], motif = 'circle';
+  if (id > 0 && countries[id] && countries[id].color) base = countries[id].color;
+  else if (id === 0) { base = [150, 158, 170]; motif = 'circle'; }
+  else {
+    var n = ((id - 1) * 137 + 7) % 9;
+    motif = (n % 2 === 0) ? 'circle' : 'square';
+    var h = (n * 40 + ((id * 53) % 200)) % 360;
+    base = hsl2rgb(h, 0.72, 0.52);
+  }
+  g.fillStyle = 'rgba(255,255,255,.14)';
+  g.fillRect(0, 0, 30, 7);
+  g.fillStyle = 'rgba(255,255,255,.14)';
+  g.fillRect(0, 23, 30, 7);
+  g.fillStyle = 'rgba(' + base[0] + ',' + base[1] + ',' + base[2] + ',.95)';
+  g.fillRect(0, 7, 30, 16);
+  g.strokeStyle = 'rgba(255,255,255,.55)';
+  g.lineWidth = 1;
+  g.strokeRect(0.5, 0.5, 29, 29);
+  g.fillStyle = 'rgba(255,255,255,.95)';
+  if (motif === 'circle') { g.beginPath(); g.arc(15, 15, 5.5, 0, Math.PI * 2); g.fill(); }
+  else { g.fillRect(10, 10, 10, 10); }
+  g.fillStyle = 'rgba(' + base[0] + ',' + base[1] + ',' + base[2] + ',.95)';
+  if (motif === 'circle') { g.beginPath(); g.arc(15, 15, 2.4, 0, Math.PI * 2); g.fill(); }
+  else { g.fillRect(12.5, 12.5, 5, 5); }
+  return c;
+}
+function renderFlags(z) {
+  if (!showFlags) return;
+  var fs = Math.max(15, Math.min(42, z * 70));
+  for (var o = 1; o < countries.length; o++) {
+    if (!countries[o].alive) continue;
+    var i = FLAG_CACHE[o];
+    if (!i) { i = makeFlagCanvas(o); FLAG_CACHE[o] = i; }
+    var fx = countries[o].fx, fy = countries[o].fy;
+    if (fx == null) continue;
+    var px = (fx - cam.x) * z + VW / 2;
+    var py = (fy - cam.y) * z + VH / 2;
+    if (px < -40 || py < -40 || px > VW + 40 || py > VH + 40) continue;
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.drawImage(i, px - fs / 2, py - fs / 2 - 4, fs, fs);
+    ctx.restore();
+  }
+}
+
+/* 鑱旂洘闃佃惀娓叉煋锛氬悓鑱旂洘棰嗗湡澶栧彂鍏?+ 鏃楀笢瑙掓爣 */
+function renderAlliances(z, cs) {
+  if (!showAlliances || alliances.length === 0) return;
+  /* 鎸夎仈鐩熷垎缁勭粯鍒堕鍦熷彂鍏夎竟妗?*/
+  for (var a = 0; a < alliances.length; a++) {
+    var alliance = alliances[a];
+    var col = alliance.color;
+    /* 缁欒仈鐩熸垚鍛橀鍦熺敾澶栧彂鍏夎竟妗?*/
+    ctx.save();
+    ctx.strokeStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.55)';
+    ctx.lineWidth = Math.max(1, Math.min(4, cs * 0.4));
+    ctx.shadowColor = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.7)';
+    ctx.shadowBlur = 8;
+    for (var oi = 0; oi < alliance.members.length; oi++) {
+      var oid = alliance.members[oi];
+      if (!countries[oid] || !countries[oid].alive) continue;
+      var flag = FLAG_CACHE[oid];
+      if (!flag) { flag = makeFlagCanvas(oid); FLAG_CACHE[oid] = flag; }
+      var fx = countries[oid].fx, fy = countries[oid].fy;
+      if (fx == null) continue;
+      /* 鐢昏仈鐩熷彂鍏夎竟妗嗗洿缁曞浗瀹朵腑蹇?*/
+      var px = (fx - cam.x) * z + VW / 2;
+      var py = (fy - cam.y) * z + VH / 2;
+      var fs = Math.max(20, Math.min(48, z * 85));
+      /* 鍦ㄦ棗甯滃懆鍥寸敾鑱旂洘鑹插妗?*/
+      ctx.strokeRect(px - fs/2 - 3, py - fs/2 - 7, fs + 6, fs + 6);
+    }
+    ctx.restore();
+  }
+}
+function renderCities(z, cs) {
+  if (cs < 6) return;
+  for (var k = 0; k < cities.length; k++) {
+    var c = cities[k];
+    var px = (c.cx * CELL - cam.x) * z + VW / 2;
+    var py = (c.cy * CELL - cam.y) * z + VH / 2;
+    if (px < -40 || py < -40 || px > VW + 40 || py > VH + 40) continue;
+    var stillOwner = (owner[c.cell] === c.owner);
+
+    /* 绮剧編 emoji 鍥炬爣 */
+    var icon = stillOwner ? '馃彊' : '馃彋';
+    var fSize = Math.max(8, Math.min(22, cs * 0.9));
+    ctx.font = fSize + 'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(icon, px + cs / 2, py + cs / 2);
+    ctx.textBaseline = 'alphabetic';
+
+    if (cs > 12) {
+      ctx.font = Math.max(9, cs * 0.45) + 'px sans-serif';
+      ctx.fillStyle = 'rgba(0,0,0,.6)';
+      ctx.fillText(c.name, px + cs / 2 + 5, py + cs / 2 + 3);
+      ctx.fillStyle = stillOwner ? 'rgba(255,255,255,.9)' : 'rgba(255,170,170,.9)';
+      ctx.fillText(c.name, px + cs / 2 + 4, py + cs / 2 + 2);
+    }
+  }
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鍦板舰鐢熸垚
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function fbm(x, y, oct, freq) {
+  var v = 0, a = 0.5, f = freq;
+  for (var o = 0; o < oct; o++) {
+    v += a * Math.sin(x*f + o*13.7) * Math.cos(y*f*1.13 + o*7.3);
+    a *= 0.5; f *= 2.07;
+  }
+  return v;
+}
+function fbm2(x, y, oct, freq) {
+  var v = 0, a = 0.5, f = freq;
+  for (var o = 0; o < oct; o++) {
+    v += a * Math.sin(x*f*0.9 + o*23.1) * Math.sin(y*f*1.3 + o*11.9);
+    a *= 0.5; f *= 2.13;
+  }
+  return v;
+}
+
+function genTerrain() {
+  var scale = 100 / N;
+  /* 绉嶅瓙鍋忕Щ锛氫粠褰撳墠 RNG 娴侀噷鍙栦袱涓吉闅忔満鏁板仛鍣０鐩镐綅 */
+  var sox = RNG() * 7.13 + 1.7;
+  var soy = RNG() * 9.41 + 2.3;
+  for (var y = 0; y < N; y++) {
+    for (var x = 0; x < N; x++) {
+      var v  = fbm(x*scale + sox, y*scale + soy, 5, 0.028);
+      var v2 = fbm2(x*scale + soy, y*scale + sox, 4, 0.060);
+      var t;
+      if      (v < -0.36) t = T_WATER;
+      else if (v >  0.50) t = T_MOUNTAIN;
+      else if (v >  0.28) t = T_HILL;
+      else if (v2 >  0.13) t = T_FOREST;
+      else if (v2 < -0.15) t = T_DESERT;
+      else                 t = T_PLAIN;
+      terrain[y*N + x] = t;
+    }
+  }
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鏂版父鎴?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function newGame(nVal, aiCount, seed) {
+  N = nVal;
+  CELL = WORLD / N;
+  TOTAL = N * N;
+  seedRNG(seed);   /* 搴旂敤鍦板浘绉嶅瓙锛堢暀绌?闅忔満锛?*/
+
+  terrain  = new Uint8Array(TOTAL);
+  owner    = new Uint8Array(TOTAL);
+  pop      = new Float32Array(TOTAL);
+  troops  = new Float32Array(TOTAL);
+  cap      = new Float32Array(TOTAL);
+  prov     = new Int32Array(TOTAL);
+  ruinTurn = new Int32Array(TOTAL);
+  ruinTurn.fill(-1);
+
+  genTerrain();
+
+  for (var i = 0; i < TOTAL; i++) {
+    var pm = TERRAIN[terrain[i]].popMax;
+    pop[i] = pm * (0.50 + RNG() * 0.36);
+    cap[i] = 30 + pop[i] * 0.03;
+    troops[i] = cap[i] * (0.18 + RNG() * 0.24);
+  }
+
+  /* 鈹€鈹€ 鍥藉 鈹€鈹€ */
+  countries = [{ id:0, name:'涓珛', color:[90,100,115], neutral:true, alive:true }];
+  for (var c2 = 1; c2 <= aiCount + 1; c2++) {
+    var isPlayer = (c2 === 1);
+    var nm;
+    if (isPlayer) {
+      nm = '鎴戝浗';
+    } else {
+      var idx = (c2 - 2) % NAME_POOL.length;
+      var suffix = (c2 - 2 >= NAME_POOL.length) ? ('-' + (Math.floor((c2-2)/NAME_POOL.length)+1)) : '';
+      nm = NAME_POOL[idx] + '鍥? + suffix;
+    }
+    countries.push({
+      id: c2,
+      name: nm,
+      color: isPlayer ? [64,158,255] : hsl2rgb((c2 * 137.508) % 360, 0.62, 0.56),
+      neutral: false,
+      alive: true,
+      isPlayer: isPlayer
+    });
+  }
+
+  var NC = countries.length;
+  relations = []; atWar = []; allied = []; landCount = new Array(NC);
+  for (var i2 = 0; i2 < NC; i2++) {
+    relations[i2] = new Array(NC);
+    atWar[i2]    = new Array(NC);
+    allied[i2]   = new Array(NC);
+    landCount[i2] = 0;
+    for (var j2 = 0; j2 < NC; j2++) {
+      relations[i2][j2] = 0;
+      atWar[i2][j2]    = false;
+      allied[i2][j2]   = false;
+    }
+  }
+  for (var i3 = 1; i3 < NC; i3++) {
+    for (var j3 = i3+1; j3 < NC; j3++) {
+      var r = Math.round((RNG() - 0.5) * 30);
+      relations[i3][j3] = relations[j3][i3] = r;
+    }
+  }
+
+  buildColorTable();
+  spawnNations();
+
+  missiles = [];
+  effects = [];
+  provinces = [];
+  barracks = [];
+  squads = [];
+  divisions = [];
+  squadIdx = 0;
+  cities = [];
+  CITY_SEQ = 0;
+  history = [];
+  provAdj = {};
+  turn = 0;
+  missileCount = 3;
+  missileMode = false;
+  selected = -1;
+  gameOver = null;
+  initWarScore();
+  buildAlliances();
+
+  cam.x = WORLD/2; cam.y = WORLD/2;
+  cam.zoom = Math.max(0.05, Math.min(VW, VH) / (WORLD * 1.15));
+
+  /* 鈹€鈹€ 灏忓湴鍥?鈹€鈹€ */
+  mini = document.createElement('canvas');
+  mini.width = N; mini.height = N;
+  miniCtx = mini.getContext('2d');
+  miniData = miniCtx.createImageData(N, N);
+
+  document.getElementById('start').style.display = 'none';
+  document.getElementById('over').style.display = 'none';
+  document.getElementById('diplo').style.display = 'none';
+
+  miniDirty = true;
+  refreshMini();
+  updateProvinces();      /* 鍒濆鐪佷唤鍒掑垎 + prov 鏍囪 */
+  updateHUD();
+  updatePanel();
+  recordHistory();
+}
+
+function spawnNations() {
+  var list = [];
+  for (var i = 1; i < countries.length; i++) list.push(i);
+  /* 鐢?RNG 娲楃墝锛岃鍥藉鍑虹敓椤哄簭涔熷畬鍏ㄩ殢鏈?*/
+  for (var i2 = list.length - 1; i2 > 0; i2--) {
+    var j2 = Math.floor(RNG() * (i2 + 1));
+    var tmp2 = list[i2]; list[i2] = list[j2]; list[j2] = tmp2;
+  }
+  var count = list.length;
+  if (count === 0) return;
+  var cx0 = N / 2, cy0 = N / 2;
+  var baseR = N * 0.34;
+
+  for (var k = 0; k < count; k++) {
+    var fid = list[k];
+    /* 瑙掑害瀹屽叏闅忔満锛堜笉鍐嶅浐瀹氱瓑鍒嗭級锛屾瘡鍥藉崰鎹?2蟺/count 鑼冨洿锛屽湪鍐呴儴闅忔満 */
+    var sector = 2 * Math.PI / count;
+    var angle = sector * k + RNG() * sector * 0.95;
+    /* 鍗婂緞鏇村垎鏁ｏ細0.15脳baseR ~ 1.05脳baseR锛堟湁鐨勫浗瀹堕潬杈广€佹湁鐨勫眳涓級 */
+    var r = baseR * (0.15 + RNG() * 0.90);
+    var cx = Math.round(cx0 + Math.cos(angle) * r);
+    var cy = Math.round(cy0 + Math.sin(angle) * r);
+    cx = Math.max(4, Math.min(N - 5, cx));
+    cy = Math.max(4, Math.min(N - 5, cy));
+
+    var rad = Math.max(3, Math.round(N * 0.045));
+    var r2 = rad * rad;
+    for (var y = Math.max(0, cy - rad); y <= Math.min(N-1, cy + rad); y++) {
+      for (var x = Math.max(0, cx - rad); x <= Math.min(N-1, cx + rad); x++) {
+        var dx = x - cx, dy = y - cy;
+        if (dx*dx + dy*dy > r2) continue;
+        var i = y*N + x;
+        if (terrain[i] === T_WATER) terrain[i] = T_PLAIN;
+        owner[i] = fid;
+        pop[i] = Math.max(pop[i], TERRAIN[terrain[i]].popMax * 0.55);
+        cap[i] = 30 + pop[i] * 0.03;     /* 瀹堝啗涓婇檺 = 浜哄彛 脳 10% + 80 */
+        troops[i] = cap[i] * 0.25;        /* 鍒濆瀹堝啗鍙崰涓婇檺鐨?30% */
+      }
+    }
+    /* 璁板綍鍥藉鏃楀笢涓績锛堜笘鐣屽潗鏍囷級 */
+    countries[fid].fx = (cx + 0.5) * CELL;
+    countries[fid].fy = (cy + 0.5) * CELL;
+  }
+}
+
+function refreshFlagCenters() {
+  /* 閲嶆柊璁＄畻鍚勫浗棰嗗湡璐ㄥ績锛岀敤浜庢棗甯滀綅缃?*/
+  var sx = new Array(countries.length), sy = new Array(countries.length), cnt = new Array(countries.length);
+  for (var i = 0; i < countries.length; i++) { sx[i] = 0; sy[i] = 0; cnt[i] = 0; }
+  for (var j = 0; j < TOTAL; j++) {
+    var o = owner[j]; if (o === 0) continue;
+    var x = j % N, y = (j / N) | 0;
+    sx[o] += x; sy[o] += y; cnt[o]++;
+  }
+  for (var c2 = 1; c2 < countries.length; c2++) {
+    if (cnt[c2] > 0) {
+      countries[c2].fx = (sx[c2] / cnt[c2] + 0.5) * CELL;
+      countries[c2].fy = (sy[c2] / cnt[c2] + 0.5) * CELL;
+    }
+  }
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   灏忓湴鍥惧埛鏂?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function refreshMini() {
+  if (!miniDirty) return;
+  if (!miniData || !COLOR.length) return;
+  var d = miniData.data;
+  for (var i = 0; i < TOTAL; i++) {
+    var o = owner[i], t = terrain[i];
+    var cv2 = cap[i] || 1;
+    var l = (troops[i] / cv2 * 4) | 0;
+    if (l > 3) l = 3; else if (l < 0) l = 0;
+    var c = COLOR[o][t][l];
+    var p = i << 2;
+    d[p] = c[0]; d[p+1] = c[1]; d[p+2] = c[2]; d[p+3] = 255;
+  }
+  miniCtx.putImageData(miniData, 0, 0);
+  miniDirty = false;
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鍥炲悎鎺ㄨ繘
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function tick() {
+  turn++;
+
+  for (var i = 0; i < TOTAL; i++) {
+    var pm = TERRAIN[terrain[i]].popMax;
+    if (pm > 0 && pop[i] < pm) {
+      pop[i] += (pm - pop[i]) * 0.0015;
+    }
+    var c = 80 + pop[i] * 0.10;
+      cap[i] = c;
+    if (troops[i] < c * 0.6) {
+      var g = (c * 0.6 - troops[i]) * 0.002;
+      if (g > 1.5) g = 1.5;
+      troops[i] += g;
+    }
+  }
+
+  /* 杈圭枂琛ュ叺锛氳竟鐤嗘牸浼樺厛鑾峰緱浜哄姏锛岃瀹堝啗鍘诲畧杈圭枂 */
+  if (turn % 4 === 0) {
+    for (var bi = 0; bi < TOTAL; bi++) {
+      if (owner[bi] === 0) continue;
+      var bx2 = bi % N, by2 = (bi / N) | 0;
+      var border = false;
+      for (var bd = 0; bd < 8; bd++) {
+        var nx2 = bx2 + DIRS8[bd][0], ny2 = by2 + DIRS8[bd][1];
+        
+        if (owner[ny2*N + nx2] !== owner[bi]) { border = true; break; }
+      }
+      if (!border) continue;
+      var c2 = cap[bi];
+      /* 杈圭枂琛ュ叺寮哄害寮卞寲锛氬彧琛ュ埌涓婇檺鐨?1.1 鍊嶃€佸洖琛ョ巼 0.004锛岄伩鍏嶈竟澧冨弽澶嶆媺閿?*/
+      if (troops[bi] < c2 * 0.8) {
+        var gb = (c2 * 0.8 - troops[bi]) * 0.004;
+        if (gb > 2.5) gb = 2.5;
+        troops[bi] += gb;
+      }
+    }
+  }
+
+  updateBarracks();
+  releaseSquads();
+  updateSquads();
+  checkSquadOverlap();   /* 鍚屾牸鍚屽浗钀ラ槦鍚堝苟 */
+  updateSquadQuality();  /* 璁粌鍦鸿缁?+ 琛板噺 */
+  updateDivisions();     /* 甯堝惛鏀?瑙ｆ暎 */
+
+  /* 鎴樹簤缁撴潫妫€娴嬶細褰撲袱鍥介兘涓嶅啀澶勪簬鎴樹簤锛岄渶妫€鏌ユ槸鍚﹀凡鍋滄垬锛堢敱 aiDiplomacy 璁?atWar=false锛?     姝ゆ椂鏍规嵁鎴樹簤鍒嗘暟鑷姩寮瑰嚭缁撶畻锛?*/
+  for (var i = 1; i < countries.length; i++) {
+    if (!countries[i].alive) continue;
+    for (var j = i + 1; j < countries.length; j++) {
+      if (!countries[j].alive) continue;
+      var wasWar = atWar[i][j];
+      /* 濡傛灉鍒氬垰鍋滄垬 鈫?缁撶畻鎴樹簤鍒嗘暟 */
+      if (!wasWar && warScore[i] && Math.abs(warScore[i][j]) > 500) {
+        /* 鏍囪宸茬粨绠楋紙鐢ㄨ礋鍒嗘暟琛ㄧず宸茬粨绠楄繃锛?*/
+        endWar(i, j);
+      }
+    }
+  }
+
+  if (turn % 8 === 0)  aiBuildBattalions();
+  if (turn % 12 === 0) aiDiplomacy();
+  if (turn % 40 === 0) updateProvinces();
+  tickPendingWars();           /* 姣忓洖鍚堟帹杩涘鎴樺€掕鏃?*/
+  if (turn % 4 === 0) updatePlayerWarPanel();
+  if (turn % 200 === 0 && missileCount < 8) missileCount++;
+  if (turn % 10 === 0) driftRelations();
+  if (turn % 24 === 0) refreshFlagCenters();
+  if (turn % 16 === 0) autoBuildCities();
+  if (turn % 8 === 0)  recoverRuins();
+  if (TOTAL > 400000) {
+    if (turn % 30 === 0)  recountLand();
+    if (turn % 40 === 0)  recordHistory();
+    if (turn % 10 === 0)  checkEnd();
+  } else {
+    if (turn % 6 === 0)  recountLand();
+    if (turn % 10 === 0) recordHistory();
+  }
+
+  miniDirty = true;
+  if (turn % 6 === 0) updateRankbar();
+  if (turn % 4 === 0 && cqCurrentOid >= 0 && cqueryEl.style.display !== 'none') openCQuery(cqCurrentOid);
+  checkEnd();
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鍐涜惀锛堥潤鎬侊級 + 钀ラ槦锛堣鍐涳級
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function idx9(cx, cy) {
+  var i = cy * N + cx;
+  if (i < 0 || i >= TOTAL) return -1;
+  return i;
+}
+
+/* 鍐涜惀鏌ユ壘琛細cell绱㈠紩 -> barracks 瀵硅薄鐨勬槧灏勶紝浣?barracksAt 鏌ユ壘鍙樹负 O(1) */
+var barracksLookup = {};
+for (var k = 0; k < barracks.length; k++) {
+  var b = barracks[k];
+  if (b.cell != null) {
+    barracksLookup[b.cell] = b;
+  }
+}
+
+/* 鍐涜惀鍗曞厓鏍兼煡鎵撅細鍩轰簬缂撳瓨鏌ユ壘锛岃€岄潪绾挎€ч亶鍘?*/
+function barracksAt(i) {
+  return barracksLookup[i] || null;
+}
+
+function squadCell(b) {
+  if (b.x == null) return b.cell;
+  return b.y * N + b.x;
+}
+
+/* 鍐涜惀锛氫富鍔?鎶借皟"鍛ㄥ洿瀹堝啗锛?5% 鈫?storedManpower锛夛紝涓婇檺 50000
+   涓€娆℃€ф娊鍙?9 鏍煎瓨閲忥紝瀹堝啗鍚庣画鑷劧琛ュ洖 鈫?鍐涘笎鍙寔缁幏寰楁柊鍏?   姣忛噴鏀句竴涓惀闃燂紝瀹炴墦瀹炰粠 storedManpower 鎵ｏ紝钀ラ槦瑙勬ā = 娑堣€?脳 2 */
+function updateBarracks() {
+  for (var k = 0; k < barracks.length; k++) {
+    var b = barracks[k];
+    if (b.x != null) continue;
+    if (b.storedManpower == null) b.storedManpower = 0;
+
+    /* 鍛ㄥ洿 9 鏍兼娊璋?75% 瀹堝啗杩涘啗甯愪汉鍔涙睜锛堜笂闄?50000锛?*/
+    if (b.storedManpower < 50000) {
+      var gathered = 0;
+      for (var dy = -1; dy <= 1; dy++)
+        for (var dx = -1; dx <= 1; dx++) {
+          var ii = idx9(b.cx+dx, b.cy+dy);
+          if (ii < 0) continue;
+          var cellTroops = troops[ii];
+          if (cellTroops <= 10) continue;
+          var take = Math.min(cellTroops * 0.75, 50000 - b.storedManpower - gathered);
+          if (take <= 0) continue;
+          troops[ii] -= take;
+          gathered += take;
+        }
+      b.storedManpower += gathered;
+    }
+    /* 鍚屾 manpower 鏄剧ず鍊?*/
+    b.manpower = b.storedManpower;
+  }
+}
+
+function releaseSquads() {
+  for (var k = barracks.length - 1; k >= 0; k--) {
+    var b = barracks[k];
+    if (b.x != null) continue;
+    if (b.storedManpower == null) b.storedManpower = 0;
+    if (b.storedManpower < 500) continue;   /* 浜哄姏<500锛氫笉閲婃斁 */
+
+    var active = 0;
+    for (var s2 = 0; s2 < squads.length; s2++)
+      if (squads[s2].fromCell === b.cell && squads[s2].x != null) active++;
+    if (active >= b.maxSquads) continue;
+
+    /* 鐩爣杈圭枂鏍硷細澶嶇敤 checkTile 寰勫悜鎼滅储 */
+    var cx = b.cx, cy = b.cy;
+    var maxR = Math.min(16, Math.max(8, Math.round(N * 0.09)));
+    var bt = -1;
+    for (var r = 1; r <= maxR && bt < 0; r++) {
+      for (var dx = -r; dx <= r; dx++) {
+        var ta = checkTile(cx + dx, cy - r, b.owner);
+        if (ta >= 0) { bt = ta; break; }
+        var tc = checkTile(cx + dx, cy + r, b.owner);
+        if (tc >= 0) { bt = tc; break; }
+      }
+      if (bt >= 0) continue;
+      for (var dy2b = -r + 1; dy2b <= r - 1; dy2b++) {
+        var ta2 = checkTile(cx - r, cy + dy2b, b.owner);
+        if (ta2 >= 0) { bt = ta2; break; }
+        var tc2 = checkTile(cx + r, cy + dy2b, b.owner);
+        if (tc2 >= 0) { bt = tc2; break; }
+      }
+    }
+    if (bt < 0) continue;
+
+    /* 涓€娆″彲閲婃斁澶氫釜钀ラ槦锛屼汉鍔涘灏变竴鐩存淳 */
+    var slots = b.maxSquads - active;
+    var bx = bt % N, by = (bt / N) | 0;
+    for (var si = 0; si < slots; si++) {
+      /* 姣忎釜钀ラ槦娑堣€?1500 浜哄姏 鈫?娲惧嚭 3000 浜鸿妯＄殑钀ラ槦锛堜汉鍔涜浆鍖栨瘮 1:2锛?         濡傛灉浜哄姏涓嶅 1500 涔熷彲浠ユ淳涓€涓皬钀ラ槦锛堟渶浣?500 浜哄姏 鈫?1000 浜猴級 */
+      var pay;
+      if (b.storedManpower >= 1500) pay = 1500;
+      else if (b.storedManpower >= 500) pay = b.storedManpower;
+      else break;
+
+      b.storedManpower -= pay;
+      var sqTroops = Math.round(pay * 2);   /* 浜哄姏 1:2 鈫?钀ラ槦鍏靛姏 */
+
+      var sq = {
+        id: ++squadIdx,
+        owner: b.owner, fromCell: b.cell, cell: bt,
+        x: bx, y: by,
+        troops: sqTroops, maxTroops: Math.round(sqTroops * 3),
+        quality: b.quality || 0.5,
+        phase: (turn >> 2) & 3
+      };
+      squads.push(sq);
+      active++;
+    }
+  }
+}
+
+function updateSquads() {
+  for (var k = squads.length - 1; k >= 0; k--) {
+    var b = squads[k];
+    if (b.quality == null) b.quality = 0.5;
+
+    /* 钀ラ槦鑷劧琛ュ憳锛歮axTroops 脳 0.5%/鍥炲悎锛堣妯¤秺澶цˉ寰楄秺蹇級 */
+    if (b.troops < b.maxTroops) {
+      var regen = Math.max(10, b.maxTroops * 0.005);
+      b.troops = Math.min(b.maxTroops, b.troops + regen);
+    }
+    if ((turn & 3) !== b.phase) continue;
+    if (b.troops < 150) continue;
+
+    var tgt = findNearestTarget(b);
+    if (tgt < 0) continue;
+
+    var ti = tgt;
+    var defMul = TERRAIN[terrain[ti]].defMul;
+    /* 鍩庡競闃插畧鍔犳垚锛氬鏋滅洰鏍囨牸鏄煄甯?鈫?瀹堝啗 +50% 涓斿畧鍐涗笂闄愭洿楂?*/
+    var isCityTarget = false;
+    for (var cc2 = 0; cc2 < cities.length; cc2++) {
+      if (cities[cc2].cell === ti) { isCityTarget = true; break; }
+    }
+    if (isCityTarget) defMul *= 1.5;
+    /* 璐ㄩ噺褰卞搷锛氶珮璁粌搴﹁惀闃熸敾鍑?+5%/0.1 璐ㄩ噺鐐?*/
+    var qualMul = 0.6 + b.quality * 0.8;
+    var attack = b.troops * 0.45 * qualMul;
+    var defense = troops[ti] * defMul;
+    /* 璁颁綇鐩爣鍘熷睘鍥藉锛岀敤浜庢垬浜夊垎鏁?*/
+    var prevOwner = owner[ti];
+
+    if (attack > defense) {
+      owner[ti] = b.owner;
+      troops[ti] = Math.min((attack - defense) * 0.55, 600);
+      b.troops -= attack * 0.75;
+      b.x = ti % N; b.y = (ti / N) | 0; b.cell = ti;
+      miniDirty = true;
+      addRing((ti % N + 0.5) * CELL, ((ti / N | 0) + 0.5) * CELL,
+              countries[b.owner].color, 420);
+      /* 鍗犳湁鏃惰幏寰楁垬鏂楃粡楠?+ 绱Н鎴樹簤鍒嗘暟 + 棰嗗湡鍙樻洿璁板綍 */
+      b.quality = Math.min(1.0, b.quality + 0.003);
+      if (prevOwner !== 0) {
+        addWarScore(b.owner, prevOwner, 10 + troops[ti] * 0.02);
+        recordTerritoryChange(b.owner, prevOwner, 1);
+      }
+    } else {
+      troops[ti] -= attack / defMul * 0.55;
+      if (troops[ti] < 0) troops[ti] = 0;
+      b.troops -= attack * 0.9;
+      miniDirty = true;
+      /* 闃插畧鏂癸紙鏁屾柟锛夋帀琛€澶?鈫?鏀诲嚮鑰呬篃寰楀皯閲忔垬浜夊垎 */
+      if (prevOwner !== 0) addWarScore(b.owner, prevOwner, Math.min(8, attack * 0.002));
+    }
+
+    /* 鎴樿触钀ラ槦锛氭壘闄勮繎鏈€寮哄悓鍥借惀闃熷惛鏀惰嚜宸辩殑娈嬩綑鍏靛姏锛堜繚鐣?60%锛?*/
+    if (b.troops < 40) {
+      var bestTgt = null, bestDist = 999;
+      for (var kk = 0; kk < squads.length; kk++) {
+        var sT = squads[kk];
+        if (sT === b) continue;
+        if (sT.owner !== b.owner) continue;
+        if (sT.troops <= 0) continue;
+        var tdx = Math.abs(sT.x - b.x), tdy = Math.abs(sT.y - b.y);
+        var td = tdx + tdy;
+        if (td < bestDist) { bestDist = td; bestTgt = sT; }
+      }
+      var survivors = Math.round(b.troops * 0.6);
+      if (bestTgt && survivors > 0) {
+        bestTgt.troops += survivors;
+        bestTgt.quality = Math.min(1.0, (bestTgt.quality || 0.5) + 0.002);
+      }
+      squads.splice(k, 1);
+      continue;
+    }
+
+    /* 姣?4 鍥炲悎鎺ㄨ繘锛? 鏂瑰悜 + 鍏堝崰鍚庤繘 + 鏃犳垬浜夊師鍦板緟鍛?+ 浼樺厛鎵撳煄甯?+ 1/4 闃插畧 */
+    if (turn % 4 === 0) {
+      var bx = b.x, by = b.y;
+      var here = owner[by*N + bx];
+      if (here !== b.owner) continue;
+
+      /* 鈹€鈹€ T5锛氭棤鎴樹簤涓嶇瀻閫?鈹€鈹€ 鍙湁涓庝粬鍥藉浜?atWar 鎵嶈兘鍘绘墦锛屾垨鑰呭幓鎵╁紶涓珛棰嗗湡 */
+      var hasRealWar = false;
+      for (var eok = 1; eok < countries.length; eok++) {
+        if (eok === b.owner || !countries[eok].alive) continue;
+        if (atWar[b.owner] && atWar[b.owner][eok]) { hasRealWar = true; break; }
+      }
+
+      /* 缁熻鍚屽浗钀ラ槦涓灏戝湪鍓嶇嚎锛堣竟鐤嗘牸锛?*/
+      var totalSquads = 0, frontlineSquads = 0;
+      for (var sk = 0; sk < squads.length; sk++) {
+        if (squads[sk].owner !== b.owner) continue;
+        totalSquads++;
+        /* 妫€鏌ヨ繖涓惀闃熸墍鍦ㄦ牸鏄惁鍦ㄨ竟鐤?*/
+        var fx2 = var fx2 = squads[sk].x, fy2 = squads[sk].y;
+        var fi2 = WCell(fx2, fy2);
+        var isFront = false;
+        for (var bd2 = 0; bd2 < 8; bd2++) {
+          var bnx = fx2 + DIRS8[bd2][0], bny = fy2 + DIRS8[bd2][1];
+          
+          if (owner[bny*N + bnx] !== b.owner) { isFront = true; break; }
+        }
+        if (isFront) frontlineSquads++;
+      }
+      /* 鍔ㄦ€侀槻瀹堟瘮渚嬶細1/8 ~ 1/4 涔嬮棿锛岃秺寮鸿秺鏁㈡妸鏇村鍏靛姏娲惧嚭鍘?*/
+      var maxThreatLand = 0;
+      for (var eok2 = 1; eok2 < countries.length; eok2++) {
+        if (eok2 === b.owner || !countries[eok2].alive) continue;
+        if (atWar[b.owner] && atWar[b.owner][eok2]) {
+          if (landCount[eok2] > maxThreatLand) maxThreatLand = landCount[eok2];
+        }
+      }
+      var myLand = landCount[b.owner] || 1;
+      var ratio = maxThreatLand > 0 ? (maxThreatLand / myLand) : 0.5;  /* 濞佽儊姣?*/
+      /* ratio 瓒婂ぇ锛堟晫瓒婂己锛夆啋 闃插畧瓒婂锛況atio 瓒婂皬 鈫?杩涙敾瓒婂 */
+      var defFrac;
+      if (ratio > 1.2) defFrac = 1/4;        /* 鏁屾瘮鎴戝己 鈫?鐣?1/4 */
+      else if (ratio > 0.8) defFrac = 7/48;  /* 绋嶅己 鈫?绾?1/7 */
+      else if (ratio > 0.4) defFrac = 5/40;  /* 1/8 */
+      else defFrac = 1/8;                    /* 纰惧帇 鈫?鍙暀 1/8 */
+      var minDefense = Math.max(1, Math.floor(totalSquads * defFrac));
+      /* 濡傛灉褰撳墠钀ラ槦鑷繁鍦ㄩ潪鍓嶇嚎涓斿墠绾胯惀闃?>= 鎬昏惀闃熸暟 - minDefense 鈫?鐣欏湪鍥藉唴闃插畧 */
+      var bIsFront = false;
+      for (var bd3 = 0; bd3 < 8; bd3++) {
+        var bnx3 = bx + DIRS8[bd3][0], bny3 = by + DIRS8[bd3][1];
+        
+        if (owner[bny3*N + bnx3] !== b.owner) { bIsFront = true; break; }
+      }
+      if (!bIsFront && frontlineSquads >= totalSquads - minDefense) continue;   /* 鍚庢柟钀ラ槦锛岀暀涓嬮槻瀹?*/
+
+      /* 鈹€鈹€ 鎺ㄨ繘鍐崇瓥 鈹€鈹€ */
+      var bestX = -1, bestY = -1, bestScore = -1e9;
+      for (var d = 0; d < 4; d++) {
+        var nx = bx + DIRS4[d][0], ny = by + DIRS4[d][1];
+        
+        var ni = WCell(nx, ny);
+        if (owner[ni] !== b.owner) continue;
+        if (!TERRAIN[terrain[ni]].pass) continue;
+        var score = 0;
+        for (var dd = 0; dd < 4; dd++) {
+          var ex = nx + DIRS4[dd][0], ey = ny + DIRS4[dd][1];
+          
+          var ei = WCell(ex, ey);
+          var eo = owner[ei];
+          if (eo === b.owner) continue;
+          if (!TERRAIN[terrain[ei]].pass) continue;
+          /* 鏈夋垬浜夋椂鍙互鎵撴晫鏂癸紱娌℃垬浜夋椂鍙墿寮犱腑绔?*/
+          if (eo !== 0) {
+            if (!hasRealWar || !atWar[b.owner][eo]) continue;
+          }
+          /* 鏁屾柟鍩庡競 = +10锛屾晫鏂规櫘閫?= +2锛屼腑绔?= +1 */
+          var isCity = false;
+          for (var cid = 0; cid < cities.length; cid++) {
+            if (cities[cid].cell === ei && cities[cid].owner !== b.owner) { isCity = true; break; }
+          }
+          score += (eo === 0 ? 1 : (isCity ? 10 : 2));
+        }
+        if (score > bestScore) { bestScore = score; bestX = nx; bestY = ny; }
+      }
+
+      if (bestX >= 0) {
+        b.x = bestX; b.y = bestY;
+        b.cell = bestY * N + bestX;
+      }
+    }
+  }
+}
+
+function findNearestTarget(b) {
+  var cx = b.x, cy = b.y;
+  var oid = b.owner;
+  var maxR = Math.min(16, Math.max(8, Math.round(N * 0.09)));
+
+  for (var r = 1; r <= maxR; r++) {
+    for (var dx = -r; dx <= r; dx++) {
+      var a = checkTile(cx + dx, cy - r, oid);
+      if (a >= 0) return a;
+      var c = checkTile(cx + dx, cy + r, oid);
+      if (c >= 0) return c;
+    }
+    for (var dy = -r + 1; dy <= r - 1; dy++) {
+      var a2 = checkTile(cx - r, cy + dy, oid);
+      if (a2 >= 0) return a2;
+      var c2 = checkTile(cx + r, cy + dy, oid);
+      if (c2 >= 0) return c2;
+    }
+  }
+  return -1;
+}
+
+function checkTile(x, y, oid) {
+  
+  var i = WCell(x, y);
+  var o = owner[i];
+  if (o === oid) return -1;
+  if (!TERRAIN[terrain[i]].pass) return -1;
+  if (o !== 0 && !atWar[oid][o]) return -1;
+  return i;
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   甯堢郴缁燂紙Division锛夛細姣忓笀鏈€澶?20 钀ラ槦锛岃嚜鍔ㄥ惛鏀堕檮杩戣惀闃?   甯堟嫢鏈夎嚜宸辩殑鏃楀笢銆佽缁冨害銆佹€诲叺鍔?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+
+/* 甯堟棗甯滅紦瀛橈紙Canvas锛?*/
+var FLAG_CACHE = {};
+
+/* 鐢熸垚甯堟棗甯?Canvas锛氬簳鑹?鍥藉棰滆壊锛屼腑蹇冩樉绀哄笀缂栧彿 */
+function makeDivisionFlag(divId, owner) {
+  var key = divId + '_' + owner;
+  if (FLAG_CACHE[key]) return FLAG_CACHE[key];
+  var c = document.createElement('canvas');
+  c.width = 24; c.height = 24;
+  var ctx = c.getContext('2d');
+  var col = countries[owner].color;
+  ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.92)';
+  ctx.fillRect(0, 0, 24, 24);
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(0, 0, 24, 24);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 12px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(String(divId), 12, 12);
+  FLAG_CACHE[key] = c;
+  return c;
+}
+
+/* 鍒涘缓鏂板笀锛氬湪鎸囧畾鍧愭爣寤虹珛锛岀珛鍗冲惛鏀跺懆鍥?12 鏍煎唴鍚屽浗钀ラ槦 */
+function createDivision(owner, cx, cy) {
+  var div = {
+    id: divisions.length,
+    owner: owner,
+    cx: cx, cy: cy,
+    x: (cx + 0.5) * CELL, y: (cy + 0.5) * CELL,
+    squads: [], manpower: 0, quality: 0.5,
+    flagCanvas: null, flagGeneratedAt: -1,
+    lifetime: turn, lastAbsorb: 0
+  };
+  divisions.push(div);
+  absorbNearbySquads(div);
+  return div;
+}
+
+/* 甯堝惛鏀堕檮杩戝悓鍥借惀闃燂紙20 钀ラ槦涓婇檺锛?*/
+function absorbNearbySquads(div) {
+  var R = 12;
+  if (div.squads.length >= 20) return;
+  for (var k = squads.length - 1; k >= 0; k--) {
+    if (div.squads.length >= 20) break;
+    var s = squads[k];
+    if (s.owner !== div.owner || s.x == null) continue;
+    var already = false;
+    for (var d = 0; d < divisions.length; d++) {
+      if (divisions[d].squads.indexOf(s) >= 0) { already = true; break; }
+    }
+    if (already) continue;
+    var dx = Math.abs(s.x - div.cx), dy = Math.abs(s.y - div.cy);
+    if (dx > R || dy > R) continue;
+    div.squads.push(s);
+  }
+  recomputeDivisionStats(div);
+  if (div.squads.length >= 20 && div.flagGeneratedAt < 0) {
+    div.flagCanvas = makeDivisionFlag(div.id, div.owner);
+    div.flagGeneratedAt = turn;
+  }
+  div.lastAbsorb = turn;
+}
+
+function recomputeDivisionStats(div) {
+  var m = 0, qSum = 0;
+  for (var k = 0; k < div.squads.length; k++) {
+    m += div.squads[k].troops;
+    qSum += div.squads[k].quality || 0.5;
+  }
+  div.manpower = m;
+  div.quality = div.squads.length > 0 ? qSum / div.squads.length : 0.5;
+}
+
+/* 甯堟瘡鍥炲悎鏇存柊锛堢敱 tick 璋冪敤锛?*/
+function updateDivisions() {
+  for (var d = divisions.length - 1; d >= 0; d--) {
+    var div = divisions[d];
+    if (!countries[div.owner].alive) { divisions.splice(d, 1); continue; }
+
+    /* 娓呯悊宸叉秷澶?+ 鑴辩妫€鏌ワ細钀ラ槦鍛ㄥ洿 5 鏍煎唴鏃犲叾浠栧悓甯堣惀闃?鈫?鑴辩姝ゅ笀锛屽厑璁歌鍏朵粬甯堝惛鏀?*/
+    for (var k = div.squads.length - 1; k >= 0; k--) {
+      var sq = div.squads[k];
+      if (squads.indexOf(sq) < 0) { div.squads.splice(k, 1); continue; }
+      var hasNearby = false;
+      for (var k2 = 0; k2 < div.squads.length; k2++) {
+        if (k2 === k) continue;
+        var oq = div.squads[k2];
+        var dx2 = Math.abs((sq.x ?? sq.cell % N) - (oq.x ?? oq.cell % N));
+        var dy2 = Math.abs((sq.y ?? (sq.cell / N | 0)) - (oq.y ?? (oq.cell / N | 0)));
+        if (dx2 + dy2 <= 5) { hasNearby = true; break; }
+      }
+      if (!hasNearby && div.squads.length > 1) {
+        /* 鑴辩姝ゅ笀锛屾垚涓烘父绂昏惀闃燂紝绛夊緟琚叾浠栧笀鍚告敹 */
+        div.squads.splice(k, 1);
+      }
+    }
+
+    if (turn - div.lastAbsorb > 20) absorbNearbySquads(div);
+    if (div.squads.length === 0 && turn - div.lifetime > 40) {
+      divisions.splice(d, 1); continue;
+    }
+    recomputeDivisionStats(div);
+  }
+  if ((turn % 150) === 0) {
+    for (var c = 2; c < countries.length; c++) {
+      if (!countries[c].alive || c === playerId) continue;
+      var count = 0, bx = -1, by = -1;
+      for (var k = 0; k < squads.length; k++) {
+        if (squads[k].owner === c && squads[k].x != null) { count++; bx = squads[k].x; by = squads[k].y; }
+      }
+      if (count >= 8) {
+        var overlap = false;
+        for (var d2 = 0; d2 < divisions.length; d2++) {
+          if (divisions[d2].owner !== c) continue;
+          if (Math.abs(divisions[d2].cx - bx) < 8 && Math.abs(divisions[d2].cy - by) < 8) { overlap = true; break; }
+        }
+        if (!overlap) createDivision(c, bx, by);
+      }
+    }
+  }
+}
+
+/* 妫€鏌ヨ惀闃熼噸鍙狅紙鍚屾牸鍚屽浗鍗冲悎骞讹級 */
+function checkSquadOverlap() {
+  var map = {};
+  for (var k = squads.length - 1; k >= 0; k--) {
+    var s = squads[k];
+    if (s.x == null) continue;
+    var key = s.owner + '_' + s.cell;
+    if (!map[key]) map[key] = [];
+    map[key].push(s);
+  }
+  for (var key in map) {
+    var arr = map[key];
+    if (arr.length <= 1) continue;
+    var main = arr[0];
+    var totalQ = main.quality || 0.5;
+    var totalT = main.troops;
+    for (var i = 1; i < arr.length; i++) {
+      totalT += arr[i].troops * 0.8;
+      totalQ += arr[i].quality || 0.5;
+      var idx = squads.indexOf(arr[i]);
+      if (idx >= 0) squads.splice(idx, 1);
+    }
+    main.troops = totalT;
+    main.quality = totalQ / arr.length;
+  }
+}
+
+/* 妫€鏌ヨ惀闃熼檮杩戞槸鍚︽湁璁粌鍦?*/
+function nearTrainingGround(s) {
+  if (s.x == null) return false;
+  for (var k = 0; k < barracks.length; k++) {
+    var b = barracks[k];
+    if (b.owner !== s.owner || !b.type || b.type !== 'training') continue;
+    var dx = Math.abs(s.x - b.cx), dy = Math.abs(s.y - b.cy);
+    if (dx <= 4 && dy <= 4) return true;
+  }
+  return false;
+}
+
+/* 鏇存柊钀ラ槦璐ㄩ噺锛氳缁冨満 + 鑷劧琛板噺 */
+function updateSquadQuality() {
+  for (var k = 0; k < squads.length; k++) {
+    var s = squads[k];
+    if (s.quality == null) s.quality = 0.5;
+    if (nearTrainingGround(s)) s.quality = Math.min(1.0, s.quality + 0.01);
+    if ((turn % 100) === 0) s.quality = Math.max(0.5, s.quality - 0.001);
+  }
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鎴樹簤鍒嗘暟绯荤粺
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var warScore = [], warScoreGain = [];
+var gold = [];            /* 姣忓浗閲戝竵 */
+var warStats = {};         /* 'a_d' 閿?鈫?{ startTurn, startLandA, startLandD, lossesA, lossesD, capturedA, capturedD } */
+
+function initWarScore() {
+  warScore = []; warScoreGain = []; gold = [];
+  for (var i = 0; i < countries.length; i++) {
+    warScore.push(new Array(countries.length).fill(0));
+    warScoreGain.push(new Array(countries.length).fill(0));
+    gold.push(20000 + Math.floor(Math.random() * 80000));
+  }
+  warStats = {};
+}
+
+/* 鎴樹簤寮€濮嬫椂璁板綍鍩虹嚎锛堝紑濮嬮鍦燂級 */
+function recordWarStart(a, d) {
+  var key = Math.min(a,d) + '_' + Math.max(a,d);
+  if (warStats[key]) return;   /* 宸茶褰?*/
+  warStats[key] = {
+    startTurn: turn,
+    startLandA: landCount[a] || 0,
+    startLandD: landCount[d] || 0,
+    startGoldA: gold[a] || 0,
+    startGoldD: gold[d] || 0,
+    lossesA: 0, lossesD: 0,         /* 浼や骸绱Н */
+    capturedA: 0, capturedD: 0      /* A 澶哄緱 D 鐨勬牸鏁?= capturedA锛屽弽涔?*/
+  };
+}
+
+/* 姣忔 addWarScore 鏃惰嚜鍔ㄧ疮绉鍦熷彉鍖?*/
+function addWarScore(attacker, defender, amount) {
+  if (!atWar[attacker] || !atWar[attacker][defender]) return;
+  warScore[attacker][defender] += amount;
+  warScore[defender][attacker] -= amount;
+
+  /* 鍚屾椂璁板綍浼や骸锛堟敾鍑绘柟鎹熷け 鈮?鏀诲嚮閲?脳 0.3锛岄槻瀹堟柟鎹熷け 鈮?鏀诲嚮閲?脳 0.25锛?*/
+  var key = Math.min(attacker,defender) + '_' + Math.max(attacker,defender);
+  var stat = warStats[key];
+  if (stat) {
+    stat.lossesA += amount * 0.3;
+    stat.lossesD += amount * 0.25;
+  }
+}
+
+/* 璁板綍棰嗗湡鍙樻洿锛坅ttacker 浠?defender 鎵嬩腑澶哄彇 delta 鏍硷級 */
+function recordTerritoryChange(attacker, defender, delta) {
+  var key = Math.min(attacker,defender) + '_' + Math.max(attacker,defender);
+  var stat = warStats[key];
+  if (!stat) return;
+  if (attacker < defender) stat.capturedA += delta;
+  else stat.capturedD += delta;
+}
+function endWar(a, d) {
+  atWar[a][d] = atWar[d][a] = false;
+  var sA = warScore[a] ? warScore[a][d] : 0;
+  var sD = warScore[d] ? warScore[d][a] : 0;
+  var w = sA > sD ? a : (sD > sA ? d : -1);
+
+  /* 鍙栨垬鍓嶆垬鍚庡揩鐓?*/
+  var key = Math.min(a,d) + '_' + Math.max(a,d);
+  var stat = warStats[key] || { lossesA:0, lossesD:0, capturedA:0, capturedD:0,
+    startTurn: turn, startLandA:landCount[a]||0, startLandD:landCount[d]||0 };
+  var nowLandA = landCount[a] || 0;
+  var nowLandD = landCount[d] || 0;
+
+  /* 璧旀锛氳儨鑰呰幏寰楄触鑰呯殑閲戝竵 脳 姣斾緥 */
+  var reparA = 0, reparD = 0;
+  if (w > 0) {
+    var loser = (w === a) ? d : a;
+    var winner = w;
+    var penalty = 0.3;             /* 30% 閲戝竵浣滀负璧旀 */
+    reparA = Math.round(gold[loser] * penalty);
+    reparD = reparA;
+    gold[loser] -= reparA;
+    gold[winner] += reparA;
+    if (loser === d) reparA = 0; else reparD = 0;  /* 绠€鍖栨樉绀猴細鑳滆€呭悕瀵瑰簲璧旀 */
+  }
+
+  var show = (w === playerId || a === playerId || d === playerId);
+  if (show) {
+    var days = Math.max(1, Math.floor((turn - stat.startTurn) / 14) + 1);
+    var colA = countries[a].color, colD = countries[d].color;
+    var colStrA = 'rgb(' + colA[0] + ',' + colA[1] + ',' + colA[2] + ')';
+    var colStrD = 'rgb(' + colD[0] + ',' + colD[1] + ',' + colD[2] + ')';
+    var loserStr = w > 0 ? countries[loser].name : null;
+    var winnerStr = w > 0 ? countries[winner].name : null;
+
+    var h = '<div class="war-report" style="min-width:360px;max-width:520px">';
+    h += '<div style="font-size:13px;color:#9ab3cc;border-bottom:1px solid rgba(90,140,200,.25);padding-bottom:8px;margin-bottom:10px;letter-spacing:1px">';
+    h += '鈿?鎴?浜?缁?鏉?路 鎸?缁?' + days + ' 澶?;
+    h += '</div>';
+    h += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
+    h += '<tr style="border-bottom:1px solid rgba(90,140,200,.2)">';
+    h += '<th style="text-align:left;padding:4px 6px">' + countries[a].name + '</th>';
+    h += '<th style="text-align:center;padding:4px 6px;color:#7d8fa6">vs</th>';
+    h += '<th style="text-align:right;padding:4px 6px">' + countries[d].name + '</th>';
+    h += '</tr>';
+
+    var dataRows = [
+      ['鎴樹簤鍒嗘暟', Math.round(sA), Math.round(sD)],
+      ['鎴樺墠棰嗗湡', stat.startLandA, stat.startLandD],
+      ['鎴樺悗棰嗗湡', nowLandA, nowLandD],
+      ['棰嗗湡鍙樺姩', (nowLandA - stat.startLandA), (nowLandD - stat.startLandD)],
+      ['鎴戞柟澶哄緱', stat.capturedA, stat.capturedD],
+      ['浼や骸(浼扮畻)', Math.round(stat.lossesA), Math.round(stat.lossesD)],
+      ['鎴樺墠閲戝竵', stat.startGoldA, stat.startGoldD],
+      ['鎴樺悗閲戝竵', gold[a], gold[d]]
+    ];
+    for (var r = 0; r < dataRows.length; r++) {
+      var isRepar = false;
+      h += '<tr style="border-bottom:1px dashed rgba(90,140,200,.12)">';
+      h += '<td style="padding:3px 6px;text-align:left;color:' + colStrA + '">' + dataRows[r][1] + '</td>';
+      h += '<td style="padding:3px 6px;text-align:center;color:#7d8fa6;font-size:11px">' + dataRows[r][0] + '</td>';
+      h += '<td style="padding:3px 6px;text-align:right;color:' + colStrD + '">' + dataRows[r][2] + '</td>';
+      h += '</tr>';
+    }
+
+    h += '</table>';
+    if (w > 0) {
+      h += '<div style="margin-top:10px;padding:8px;border-radius:6px;background:rgba(90,200,120,.12);border:1px solid rgba(90,200,120,.3)">';
+      h += '<div style="color:#8fdf98;font-weight:600">' + winnerStr + ' 鑳滃埄锛?/div>';
+      h += '<div style="color:#b8cce0;font-size:11px;margin-top:4px">';
+      h += '鈥?' + loserStr + ' 鍚?' + winnerStr + ' 鏀粯 <b style="color:#ffc861">' + reparA + '</b> 閲戝竵锛?0%锛?br>';
+      h += '鈥?鎴樹簤鍒嗘暟宸?<b>' + Math.abs(Math.round(sA - sD)) + '</b>';
+      h += '</div></div>';
+    } else {
+      h += '<div style="margin-top:10px;padding:8px;border-radius:6px;background:rgba(180,160,100,.12);border:1px solid rgba(200,180,100,.3)">';
+      h += '<div style="color:#e0cc8f;font-weight:600">鍙屾柟鍍垫寔</div>';
+      h += '<div style="color:#b8cce0;font-size:11px;margin-top:4px">鏃犺禂娆?路 鍏崇郴 -20</div></div>';
+    }
+    h += '</div>';
+
+    var modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);' +
+      'z-index:51;max-height:80vh;overflow:auto';
+    modal.innerHTML = h;
+    document.body.appendChild(modal);
+    setTimeout(function () { if (modal.parentNode) modal.parentNode.removeChild(modal); }, 10000);
+  }
+
+  setRel(a, d, relations[a][d] - 20);
+  if (warScore[a]) warScore[a][d] = 0;
+  if (warScore[d]) warScore[d][a] = 0;
+  if (warStats[key]) delete warStats[key];
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   琛屾斂鍖哄煙
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var provinceVisited = null;
+var PROV_NAME_SEED = 1;   /* 鐪?甯傚懡鍚嶈鏁?*/
+
+function targetProvSize() {
+  return Math.max(30, Math.round(Math.pow(Math.sqrt(TOTAL) / 22, 2)));
+}
+
+/* 缁欑渷鐢熸垚 "鐪伮峰競" 鍚嶏細鐪佸悕鍙栬嚜 PROV_POOL锛屽競鍚嶅彇鑷?CITY_POOL锛堢敤 RNG锛?*/
+function nameProvince(ownerId, idx) {
+  var p = PROV_POOL[(ownerId * 7 + idx * 3 + (PROV_NAME_SEED % 5)) % PROV_POOL.length];
+  var c = CITY_POOL[(ownerId * 5 + idx * 11) % CITY_POOL.length];
+  return p + '路' + c;
+}
+
+function updateProvinces() {
+  if (!provinceVisited || provinceVisited.length !== TOTAL) {
+    provinceVisited = new Uint8Array(TOTAL);
+  } else {
+    provinceVisited.fill(0);
+  }
+
+  prov.fill(-1);
+  provinces = [];
+
+  /* 鍏堟寜鍥藉缁熻棰嗗湡瑙勬ā锛屽喅瀹氭瘡鍥界粏鍒嗘垚鍑犵渷锛堥鍦熻秺澶ц秺缁嗭級 */
+  var ownLand = new Array(countries.length);
+  for (var oi = 0; oi < countries.length; oi++) ownLand[oi] = 0;
+  for (var ci = 0; ci < TOTAL; ci++) if (owner[ci] > 0) ownLand[owner[ci]]++;
+  var tgt = targetProvSize();
+
+  var provSeq = {};   /* 姣忓浗宸茬敤鐪佷唤搴忓彿锛岀敤浜庡懡鍚?*/
+  for (var gi = 1; gi < countries.length; gi++) provSeq[gi] = 0;
+
+  for (var i = 0; i < TOTAL; i++) {
+    if (provinceVisited[i]) continue;
+    var o = owner[i];
+    provinceVisited[i] = 1;
+    if (o === 0) continue;
+
+    /* 鏁寸墖鍥藉棰嗗湡 BFS */
+    var cells = [i];
+    var queue = [i];
+    var head = 0;
+    var totalPop = 0, totalGar = 0;
+    while (head < queue.length) {
+      var c = queue[head++];
+      totalPop += pop[c];
+      totalGar += troops[c];
+      var cx = c % N, cy = (c / N) | 0;
+      for (var d = 0; d < 8; d++) {
+        var nx = cx + DIRS8[d][0], ny = cy + DIRS8[d][1];
+        
+        var ni = WCell(nx, ny);
+        if (provinceVisited[ni]) continue;
+        if (owner[ni] !== o) continue;
+        provinceVisited[ni] = 1;
+        queue.push(ni);
+        cells.push(ni);
+      }
+    }
+
+    /* 鍐冲畾璇ュ浗瀹跺簲缁嗗垎涓哄嚑鐪侊紙闈㈢Н >= tgt 灏卞啀鍒嗭級 */
+    var wantProvs = Math.max(1, Math.round(ownLand[o] / tgt));
+    wantProvs = Math.min(wantProvs, 60);
+    var chunk = Math.ceil(cells.length / wantProvs);
+
+    /* 鎶婃暣鐗囬鍦熷垏鎴?wantProvs 鍧?鈫?姣忓潡涓€涓渷锛堝競锛?*/
+    var start = 0;
+    while (start < cells.length) {
+      var segEnd = Math.min(cells.length, start + chunk);
+      var subCells = cells.slice(start, segEnd);
+      var subPop = 0, subGar = 0;
+      var capIdx = subCells[0], capPop = pop[subCells[0]];
+      for (var ci2 = 0; ci2 < subCells.length; ci2++) {
+        subPop += pop[subCells[ci2]];
+        subGar += troops[subCells[ci2]];
+        if (pop[subCells[ci2]] > capPop) { capPop = pop[subCells[ci2]]; capIdx = subCells[ci2]; }
+      }
+      var provId = provinces.length;
+      for (var mk = 0; mk < subCells.length; mk++) prov[subCells[mk]] = provId;
+
+      var seq = provSeq[o]++;
+      var obj = {
+        owner: o,
+        cells: subCells,
+        capital: capIdx,
+        pop: subPop,
+        troops: subGar,
+        size: subCells.length,
+        name: nameProvince(o, seq)
+      };
+      provinces.push(obj);
+
+      /* 鑷姩寰佸叺 */
+      if (turn % 40 === 0 && subPop > subCells.length * 400) {
+        var recruits = Math.min(subGar * 0.02 + subCells.length * 8, subPop * 0.02);
+        var per = recruits / subCells.length;
+        for (var cj = 0; cj < subCells.length; cj++) {
+          var cc = subCells[cj];
+          if (pop[cc] > 200) {
+            pop[cc] -= per * 0.9;
+            troops[cc] += per * 1.2;
+          }
+        }
+      }
+      start = segEnd;
+    }
+  }
+
+  /* 鑷姩寤哄啗钀ワ紙闈欐€佸缓绛戯紝璐熻矗閲婃斁钀ラ槦锛?*/
+  if (turn % 40 === 0) {
+    for (var pi = 0; pi < provinces.length; pi++) {
+      var prov2 = provinces[pi];
+      if (prov2.size < 12) continue;
+      if (prov2.troops < 1000) continue;
+
+      var myBats = 0;
+      for (var bi = 0; bi < barracks.length; bi++)
+        if (barracks[bi].owner === prov2.owner) myBats++;
+      var maxBats = Math.max(4, Math.round(prov2.size / 40));
+      if (myBats >= maxBats) continue;
+
+      var shuffled = prov2.cells.slice();
+      for (var s = 0; s < Math.min(30, shuffled.length); s++) {
+        var idx = s + ((Math.random() * (shuffled.length - s)) | 0);
+        var tmp = shuffled[s]; shuffled[s] = shuffled[idx]; shuffled[idx] = tmp;
+      }
+
+      for (var s2 = 0; s2 < Math.min(30, shuffled.length); s2++) {
+        var c2 = shuffled[s2];
+        var x = c2 % N, y = (c2 / N) | 0;
+        if (x < 2 || y < 2 || x >= N-2 || y >= N-2) continue;
+        if (!canPlaceBattalion(x, y, prov2.owner)) continue;
+
+        var ok = true;
+        for (var dy2 = -1; dy2 <= 1; dy2++)
+          for (var dx2 = -1; dx2 <= 1; dx2++) {
+            var ni2 = (y+dy2)*N + (x+dx2);
+            if (troops[ni2] < 1000/9 + 30) { ok = false; break; }
+          }
+        if (!ok) continue;
+
+        for (var dy3 = -1; dy3 <= 1; dy3++)
+          for (var dx3 = -1; dx3 <= 1; dx3++)
+            troops[(y+dy3)*N + (x+dx3)] -= 1000/9;
+
+        var ci = y * N + x;
+        var man = 0;
+        for (var dy4 = -1; dy4 <= 1; dy4++)
+          for (var dx4 = -1; dx4 <= 1; dx4++)
+            man += troops[(y+dy4)*N + (x+dx4)];
+        barracks.push({
+          owner: prov2.owner,
+          cx: x, cy: y, cell: ci,
+          manpower: man, storedManpower: 0,
+          maxSquads: 25
+        });
+        break;
+      }
+    }
+  }
+}
+
+function canPlaceBattalion(cx, cy, oid) {
+  for (var dy = -1; dy <= 1; dy++)
+    for (var dx = -1; dx <= 1; dx++) {
+      var x = cx + dx, y = cy + dy;
+      
+      var i = y*N + x;
+      if (owner[i] !== oid) return false;
+      if (!TERRAIN[terrain[i]].pass) return false;
+    }
+  for (var k = 0; k < barracks.length; k++) {
+    var bb = barracks[k];
+    if (bb.x != null) continue;       /* 琛屽啗钀ラ槦涓嶉樆鎸?*/
+    if (Math.abs(bb.cx - cx) <= 2 && Math.abs(bb.cy - cy) <= 2)
+      return false;
+  }
+  return true;
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   AI 寤鸿惀
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function aiBuildBattalions() {
+  for (var f = 2; f < countries.length; f++) {
+    if (!countries[f].alive) continue;
+
+    var myBats = 0;
+    for (var bi = 0; bi < barracks.length; bi++)
+      if (barracks[bi].owner === f) myBats++;
+    if (myBats >= 12) continue;
+
+    var best = -1;
+    for (var s = 0; s < 120; s++) {
+      var i = (Math.random() * TOTAL) | 0;
+      if (owner[i] !== f) continue;
+      var x = i % N, y = (i / N) | 0;
+      if (x < 2 || y < 2 || x >= N-2 || y >= N-2) continue;
+
+      var border = false;
+      for (var d = 0; d < 8; d++) {
+        var nx = x + DIRS8[d][0], ny = y + DIRS8[d][1];
+        
+        if (owner[ny*N + nx] !== f) { border = true; break; }
+      }
+      if (!border) continue;
+      if (!canPlaceBattalion(x, y, f)) continue;
+
+      var g = 0;
+      for (var dy = -1; dy <= 1; dy++)
+        for (var dx = -1; dx <= 1; dx++)
+          g += troops[WCell(x+dx, y+dy)];
+      if (g < 1000) continue;
+      best = i; break;
+    }
+
+    if (best < 0) continue;
+    var bx = best % N, by = (best / N) | 0;
+
+    for (var dy2 = -1; dy2 <= 1; dy2++)
+      for (var dx2 = -1; dx2 <= 1; dx2++)
+        troops[(by+dy2)*N + (bx+dx2)] -= 111;
+
+    var bcell = by * N + bx;
+    var man = 0;
+    for (var d3 = -1; d3 <= 1; d3++)
+      for (var d4 = -1; d4 <= 1; d4++)
+        man += troops[(by+d3)*N + (bx+d4)];
+    barracks.push({
+      owner: f, cx: bx, cy: by, cell: bcell,
+      manpower: man, maxSquads: 25
+    });
+  }
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鍩庡競绯荤粺锛氳嚜鍔ㄥ缓鍩庯紱鍩庡競娌﹂櫡鍒欏崰棰嗗叾涓€閮ㄥ垎棰嗗湡
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function autoBuildCities() {
+  /* 姣忓浗鎸夐鍦熻妯¤嚜鍔ㄥ缓鑻ュ共鍩庡競锛堜綅浜庝汉鍙ｉ珮鐐癸級 */
+  var wantLand = new Array(countries.length), wantCities = new Array(countries.length);
+  for (var oi = 0; oi < countries.length; oi++) { wantLand[oi] = 0; wantCities[oi] = 0; }
+  for (var ci = 0; ci < TOTAL; ci++) if (owner[ci] > 0) wantLand[owner[ci]]++;
+  for (var o = 1; o < countries.length; o++) {
+    if (!countries[o].alive) continue;
+    /* 棰嗗湡瓒婂ぇ寤哄煄瓒婂锛氭洿婵€杩?鈫?棰嗗湡/20 寮€骞虫柟锛屽皝椤?50 */
+    wantCities[o] = Math.round(Math.sqrt(wantLand[o] / 5));
+    var have = 0;
+    for (var c2i = 0; c2i < cities.length; c2i++)
+      if (cities[c2i].owner === o) have++;
+    if (have >= wantCities[o]) continue;
+
+    /* 闅忔満灏濊瘯鍦ㄤ汉鍙ｉ珮鐐瑰缓鍩庯紙閬垮紑宸叉湁鍩庡競锛?*/
+    var tries = wantCities[o] - have;
+    for (var t = 0; t < tries; t++) {
+      var placed = false;
+      for (var s = 0; s < 60 && !placed; s++) {
+        var i = (Math.random() * TOTAL) | 0;
+        if (owner[i] !== o) continue;
+        if (TERRAIN[terrain[i]].defMul < 0.9) continue;   /* 蹇呴』鍙€氳涓斾笉鏄按鍩?*/
+        if (pop[i] < 250) continue;                        /* 闄嶄綆浜哄彛闂ㄦ */
+        var x = i % N, y = (i / N) | 0;
+        var nearCity = false;
+        for (var c3 = 0; c3 < cities.length; c3++) {
+          if (Math.abs(cities[c3].cx - x) < 3 && Math.abs(cities[c3].cy - y) < 3) { nearCity = true; break; }
+        }
+        if (nearCity) continue;
+        /* 寤哄煄闇€涓€瀹氬畧鍐涙敮鎾戯紙闄嶄綆闂ㄦ锛?*/
+        var g = 0;
+        for (var dy = -1; dy <= 1; dy++)
+          for (var dx = -1; dx <= 1; dx++)
+            if (dx === 0 && dy === 0) continue;
+            g += troops[WCell(x+dx, y+dy)];
+        if (g < 300) continue;
+        cities.push({
+          owner: o, cx: x, cy: y, cell: i,
+          name: CITY_POOL[(o * 11 + CITY_SEQ * 7) % CITY_POOL.length] + '鍩?,
+          seq: CITY_SEQ++
+        });
+        placed = true;
+      }
+    }
+  }
+
+  /* 鍩庡競鑱氶泦浜哄彛锛氬煄甯傚崐寰?2 鍐咃紝鍛ㄥ洿鏍间汉鍙ｆ參鎱㈡祦鍏ュ煄甯傛牸锛堟瘡鏍兼祦鍑?0.2% 鈫?鍩庡競 +0.4%锛?*/
+  for (var cc = 0; cc < cities.length; cc++) {
+    var ctd = cities[cc];
+    if (ctd.cell < 0 || ctd.cell >= TOTAL) continue;
+    var rad = 2;
+    var accum = 0;
+    for (var dy = -rad; dy <= rad; dy++)
+      for (var dx = -rad; dx <= rad; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        if (dx*dx + dy*dy > rad*rad) continue;
+        var nx = ctd.cx + dx, ny = ctd.cy + dy;
+        
+        var ni = WCell(nx, ny);
+        if (owner[ni] !== ctd.owner) continue;
+        var pm2 = TERRAIN[terrain[ni]].popMax;
+        var outflow = pop[ni] * 0.002;
+        if (outflow > 2) outflow = 2;
+        pop[ni] -= outflow;
+        accum += outflow;
+      }
+    pop[ctd.cell] = Math.min(TERRAIN[terrain[ctd.cell]].popMax * 1.8, pop[ctd.cell] + accum);
+  }
+
+  /* 鍩庡競娌﹂櫡锛氬煄甯傛牸琚晫鍥藉崰棰?鈫?鍗犻璇ュ煄鎵€杈栧尯鍩燂紙鍩庡競鍗婂緞鍐呮敼褰掑睘锛?*/
+  var cityMap = {};
+  for (var c4 = 0; c4 < cities.length; c4++) {
+    var ctd = cities[c4];
+    var cur = owner[ctd.cell];
+    if (cur === ctd.owner) continue;       /* 浠嶅睘鍘熶富 */
+    if (cur === 0 || cur === ctd.owner) continue;
+    /* 鍩庡競琚?cur 鍗犻锛氬皢鍩庡競鍗婂緞鍐呮湰灞?ctd.owner 鐨勬牸杞粰 cur */
+    var rad = 3;
+    for (var dy = -rad; dy <= rad; dy++)
+      for (var dx = -rad; dx <= rad; dx++) {
+        var nx = ctd.cx + dx, ny = ctd.cy + dy;
+        
+        if (dx*dx + dy*dy > rad*rad) continue;
+        var ni = WCell(nx, ny);
+        if (owner[ni] === ctd.owner) { owner[ni] = cur; miniDirty = true; }
+      }
+    ctd.owner = cur;   /* 鍩庡競褰掑睘鏇存柊 */
+  }
+}
+
+/* 搴熷澶嶅師锛氬埌杈?80 鍥炲悎鍚庯紝搴熷鎭㈠涓哄師鍦板舰锛堣崏鍘?灞卞湴渚濆櫔澹拌繎浼硷級 */
+function recoverRuins() {
+  for (var i = 0; i < TOTAL; i++) {
+    if (terrain[i] !== T_RUIN) continue;
+    if (ruinTurn[i] < 0) ruinTurn[i] = turn;
+    if (turn - ruinTurn[i] < 80) continue;
+    /* 绠€鍗曟寜閭昏繎鍙栦竴涓潪搴熷鍙€氳鍦板舰澶嶅師 */
+    var t = T_PLAIN;
+    var found = false;
+    var cx = i % N, cy = (i / N) | 0;
+    for (var d = 0; d < 8 && !found; d++) {
+      var nx = cx + DIRS8[d][0], ny = cy + DIRS8[d][1];
+      
+      var nt = terrain[ny*N + nx];
+      if (nt !== T_RUIN && nt !== T_WATER) { t = nt; found = true; }
+    }
+    terrain[i] = t;
+    ruinTurn[i] = -1;
+    cap[i] = TERRAIN[t].popMax * 0.4;
+    if (pop[i] < cap[i] * 0.5) pop[i] = cap[i] * 0.5;
+    miniDirty = true;
+  }
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   澶栦氦
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function setRel(a, b, v) {
+  v = Math.max(-100, Math.min(100, v));
+  relations[a][b] = v;
+  relations[b][a] = v;
+}
+function addRel(a, b, d) { setRel(a, b, relations[a][b] + d); }
+
+function driftRelations() {
+  for (var i = 1; i < countries.length; i++) {
+    for (var j = i+1; j < countries.length; j++) {
+      var d = (Math.random() - 0.5) * 2.2;
+      if (adjacent(i, j)) d -= 0.6;
+      if (allied[i][j]) d += 0.4;
+      addRel(i, j, d);
+    }
+  }
+}
+
+function adjacent(a, b) {
+  var found = false;
+  for (var s = 0; s < 160 && !found; s++) {
+    var i = (Math.random() * TOTAL) | 0;
+    if (owner[i] !== a) continue;
+    var x = i % N, y = (i / N) | 0;
+    for (var d = 0; d < 8; d++) {
+      var nx = x + DIRS8[d][0], ny = y + DIRS8[d][1];
+      
+      if (owner[ny*N + nx] === b) { found = true; break; }
+    }
+  }
+  return found;
+}
+
+/* 鈹€鈹€ 鑱旂洘闃佃惀锛氭寜鍏崇郴鑱氱被锛?-4 涓仈鐩燂紝鍚岃仈鐩熸垚鍛樹簰鐩镐繚鎶?鈹€鈹€ */
+function buildAlliances() {
+  alliances = [];
+  var alive = [];
+  for (var i = 1; i < countries.length; i++)
+    if (countries[i].alive) alive.push(i);
+  if (alive.length < 3) { alliances.push({ name:'鑷敱閭?, members: alive.slice(), color:ALLIANCE_COLORS[0].slice() }); return; }
+
+  /* 闅忔満鍐冲畾鑱旂洘鏁伴噺锛?~min(4, 鍥藉鏁?2) */
+  var nAll = 2 + ((RNG() * Math.min(3, Math.floor(alive.length / 2) - 1)) | 0);
+  nAll = Math.max(2, Math.min(4, nAll));
+
+  /* 绠€鍗曡仛绫伙細鎸夊叧绯诲緱鍒嗛珮鐨勬姳鍥?*/
+  var assigned = {};
+  /* 鍏堥€?nAll 涓瀛愬浗瀹?*/
+  var shuffled = alive.slice();
+  for (var s = 0; s < shuffled.length; s++) {
+    var idx = s + ((RNG() * (shuffled.length - s)) | 0);
+    var tmp = shuffled[s]; shuffled[s] = shuffled[idx]; shuffled[idx] = tmp;
+  }
+  var seeds = shuffled.slice(0, nAll);
+  for (var ai = 0; ai < nAll; ai++) {
+    alliances.push({
+      name: ['澶╂灑','鐜勯粍','璧ゆ疆','纰ц惤'][ai] + '鑱旂洘',
+      members: [seeds[ai]],
+      color: ALLIANCE_COLORS[ai % ALLIANCE_COLORS.length].slice()
+    });
+    assigned[seeds[ai]] = ai;
+  }
+
+  /* 鍓╀綑鍥藉锛氬姞鍏ュ叧绯绘渶濂界殑绉嶅瓙鎵€鍦ㄨ仈鐩?*/
+  for (var ri = 0; ri < alive.length; ri++) {
+    var oid = alive[ri];
+    if (assigned[oid] !== undefined) continue;
+    var bestA = -1, bestRel = -999;
+    for (var a2 = 0; a2 < nAll; a2++) {
+      var seed = seeds[a2];
+      var r = relations[oid][seed] || 0;
+      if (r > bestRel) { bestRel = r; bestA = a2; }
+    }
+    if (bestA >= 0) {
+      alliances[bestA].members.push(oid);
+      assigned[oid] = bestA;
+      /* 鑷姩寤虹珛 allied 鍏崇郴 */
+      for (var mi = 0; mi < alliances[bestA].members.length; mi++) {
+        var m2 = alliances[bestA].members[mi];
+        allied[oid][m2] = allied[m2][oid] = true;
+      }
+    }
+  }
+}
+
+/* 鑾峰彇鏌愬浗鎵€灞炶仈鐩燂紙杩斿洖鑱旂洘瀵硅薄鎴?null锛?*/
+function getAllianceOf(oid) {
+  for (var i = 0; i < alliances.length; i++)
+    if (alliances[i].members.indexOf(oid) >= 0) return alliances[i];
+  return null;
+}
+
+/* aiDiplomacy 鏀逛负閫氳繃 PENDING_WARS 瀹ｆ垬 */
+function aiDiplomacy() {
+  for (var f = 2; f < countries.length; f++) {
+    if (!countries[f].alive) continue;
+    for (var g = 1; g < countries.length; g++) {
+      if (g === f || !countries[g].alive) continue;
+      var rel = relations[f][g];
+
+      if (atWar[f][g]) {
+        /* AI 澶勪簬鍔ｅ娍鏃朵細涓诲姩姹傚拰 */
+        if (landCount[f] < landCount[g] * 0.35 || rel > -20) {
+          if (Math.random() < 0.5) {
+            atWar[f][g] = atWar[g][f] = false;
+            setRel(f, g, Math.max(rel, -12));
+            if (g === playerId) toast(countries[f].name + ' 鍚戜綘姹傚拰');
+          }
+        }
+      } else if (!allied[f][g]) {
+        if (rel < -45 && landCount[f] > landCount[g] * 1.35 && Math.random() < 0.35) {
+          pushPendingWar(f, g);
+        } else if (rel > 72 && Math.random() < 0.25) {
+          allied[f][g] = allied[g][f] = true;
+          if (g === playerId) toast(countries[f].name + ' 涓庝綘缁撶洘');
+        }
+      }
+    }
+  }
+}
+
+function recountLand() {
+  for (var i = 0; i < landCount.length; i++) landCount[i] = 0;
+  for (var k = 0; k < TOTAL; k++) landCount[owner[k]]++;
+  for (var c = 1; c < countries.length; c++) {
+    if (landCount[c] === 0) countries[c].alive = false;
+  }
+}
+
+/* 鈹€鈹€ 瀹ｆ垬绯荤粺锛氬脊绐?+ 鍊掕鏃?+ 鐜╁绔欓槦 鈹€鈹€ */
+var WAR_COMMENTS = [
+  '銆岃繖鍦烘垬浜夋棭璇ョ垎鍙戯紝鏄椂鍊欒浠栦滑浠樺嚭浠ｄ环浜嗐€傘€嶁€斺€?鍐涗簨璇勮鍛?,
+  '銆屽浜ゅ凡姝伙紝鏋偖灏嗘浛鎴戜滑璇磋瘽銆傘€嶁€斺€?鏌愬浗澶ц嚕',
+  '銆屾垜浠笉杩芥眰鎴樹簤锛屼絾鎴戜滑涓嶆€曟垬浜夈€傘€嶁€斺€?鍥戒細澹版槑',
+  '銆岄偦鍥界殑璐┆姘告棤姝㈠锛屽繀椤讳互鏆村埗鏆淬€傘€嶁€斺€?涓绘垬娲鹃琚?,
+  '銆屾効涓婂笣绔欏湪姝ｄ箟涓€鏂光€斺€斿綋鐒舵槸鎴戜滑杩欐柟銆傘€嶁€斺€?闅忓啗绁炵埗',
+  '銆屾垬浜夛紵鍙堟槸鎴樹簤锛熻繖涓€浠ｄ汉杩樻病鎵撳鍚楋紵銆嶁€斺€?琛楅潰璺汉',
+  '銆屽鎴樹功宸叉嫙濂斤紝澧ㄨ抗鏈共锛岀宸插湪寮︺€傘€嶁€斺€?鍙插畼绗旇',
+  '銆屽埆闂垜涓轰粈涔堬紝闂棶浠栦滑鍦ㄨ竟澧冨仛浜嗕粈涔堛€傘€嶁€斺€?鍓嶇嚎鎸囨尌瀹?,
+  '銆屼袱鍥戒箣闂寸殑鎭╂€ㄥ凡闈炰竴鏃ヤ箣瀵掞紝浠婂ぉ缁堜簬鐮村啺銆傘€嶁€斺€?鎴樺湴璁拌€?
+];
+
+/* 鐜╁绔欓槦閫夋嫨璁板綍锛歱ending war 閲?playerSide = 'attacker'|'defender'|'neutral' */
+
+/* 妫€鏌?fromOid 鑳藉惁瀵?toOid 鍑哄叺锛? 鏂瑰悜浠讳竴鏂瑰悜鍙揪锛氱洿鎺ユ帴澹?to 鍥斤紝
+   鎴栭殧 1~2 鏍间腑绔嬮鍦熷彲鍒拌揪锛涜绗笁鍥芥尅浣?鈫?涓嶅彲杈撅級 */
+function canReachEnemy(fromOid, toOid) {
+  for (var y = 0; y < N; y++) {
+    for (var x = 0; x < N; x++) {
+      if (owner[y*N + x] !== fromOid) continue;
+      /* 杩欎釜 from 鏍肩殑 4 鏂瑰悜 */
+      for (var d = 0; d < 4; d++) {
+        var nx = x + DIRS4[d][0], ny = y + DIRS4[d][1];
+        
+        /* 鏂瑰悜閾炬渶澶氱湅 3 鏍兼繁锛?鈫?鈫? */
+        for (var step = 0; step < 3; step++) {
+          var ni = WCell(nx, ny);
+          var eo = owner[ni];
+          if (eo === toOid) return true;         /* 鎵惧埌鏁屽浗 鈫?鍙揪 */
+          if (eo === fromOid) break;              /* 鍥炲埌鑷繁棰嗗湡 鈫?鍋滀笅 */
+          if (eo !== 0) break;                    /* 绗笁鍥芥尅浣?鈫?鎹㈡柟鍚?*/
+          /* 涓珛 鈫?缁х画寰€鍓?*/
+          nx += DIRS4[d][0]; ny += DIRS4[d][1];
+          
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function pushPendingWar(attacker, defender) {
+  /* 闃叉閲嶅 push */
+  for (var pi = 0; pi < PENDING_WARS.length; pi++) {
+    var pw = PENDING_WARS[pi];
+    if ((pw.a === attacker && pw.d === defender) || (pw.a === defender && pw.d === attacker)) return;
+  }
+  /* 涔熼槻姝㈠凡缁忓湪鎴樹簤涓?*/
+  if (atWar[attacker][defender]) return;
+
+  /* 鈹€鈹€ N2锛氭鏌ユ槸鍚﹀鏁屾柟鏈夊彲杈捐矾寰勶紙4 鏂瑰悜浠讳竴鏂瑰悜鍙揪鍗冲彲锛?鈹€鈹€ */
+  if (!canReachEnemy(attacker, defender)) {
+    if (attacker === playerId || defender === playerId) {
+      toast('鏃犳硶瀹ｆ垬锛? + countries[defender].name + ' 鐨勯鍦熻鍏朵粬鍥藉鎸′綇浜嗭紒');
+    }
+    return;   /* AI 涔熺洿鎺ユ斁寮?*/
+  }
+
+  var p = {
+    a: attacker, d: defender,
+    startTurn: turn,
+    countdown: 60,  /* 鍥哄畾 60 鍥炲悎鍚庢寮忓鎴?*/
+    playerSide: 'neutral',
+    comments: [],
+    resolved: false
+  };
+  /* 棰勫啓 2-3 鏉¤瘎璁?*/
+  var nc = 2 + ((RNG() * 2) | 0);
+  for (var ci = 0; ci < nc; ci++)
+    p.comments.push(WAR_COMMENTS[((RNG() * WAR_COMMENTS.length) | 0)]);
+  PENDING_WARS.push(p);
+
+  /* 濡傛灉鐜╁娑夊強鍏朵腑 鈫?寮瑰嚭绐楀彛 */
+  if (attacker === playerId || defender === playerId) {
+    showWarDeclaration(p);
+  } else {
+    toast(countries[attacker].name + ' 鍗冲皢鍚?' + countries[defender].name + ' 瀹ｆ垬');
+  }
+}
+
+/* 姣忓洖鍚堟帹杩?PENDING_WARS 鍊掕鏃?*/
+function tickPendingWars() {
+  for (var i = PENDING_WARS.length - 1; i >= 0; i--) {
+    var pw = PENDING_WARS[i];
+    if (pw.resolved) { PENDING_WARS.splice(i, 1); continue; }
+    pw.countdown--;
+    if (pw.countdown <= 0) {
+      /* 姝ｅ紡瀹ｆ垬 */
+      launchWar(pw);
+      PENDING_WARS.splice(i, 1);
+    }
+  }
+}
+
+/* 姝ｅ紡瀹ｆ垬锛氳缃?atWar銆佽褰曟垬浜夈€佸脊绐?*/
+function launchWar(pw) {
+  var a = pw.a, d = pw.d;
+  atWar[a][d] = atWar[d][a] = true;
+  setRel(a, d, (relations[a][d] || 0) - 25);
+  recordWarStart(a, d);
+
+  /* 鐜╁绔欓槦鐢熸晥 */
+  if (pw.playerSide === 'attacker' && playerId !== a && playerId !== d) {
+    /* 鐜╁閫夋嫨鏀寔 attacker 鈫?鍔犲叆 attacker 鏂瑰 d 瀹ｆ垬 */
+    atWar[playerId][d] = atWar[d][playerId] = true;
+    recordWarStart(playerId, d);
+  } else if (pw.playerSide === 'defender' && playerId !== a && playerId !== d) {
+    atWar[playerId][a] = atWar[a][playerId] = true;
+    recordWarStart(playerId, a);
+  }
+
+  /* 寮圭獥灞曠ず姝ｅ紡瀹ｆ垬 */
+  if (a === playerId || d === playerId || pw.playerSide !== 'neutral') {
+    showWarLaunched(a, d, pw);
+  } else {
+    toast('鈿?' + countries[a].name + ' 姝ｅ紡鍚?' + countries[d].name + ' 瀹ｆ垬锛?);
+  }
+}
+
+/* 寮圭獥锛氬鎴樺０鏄庯紙persistent锛屼笉鑷姩鍏抽棴锛?*/
+function showWarDeclaration(pw) {
+  var a = pw.a, d = pw.d;
+  var aCol = 'rgb(' + countries[a].color.join(',') + ')';
+  var dCol = 'rgb(' + countries[d].color.join(',') + ')';
+  var isPlayer = (a === playerId || d === playerId);
+
+  var h = '<div class="war-decl" style="min-width:440px;max-width:560px">';
+  h += '<div style="font-size:14px;color:#ffce7a;border-bottom:1px solid rgba(255,180,80,.3);padding-bottom:10px;margin-bottom:12px;letter-spacing:3px;text-align:center">';
+  h += '鈿?鎴?浜?棰?鍛?鈿?;
+  h += '</div>';
+
+  h += '<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px">';
+  h += '<div style="text-align:center"><div style="color:' + aCol + ';font-size:16px;font-weight:600">' + countries[a].name + '</div><div style="font-size:11px;color:#7d8fa6;margin-top:2px">杩涙敾鏂?/div></div>';
+  h += '<div style="color:#7d8fa6;font-size:18px">鈫?瀹?鎴?鈫?/div>';
+  h += '<div style="text-align:center"><div style="color:' + dCol + ';font-size:16px;font-weight:600">' + countries[d].name + '</div><div style="font-size:11px;color:#7d8fa6;margin-top:2px">闃插尽鏂?/div></div>';
+  h += '</div>';
+
+  /* 鍊掕鏃?*/
+  h += '<div style="text-align:center;margin-bottom:14px;font-size:12px;color:#8fa5bb">璺濈姝ｅ紡瀹ｆ垬杩樻湁 <b style="color:#ffce7a;font-size:14px">' + pw.countdown + '</b> 鍥炲悎锛堢害 ' + Math.max(1, Math.round(pw.countdown/14)) + ' 澶╋級</div>';
+
+  /* 棰勫啓璇勮 */
+  h += '<div style="border:1px solid rgba(90,140,200,.2);border-radius:6px;padding:10px;margin-bottom:14px;font-size:11.5px;color:#a5b8cc;line-height:1.8;max-height:140px;overflow-y:auto">';
+  h += '<div style="color:#7d8fa6;margin-bottom:6px;letter-spacing:1px">鈥?鍚勬柟璇勮 鈥?/div>';
+  for (var ci = 0; ci < pw.comments.length; ci++)
+    h += '<div style="margin-bottom:4px">' + pw.comments[ci] + '</div>';
+  h += '</div>';
+
+  /* 鐜╁绔欓槦閫夐」锛堝彧鏈夊綋鐜╁涓嶇洿鎺ュ弬涓庢椂鏄剧ず绔欓槦锛涘惁鍒欏彧鏄剧ず鏃佽锛?*/
+  if (!isPlayer) {
+    h += '<div style="display:flex;gap:8px;margin-bottom:10px">';
+    h += '<button class="btn" style="flex:1;background:rgba(255,100,100,.12);border-color:rgba(255,100,100,.35);color:#ffb0b0" onclick="alignWar(' + pw.a + ',' + pw.d + ',\'attacker\')">鏀寔 ' + countries[a].name + '</button>';
+    h += '<button class="btn" style="flex:1;background:rgba(100,150,255,.12);border-color:rgba(100,150,255,.35);color:#b0c8ff" onclick="alignWar(' + pw.a + ',' + pw.d + ',\'defender\')">鏀寔 ' + countries[d].name + '</button>';
+    h += '<button class="btn amber" style="flex:1" onclick="alignWar(' + pw.a + ',' + pw.d + ',\'neutral\')">淇濇寔涓珛</button>';
+    h += '</div>';
+  } else {
+    h += '<div style="text-align:center;color:#ffce7a;font-size:12px;margin-bottom:10px">浣犳槸浜ゆ垬鏂癸紝璇峰仛濂芥垬浜夊噯澶囷紒</div>';
+  }
+
+  h += '<div style="display:flex;gap:8px">';
+  h += '<button class="btn" style="flex:1" onclick="closeWarDecl()">鍏抽棴绐楀彛锛堟垬浜夌户缁級</button>';
+  h += '</div>';
+  h += '</div>';
+
+  openModal('war-decl', h);
+}
+
+function alignWar(a, d, side) {
+  for (var i = 0; i < PENDING_WARS.length; i++) {
+    var pw = PENDING_WARS[i];
+    if (pw.a === a && pw.d === d) {
+      pw.playerSide = side;
+      if (side === 'attacker') toast('浣犻€夋嫨鏀寔 ' + countries[a].name);
+      else if (side === 'defender') toast('浣犻€夋嫨鏀寔 ' + countries[d].name);
+      else toast('浣犻€夋嫨淇濇寔涓珛');
+      break;
+    }
+  }
+  closeWarDecl();
+}
+
+function closeWarDecl() {
+  var m = document.getElementById('war-decl');
+  if (m) m.style.display = 'none';
+}
+
+/* 寮圭獥锛氭寮忓鎴?*/
+function showWarLaunched(a, d, pw) {
+  var aCol = 'rgb(' + countries[a].color.join(',') + ')';
+  var dCol = 'rgb(' + countries[d].color.join(',') + ')';
+  var h = '<div class="war-decl" style="min-width:380px;max-width:480px">';
+  h += '<div style="font-size:15px;color:#ff8a8a;border-bottom:1px solid rgba(255,120,120,.35);padding-bottom:10px;margin-bottom:14px;letter-spacing:4px;text-align:center">';
+  h += '鈿?鎴?浜?鐖?鍙?鈿?;
+  h += '</div>';
+  h += '<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px">';
+  h += '<div style="text-align:center"><div style="color:' + aCol + ';font-size:17px;font-weight:600">' + countries[a].name + '</div></div>';
+  h += '<div style="color:#ff8a8a;font-size:22px;font-weight:700">鈿?/div>';
+  h += '<div style="text-align:center"><div style="color:' + dCol + ';font-size:17px;font-weight:600">' + countries[d].name + '</div></div>';
+  h += '</div>';
+  h += '<div style="text-align:center;color:#9ab3cc;font-size:12px;margin-bottom:14px">鎴樹簤宸茬粡鎵撳搷锛佽惀闃熸鍦ㄩ泦缁撳紑寰€鍓嶇嚎鈥︹€?/div>';
+  if (pw && pw.playerSide !== 'neutral' && pw.playerSide) {
+    h += '<div style="text-align:center;color:#ffce7a;font-size:12px;margin-bottom:14px">浣犻€夋嫨浜? + (pw.playerSide === 'attacker' ? '杩涙敾鏂? : '闃插尽鏂?) + '闃佃惀</div>';
+  }
+  h += '<button class="btn" onclick="closeWarDecl()">纭</button>';
+  h += '</div>';
+  openModal('war-decl', h);
+}
+
+/* 寮圭獥鍩虹璁炬柦 */
+function openModal(id, html) {
+  var m = document.getElementById(id);
+  if (!m) {
+    m = document.createElement('div');
+    m.id = id;
+    m.className = 'modal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center';
+    document.body.appendChild(m);
+  }
+  m.innerHTML = '<div class="modal-box" style="pointer-events:auto">' + html + '</div>';
+  m.style.display = 'flex';
+}
+
+/* 鐜╁鍙傛垬鏃跺彸涓嬭鎴樹簤鏁版嵁闈㈡澘 */
+function updatePlayerWarPanel() {
+  var panel = document.getElementById('player-war-panel');
+  var activeWars = [];
+  for (var i = 1; i < countries.length; i++) {
+    if (!countries[i].alive) continue;
+    if (atWar[playerId] && atWar[playerId][i]) activeWars.push(i);
+  }
+  if (activeWars.length === 0) {
+    if (panel) panel.style.display = 'none';
+    return;
+  }
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'player-war-panel';
+    panel.style.cssText = 'position:fixed;bottom:60px;right:12px;z-index:10;background:rgba(20,26,36,.94);border:1px solid rgba(255,120,120,.3);border-radius:8px;padding:10px 14px;font-size:12px;box-shadow:0 4px 20px rgba(0,0,0,.6);min-width:200px;max-width:280px;max-height:200px;overflow-y:auto';
+    document.body.appendChild(panel);
+  }
+  var h = '<div style="color:#ff8a8a;font-weight:600;margin-bottom:6px;letter-spacing:1px">鈿?浣犵殑鎴樹簤</div>';
+  for (var wi = 0; wi < activeWars.length; wi++) {
+    var enemy = activeWars[wi];
+    var key = Math.min(playerId,enemy) + '_' + Math.max(playerId,enemy);
+    var stat = warStats[key];
+    var ws = warScore[playerId] ? warScore[playerId][enemy] : 0;
+    h += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#dfe8f3">';
+    h += '<span>' + countries[enemy].name + '</span>';
+    h += '<span style="color:' + (ws >= 0 ? '#7ee0a0' : '#ff8a8a') + '">鍒?' + Math.round(ws) + '</span>';
+    h += '</div>';
+    if (stat) {
+      h += '<div style="color:#7d8fa6;font-size:11px;padding-left:6px">';
+      h += '棰嗗湡宸?' + ((landCount[playerId]||0) - (landCount[enemy]||0));
+      h += ' 路 鎴戞柟鎹熷け:' + Math.round(playerId < enemy ? stat.lossesA : stat.lossesD);
+      h += '</div>';
+    }
+  }
+  panel.innerHTML = h;
+  panel.style.display = 'block';
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鏈眬鍘嗗彶缁熻
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function recordHistory() {
+  recountLand();
+  var snap = {
+    turn: turn,
+    day: Math.floor(turn / 14) + 1,
+    pop: new Array(countries.length),
+    troop: new Array(countries.length),
+    land: new Array(countries.length),
+    prov: new Array(countries.length)
+  };
+  var pSum = new Array(countries.length),
+      gSum = new Array(countries.length);
+  for (var i = 0; i < TOTAL; i++) {
+    var o = owner[i];
+    if (o === 0) continue;
+    pSum[o] = (pSum[o] || 0) + pop[i];
+    gSum[o] = (gSum[o] || 0) + troops[i];
+  }
+  var pv = {};
+  for (var pi = 0; pi < provinces.length; pi++)
+    pv[provinces[pi].owner] = (pv[provinces[pi].owner] || 0) + 1;
+  for (var c2 = 0; c2 < countries.length; c2++) {
+    snap.pop[c2]   = Math.round(pSum[c2] || 0);
+    snap.troop[c2] = Math.round(gSum[c2] || 0);
+    snap.land[c2]  = landCount[c2] || 0;
+    snap.prov[c2]  = pv[c2] || 0;
+  }
+  history.push(snap);
+  if (history.length > 600) history.shift();
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鏍告墦鍑?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function launchMissile(tx, ty) {
+  var sx = WORLD/2, sy = WORLD/2;
+  var best = -1, bestPop = 0;
+  for (var i = 0; i < TOTAL; i++) {
+    if (owner[i] === playerId && pop[i] > bestPop) { bestPop = pop[i]; best = i; }
+  }
+  if (best >= 0) {
+    sx = (best % N + 0.5) * CELL;
+    sy = ((best / N | 0) + 0.5) * CELL;
+  }
+  missiles.push({ sx: sx, sy: sy, tx: tx, ty: ty, t: 0, dur: 1400 });
+}
+
+function explode(tx, ty) {
+  var R = Math.max(900, CELL * 9);
+  var R2 = R * R;
+
+  var gx0 = Math.max(0, Math.floor((tx - R) / CELL));
+  var gx1 = Math.min(N-1, Math.ceil((tx + R) / CELL));
+  var gy0 = Math.max(0, Math.floor((ty - R) / CELL));
+  var gy1 = Math.min(N-1, Math.ceil((ty + R) / CELL));
+
+  for (var gy = gy0; gy <= gy1; gy++) {
+    for (var gx = gx0; gx <= gx1; gx++) {
+      var cx = (gx + 0.5) * CELL, cy = (gy + 0.5) * CELL;
+      var dx = cx - tx, dy = cy - ty;
+      var d2 = dx*dx + dy*dy;
+      if (d2 > R2) continue;
+      var i = gy*N + gx;
+      var fall = 1 - Math.sqrt(d2) / R;
+      troops[i] = 0;
+      pop[i] *= (1 - 0.85 * fall);
+      if (terrain[i] !== T_WATER) {
+        terrain[i] = T_RUIN;
+        ruinTurn[i] = turn;   /* 璁板綍搴熷璧峰鍥炲悎锛屽埌鐐瑰鍘?*/
+      }
+    }
+  }
+
+  for (var k = barracks.length - 1; k >= 0; k--) {
+    var b = barracks[k];
+    var bx = b.cx*CELL - tx, by = b.cy*CELL - ty;
+    if (bx*bx + by*by < R2) barracks.splice(k, 1);
+  }
+  for (var k2 = squads.length - 1; k2 >= 0; k2--) {
+    var s2 = squads[k2];
+    var sc = squadCell(s2);
+    var sx2 = (sc % N) * CELL - tx, sy2 = ((sc / N) | 0) * CELL - ty;
+    if (sx2*sx2 + sy2*sy2 < R2) squads.splice(k2, 1);
+  }
+
+  effects.push({ type:'nuke', x:tx, y:ty, t:0, dur:1700, r:R });
+  miniDirty = true;
+}
+
+function addRing(x, y, color, dur) {
+  effects.push({ type:'ring', x: x, y: y, t:0, dur: dur || 460, color: color });
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鑳滆礋
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function checkEnd() {
+  if (gameOver) return;
+  var mine = 0, enemies = 0;
+  var alive = new Uint8Array(countries.length);
+  for (var i = 0; i < TOTAL; i++) {
+    var o = owner[i];
+    if (o === playerId) mine++;
+    else if (o !== 0) alive[o] = 1;
+  }
+  for (var f = 2; f < countries.length; f++) if (alive[f]) enemies++;
+
+  if (mine === 0) {
+    gameOver = 'lose';
+    showOver('浜°€€鍥?, '浣犵殑鎵€鏈夐鍦熷潎宸插け瀹堛€?, '#ff6b6b');
+  } else if (enemies === 0) {
+    gameOver = 'win';
+    showOver('澶?涓?涓€ 缁?, '鎵€鏈夋晫瀵瑰娍鍔涘凡琚秷鐏€?, '#6fc0ff');
+  }
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   娓叉煋 鈥斺€?甯︿弗鏍煎畧鍗?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function render() {
+  /* 娓呭睆 */
+  ctx.fillStyle = '#05070a';
+  ctx.fillRect(0, 0, VW, VH);
+
+  /* 娌℃湁鏁版嵁鏃剁洿鎺ヨ繑鍥烇紙淇濈暀榛戝睆锛?*/
+  if (!terrain || !owner || !cap || !countries.length) return;
+
+  var z = cam.zoom;
+  if (!(z > 0) || !isFinite(z)) z = cam.zoom = 0.25;
+
+  var cs = CELL * z;
+
+  if (cs < 5.5) {
+    renderCached(z);
+  } else {
+    renderDirect(z, cs);
+  }
+
+  /* 閫変腑妗?*/
+  if (selected >= 0 && selected < TOTAL && owner[selected] === playerId) {
+    var sgx = selected % N, sgy = (selected / N) | 0;
+    var spx = (sgx * CELL - cam.x) * z + VW/2;
+    var spy = (sgy * CELL - cam.y) * z + VH/2;
+    ctx.strokeStyle = 'rgba(255,255,255,.95)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(spx + 1, spy + 1, Math.max(2, cs - 2), Math.max(2, cs - 2));
+  }
+
+  renderBattalions(z);
+  renderFlags(z);
+  renderAlliances(z, cs);
+  renderCities(z, cs);
+  renderMissiles(z);
+  renderEffects(z);
+  renderDivisions(z);   /* 甯堝浘灞傛渶椤跺眰锛堝湴鍥句箣涓婏級 */
+
+  if (missileMode) renderAim(z);
+}
+
+function renderCached(z) {
+  if (!mini) return;
+  refreshMini();
+  var scale = CELL * z;
+  if (!(scale > 0)) return;
+  var w = VW / scale, h = VH / scale;
+  var cx = cam.x / CELL, cy = cam.y / CELL;
+  var sx = cx - w/2, sy = cy - h/2;
+
+  ctx.imageSmoothingEnabled = true;
+  try {
+    ctx.drawImage(mini, sx, sy, w, h, 0, 0, VW, VH);
+  } catch (e) {
+    /* 蹇界暐 鈥?鏋佺缂╂斁涓嬬殑瑁佸壀閿欒 */
+  }
+}
+
+function renderDirect(z, cs) {
+  var halfW = VW / (2*z), halfH = VH / (2*z);
+  if (!isFinite(halfW) || !isFinite(halfH)) return;
+
+  var gx0 = Math.max(0, Math.floor((cam.x - halfW) / CELL));
+  var gx1 = Math.min(N-1, Math.ceil((cam.x + halfW) / CELL));
+  var gy0 = Math.max(0, Math.floor((cam.y - halfH) / CELL));
+  var gy1 = Math.min(N-1, Math.ceil((cam.y + halfH) / CELL));
+
+  if (gx0 > gx1 || gy0 > gy1) return;
+
+  /* 鍦板潡 */
+  var px0 = VW/2 - cam.x * z;
+  var py0 = VH/2 - cam.y * z;
+  var sz = cs + 0.6;
+
+  for (var gy = gy0; gy <= gy1; gy++) {
+    var py = gy * CELL * z + py0;
+    var rowBase = gy * N;
+    for (var gx = gx0; gx <= gx1; gx++) {
+      var i = rowBase + gx;
+      var oi = owner[i];
+      var ti = terrain[i];
+      var c = cap[i] || 1;
+      var l = (troops[i] / c * 4) | 0;
+      if (l > 3) l = 3; else if (l < 0) l = 0;
+      ctx.fillStyle = COLOR_CSS[oi][ti][l];
+      ctx.fillRect(gx * CELL * z + px0, py, sz, sz);
+    }
+  }
+
+  /* 鍥界晫 */
+  if (cs > 6) {
+    ctx.lineWidth = Math.max(1, cs * 0.055);
+    ctx.strokeStyle = 'rgba(0,0,0,.45)';
+    ctx.beginPath();
+    for (var gy2 = gy0; gy2 <= gy1; gy2++) {
+      var py2 = gy2 * CELL * z + py0;
+      var rb = gy2 * N;
+      for (var gx2 = gx0; gx2 <= gx1; gx2++) {
+        var i2 = rb + gx2;
+        var o2 = owner[i2];
+        var px2 = gx2 * CELL * z + px0;
+        if (gx2 === 0 || owner[i2-1] !== o2) {
+          ctx.moveTo(px2, py2); ctx.lineTo(px2, py2 + cs);
+        }
+        if (gy2 === 0 || owner[i2-N] !== o2) {
+          ctx.moveTo(px2, py2); ctx.lineTo(px2 + cs, py2);
+        }
+      }
+    }
+    ctx.stroke();
+  }
+
+  /* 鐪?甯傝竟鐣岋細鏀惧ぇ鏃讹紙cs > 11锛夋墠缁樺埗锛涗粎鍦ㄥ悓涓€鍥藉鍐呴儴缁樺埗锛?     鎸夌渷鍒嗚壊鎻忚竟锛岄伩鍏嶄笌鍥界晫閲嶅彔閫犳垚鏉備贡 */
+  if (cs > 11 && prov) {
+    ctx.lineWidth = Math.max(1, cs * 0.035);
+    var drawnSeg = 0;
+    for (var gy3 = gy0; gy3 <= gy1; gy3++) {
+      var py3 = gy3 * CELL * z + py0;
+      var rb3 = gy3 * N;
+      for (var gx3 = gx0; gx3 <= gx1; gx3++) {
+        var i3 = rb3 + gx3;
+        var o3 = owner[i3];
+        var p3 = prov[i3];
+        if (p3 < 0) continue;
+        var px3 = gx3 * CELL * z + px0;
+        /* 鍙抽偦锛氬悓鍥藉銆佷笉鍚岀渷 鈫?鐢荤渷鐣?*/
+        if (gx3 < N-1) {
+          var ir = i3 + 1;
+          if (owner[ir] === o3 && o3 > 0 && prov[ir] !== p3) {
+            ctx.strokeStyle = PROV_EDGE[p3 % PROV_EDGE.length];
+            ctx.beginPath();
+            ctx.moveTo(px3 + cs, py3); ctx.lineTo(px3 + cs, py3 + cs);
+            ctx.stroke(); drawnSeg++;
+          }
+        }
+        /* 涓嬮偦锛氬悓鍥藉銆佷笉鍚岀渷 鈫?鐢荤渷鐣?*/
+        if (gy3 < N-1) {
+          var id = i3 + N;
+          if (owner[id] === o3 && o3 > 0 && prov[id] !== p3) {
+            ctx.strokeStyle = PROV_EDGE[p3 % PROV_EDGE.length];
+            ctx.beginPath();
+            ctx.moveTo(px3, py3 + cs); ctx.lineTo(px3 + cs, py3 + cs);
+            ctx.stroke(); drawnSeg++;
+          }
+        }
+      }
+    }
+  }
+}
+
+function fmtMan(v) {
+  v = Math.round(v);
+  if (v >= 1000) return (v / 1000).toFixed(1) + 'k';
+  return String(v);
+}
+function renderBattalions(z) {
+  var cs = CELL * z;
+
+  /* 闈欐€佸啗钀ワ細鍥藉鑹叉柟鍧?+ emoji 鍥炬爣 + 浜哄姏鏁板瓧 */
+  for (var k = 0; k < barracks.length; k++) {
+    var b = barracks[k];
+    if (b.x != null) continue;
+    var px = (b.cx * CELL - cam.x) * z + VW/2;
+    var py = (b.cy * CELL - cam.y) * z + VH/2;
+    if (px < -60 || py < -60 || px > VW + 60 || py > VH + 60) continue;
+
+    var s = Math.max(6, cs * 0.62);
+    var col = countries[b.owner].color;
+
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.fillRect(px - s/2 + 1.5, py - s/2 + 1.5, s, s);
+    ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.85)';
+    ctx.fillRect(px - s/2, py - s/2, s, s);
+    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px - s/2, py - s/2, s, s);
+
+    /* emoji 鍥炬爣锛歵ype 鍖哄垎寤虹瓚绫诲瀷 */
+    if (cs > 9) {
+      var icon = '鉀?;
+      if (b.type === 'large') icon = '馃帾';
+      else if (b.type === 'training') icon = '馃弸';
+      ctx.font = Math.max(9, Math.min(18, cs * 0.6)) + 'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(icon, px, py);
+      ctx.textBaseline = 'alphabetic';
+    } else if (cs > 5) {
+      /* 灏忎竴鐐逛篃缁欑畝鍗曟枃瀛楁爣璇?*/
+      ctx.fillStyle = '#fff';
+      ctx.font = Math.min(10, cs*0.7) + 'px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(fmtMan(b.manpower), px, py);
+      ctx.textBaseline = 'alphabetic';
+    }
+  }
+
+  /* 琛屽啗钀ラ槦锛?.8脳0.8 鏂瑰潡锛屾樉绀哄叺鍔?+ 缂栧彿 + 璐ㄩ噺锛堟斁澶ф椂锛?*/
+  for (var q = 0; q < squads.length; q++) {
+    var s2 = squads[q];
+    var ci = squadCell(s2);
+    var qx = ci % N, qy = (ci / N) | 0;
+    var qpx = ((qx + 0.5) * CELL - cam.x) * z + VW/2;
+    var qpy = ((qy + 0.5) * CELL - cam.y) * z + VH/2;
+    if (qpx < -40 || qpy < -40 || qpx > VW + 40 || qpy > VH + 40) continue;
+
+    var qs = Math.max(4, cs * 0.8);
+    var qcol = countries[s2.owner].color;
+
+    ctx.fillStyle = 'rgba(0,0,0,.4)';
+    ctx.fillRect(qpx - qs/2 + 1, qpy - qs/2 + 1, qs, qs);
+
+    /* 鏍规嵁璐ㄩ噺鏀瑰彉浜害锛堣川閲忚秺楂樿秺浜級 */
+    var qq = (s2.quality != null ? s2.quality : 0.5);
+    var bright = 0.6 + qq * 0.4;
+    ctx.fillStyle = 'rgba(' + Math.min(255, Math.floor(qcol[0] * bright)) + ',' +
+      Math.min(255, Math.floor(qcol[1] * bright)) + ',' +
+      Math.min(255, Math.floor(qcol[2] * bright)) + ',.85)';
+    ctx.fillRect(qpx - qs/2, qpy - qs/2, qs, qs);
+
+    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(qpx - qs/2, qpy - qs/2, qs, qs);
+
+    if (cs > 8) {
+      ctx.fillStyle = '#fff';
+      ctx.font = Math.min(9, cs*0.5) + 'px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      /* 鍏靛姏鍦ㄦ柟鍧椾笂鏂?*/
+      ctx.fillText(fmtMan(s2.troops), qpx, qpy - qs/2 - 2);
+    }
+    if (cs > 14 && s2.id != null) {
+      /* 鏀惧ぇ鍒拌冻澶熷ぇ鏃舵樉绀鸿惀闃熺紪鍙?*/
+      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      ctx.font = Math.min(7, cs*0.35) + 'px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('#' + s2.id, qpx, qpy);
+      ctx.textBaseline = 'alphabetic';
+    }
+  }
+}
+
+/* 甯堟棗甯滄覆鏌擄細showDivisions 寮€鍚氨鏄剧ず锛岀缉鍒板叏鍥炬椂涔熻兘鐪嬪埌灏忓浘鏍?*/
+function renderDivisions(z) {
+  if (!showDivisions) return;
+  var cs = CELL * z;
+  if (cs < 2) return;   /* 缂╁埌姣?2px 杩樺皬灏变笉鐢讳簡锛堟牴鏈湅涓嶅埌锛?*/
+  var iconSize;          /* 鏍规嵁缂╂斁鍔ㄦ€侀€夊笀鍥炬爣澶у皬 */
+  if (cs > 20) iconSize = Math.max(10, cs * 0.45);      /* 鏀惧ぇ鏃讹細杈冨ぇ */
+  else if (cs > 6) iconSize = Math.max(8, cs * 0.35);   /* 涓瓑锛氶€備腑 */
+  else iconSize = Math.max(4, cs * 0.5);               /* 缂╁皬鏃讹細鐩稿鏇村ぇ */
+
+  for (var d = 0; d < divisions.length; d++) {
+    var div = divisions[d];
+    var px = (div.cx + 0.5) * CELL - cam.x; px *= z; px += VW/2;
+    var py = (div.cy + 0.5) * CELL - cam.y; py *= z; py += VH/2;
+    if (px < -40 || py < -40 || px > VW + 40 || py > VH + 40) continue;
+
+    var size = iconSize;
+    /* 闃村奖 */
+    ctx.fillStyle = 'rgba(0,0,0,.5)';
+    ctx.fillRect(px - size/2 + 1, py - size/2 + 1, size, size);
+
+    var col = countries[div.owner].color;
+    /* 甯堟柟鍧楀簳鑹诧紙鍥藉鑹诧級 */
+    ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.95)';
+    ctx.fillRect(px - size/2, py - size/2, size, size);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = Math.max(0.5, size * 0.1);
+    ctx.strokeRect(px - size/2, py - size/2, size, size);
+
+    /* 甯堢紪鍙凤紙缂╁埌澶熷ぇ鎵嶆樉绀猴級 */
+    if (size > 10) {
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold ' + Math.max(7, Math.min(size * 0.7, 14)) + 'px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(div.id), px, py);
+      ctx.textBaseline = 'alphabetic';
+    }
+
+    /* 甯?鈮?0 钀ラ槦鏃剁粯鍒跺笀鏃楀笢 canvas */
+    if (div.flagCanvas && size > 6) {
+      var fs = Math.max(6, size * 1.2);
+      ctx.drawImage(div.flagCanvas, px + size*0.5 + 2, py - fs/2, fs, fs);
+    }
+
+    /* 鏀惧ぇ鏃舵樉绀哄笀瑙勬ā */
+    if (cs > 18) {
+      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      ctx.font = Math.min(9, cs*0.35) + 'px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(div.squads.length + '/20', px, py + size/2 + 10);
+    }
+  }
+}
+
+function renderMissiles(z) {
+  for (var k = 0; k < missiles.length; k++) {
+    var m = missiles[k];
+    var p = Math.min(1, m.t / m.dur);
+    var ax = (m.sx - cam.x) * z + VW/2;
+    var ay = (m.sy - cam.y) * z + VH/2;
+    var bx = (m.tx - cam.x) * z + VW/2;
+    var by = (m.ty - cam.y) * z + VH/2;
+
+    ctx.strokeStyle = 'rgba(255,120,70,.26)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+
+    var arc = Math.sin(p * Math.PI) * Math.min(VH * 0.6, 340);
+    var hx = ax + (bx - ax) * p;
+    var hy = ay + (by - ay) * p - arc;
+
+    ctx.fillStyle = 'rgba(255,200,130,.32)';
+    ctx.beginPath(); ctx.arc(hx, hy, 13, 0, Math.PI*2); ctx.fill();
+
+    ctx.fillStyle = '#ffb060';
+    ctx.beginPath(); ctx.arc(hx, hy, 5, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+function renderEffects(z) {
+  for (var k = 0; k < effects.length; k++) {
+    var e = effects[k];
+    var px = (e.x - cam.x) * z + VW/2;
+    var py = (e.y - cam.y) * z + VH/2;
+
+    if (e.type === 'nuke') {
+      var p = e.t / e.dur;
+
+      if (p < 0.16) {
+        ctx.globalAlpha = (0.16 - p) / 0.16 * 0.92;
+        ctx.fillStyle = '#fff8e8';
+        ctx.beginPath();
+        ctx.arc(px, py, e.r * z * (0.5 + p * 5), 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      var rr = e.r * z * (0.25 + p * 1.25);
+      ctx.globalAlpha = (1 - p) * 0.85;
+      ctx.strokeStyle = '#ff9a4a';
+      ctx.lineWidth = 4 * (1 - p) + 1;
+      ctx.beginPath(); ctx.arc(px, py, Math.max(1, rr), 0, Math.PI*2); ctx.stroke();
+
+      ctx.globalAlpha = (1 - p) * 0.45;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2 * (1 - p) + 0.6;
+      ctx.beginPath(); ctx.arc(px, py, Math.max(1, rr * 0.66), 0, Math.PI*2); ctx.stroke();
+
+      ctx.globalAlpha = 1;
+    } else {
+      var p2 = e.t / e.dur;
+      ctx.globalAlpha = (1 - p2) * 0.9;
+      ctx.strokeStyle = 'rgb(' + e.color[0] + ',' + e.color[1] + ',' + e.color[2] + ')';
+      ctx.lineWidth = 2.2 * (1 - p2) + 0.6;
+      ctx.beginPath();
+      ctx.arc(px, py, Math.max(1, CELL * z * (0.45 + p2 * 1.7)), 0, Math.PI*2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+var mouseWX = 0, mouseWY = 0;
+
+function renderAim(z) {
+  var gx = Math.floor(mouseWX / CELL), gy = Math.floor(mouseWY / CELL);
+  
+  var px = (gx * CELL - cam.x) * z + VW/2;
+  var py = (gy * CELL - cam.y) * z + VH/2;
+  var cs = CELL * z;
+
+  ctx.strokeStyle = 'rgba(255,120,80,.85)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 5]);
+  ctx.beginPath();
+  ctx.arc(px + cs/2, py + cs/2, Math.max(900, CELL*9) * z, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = 'rgba(255,255,255,.55)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(px + cs/2 - 14, py + cs/2); ctx.lineTo(px + cs/2 + 14, py + cs/2);
+  ctx.moveTo(px + cs/2, py + cs/2 - 14); ctx.lineTo(px + cs/2, py + cs/2 + 14);
+  ctx.stroke();
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   涓诲惊鐜?+ FPS
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var lastT = performance.now();
+var acc = 0, hudTimer = 0;
+
+var fpsEl = document.getElementById('fps');
+var fpsAcc = 0, fpsFrames = 0, fpsMin = 999, fpsMax = 0;
+
+function loop(now) {
+  var dt = now - lastT;
+  if (!isFinite(dt) || dt < 0) dt = 16;
+  if (dt > 100) dt = 100;
+  lastT = now;
+
+  /* 鈹€鈹€ FPS 缁熻 鈹€鈹€ */
+  fpsAcc += dt;
+  fpsFrames++;
+  if (fpsAcc >= 500) {
+    var fps = Math.round(fpsFrames * 1000 / fpsAcc);
+    if (fps < fpsMin) fpsMin = fps;
+    if (fps > fpsMax) fpsMax = fps;
+    fpsEl.innerHTML = '<b>' + fps + '</b> FPS 路 ' + fpsFrames + '甯?路 dt ' +
+      (fpsAcc/fpsFrames).toFixed(1) + 'ms 路 ' +
+      (terrain ? (N + '脳' + N) : '---');
+    fpsAcc = 0; fpsFrames = 0;
+  }
+
+  /* 鈹€鈹€ 鍥炲悎鎺ㄨ繘 鈹€鈹€ */
+  acc += dt;
+  var guard = 0;
+  var step = (TOTAL > 400000) ? TICK_MS * 2 : TICK_MS;
+  while (acc >= step && guard++ < 5) {
+    if (!gameOver && terrain) {
+      try { tick(); } catch (err) { console.error('tick error:', err); }
+    }
+    acc -= step;
+  }
+
+  /* 鈹€鈹€ 鐗规晥 鈹€鈹€ */
+  for (var i = effects.length - 1; i >= 0; i--) {
+    effects[i].t += dt;
+    if (effects[i].t >= effects[i].dur) effects.splice(i, 1);
+  }
+  for (var j = missiles.length - 1; j >= 0; j--) {
+    var m = missiles[j];
+    m.t += dt;
+    if (m.t >= m.dur) {
+      try { explode(m.tx, m.ty); } catch (e) { console.error('explode error:', e); }
+      missiles.splice(j, 1);
+    }
+  }
+
+  /* 鈹€鈹€ 娓叉煋 鈹€鈹€ */
+  try { render(); } catch (err) { console.error('render error:', err); }
+
+  /* 鈹€鈹€ HUD 鈹€鈹€ */
+  hudTimer += dt;
+  if (hudTimer > 220) {
+    hudTimer = 0;
+    try { updateHUD(); updatePanel(); } catch (e) { console.error('hud error:', e); }
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   HUD
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var rPop   = document.getElementById('r-pop');
+var rTroop = document.getElementById('r-troop');
+var rActive= document.getElementById('r-active');
+var rLand  = document.getElementById('r-land');
+var rBat   = document.getElementById('r-bat');
+var rMsl   = document.getElementById('r-msl');
+var rProv  = document.getElementById('r-prov');
+var rDay   = document.getElementById('r-day');
+
+function updateHUD() {
+  if (!owner) return;
+  var land = 0, tp = 0, pp = 0, bat = 0, prov = 0;
+  for (var i = 0; i < TOTAL; i++) {
+    if (owner[i] === playerId) {
+      land++;
+      tp += troops[i];
+      pp += pop[i];
+    }
+  }
+  var bat = 0, sqd = 0, sqT = 0;
+  for (var k = 0; k < barracks.length; k++)
+    if (barracks[k].owner === playerId && barracks[k].x == null) bat++;
+  for (var s2 = 0; s2 < squads.length; s2++)
+    if (squads[s2].owner === playerId) { sqd++; sqT += squads[s2].troops; }
+  for (var p = 0; p < provinces.length; p++)
+    if (provinces[p].owner === playerId) prov++;
+
+  rPop.textContent   = Math.round(pp).toLocaleString();
+  rTroop.textContent = Math.round(tp).toLocaleString();
+  rActive.textContent = Math.round(sqT).toLocaleString();
+  rLand.textContent  = land.toLocaleString();
+  rBat.textContent   = bat + ' / ' + sqd;
+  rMsl.textContent   = missileCount;
+  rProv.textContent  = prov;
+  rDay.textContent   = '绗?' + (Math.floor(turn / 14) + 1) + ' 澶?;
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鎺掕姒滐紙鈫?鈫?鍒囨崲 5 绉嶆锛?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var RANK_TITLES = ['馃弳 棰嗗湡姒?, '馃懃 浜哄彛姒?, '鈿?鐜板焦姒?, '馃搵 钀ラ槦姒?, '馃彊 鍩庡競姒?];
+var RANK_KEYS   = ['land', 'pop', 'active', 'squad', 'city'];
+var rankingType = 0;   /* 褰撳墠姒滅被鍨?*/
+
+var rkTitle = document.getElementById('rk-title');
+var rkList  = document.getElementById('rk-list');
+
+function updateRankbar() {
+  if (!rkList || !owner) return;
+  var key = RANK_KEYS[rankingType];
+
+  /* 鏀堕泦鎵€鏈夊瓨娲诲浗瀹舵暟鎹?*/
+  var arr = [];
+  for (var ci = 1; ci < countries.length; ci++) {
+    if (!countries[ci].alive) continue;
+    var val = 0;
+    if (key === 'land') {
+      val = landCount[ci] || 0;
+    } else if (key === 'pop') {
+      for (var i = 0; i < TOTAL; i++)
+        if (owner[i] === ci) val += pop[i];
+    } else if (key === 'active') {
+      for (var s = 0; s < squads.length; s++)
+        if (squads[s].owner === ci) val += squads[s].troops;
+    } else if (key === 'squad') {
+      for (var s2 = 0; s2 < squads.length; s2++)
+        if (squads[s2].owner === ci) val++;
+    } else if (key === 'city') {
+      val = 0;
+      for (var c3 = 0; c3 < cities.length; c3++)
+        if (cities[c3].owner === ci) val++;
+    }
+    arr.push({ id: ci, name: countries[ci].name, color: countries[ci].color, val: Math.round(val) });
+  }
+  arr.sort(function (a, b) { return b.val - a.val; });
+
+  rkTitle.textContent = RANK_TITLES[rankingType];
+  var html = '';
+  var max = Math.max(1, arr[0] ? arr[0].val : 1);
+  for (var r = 0; r < Math.min(5, arr.length); r++) {
+    var item = arr[r];
+    var cls = item.id === playerId ? 'rk-item me' : 'rk-item';
+    var flag = 'background:rgb(' + item.color[0] + ',' + item.color[1] + ',' + item.color[2] + ')';
+    var num = r + 1;
+    html += '<span class="' + cls + '">';
+    html += '<span style="color:#7d8fa6">' + num + '.</span>';
+    html += '<span class="rk-flag" style="' + flag + '"></span>';
+    html += '<span>' + item.name + '</span>';
+    html += '<b>' + item.val.toLocaleString() + '</b>';
+    html += '</span>';
+  }
+  rkList.innerHTML = html;
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   淇℃伅闈㈡澘
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var selInfo = document.getElementById('selinfo');
+var btnRec  = document.getElementById('btn-recruit');
+var btnBat  = document.getElementById('btn-bat');
+var btnMsl  = document.getElementById('btn-missile');
+
+function updatePanel() {
+  if (!owner) return;
+
+  if (selected < 0 || selected >= TOTAL) {
+    selInfo.innerHTML = '<div class="none">鏈€変腑鍦板潡</div>';
+    btnRec.disabled = true;
+    btnBat.disabled = true;
+    return;
+  }
+
+  var o = owner[selected];
+  var t = TERRAIN[terrain[selected]];
+  var x = selected % N, y = (selected / N) | 0;
+  var col = countries[o].color;
+
+  var stateTag = '';
+  if (o !== playerId && o !== 0) {
+    if (atWar[playerId][o]) stateTag = '<span class="tag" style="color:#ff9d9d">鎴樹簤涓?/span>';
+    else if (allied[playerId][o]) stateTag = '<span class="tag" style="color:#8fc9ff">鍚岀洘</span>';
+    else stateTag = '<span class="tag">鍜屽钩</span>';
+  }
+
+  var provName = '鈥?;
+  for (var pi = 0; pi < provinces.length; pi++) {
+    var p = provinces[pi];
+    if (p.owner !== o) continue;
+    for (var ci = 0; ci < p.cells.length; ci++) {
+      if (p.cells[ci] === selected) {
+        provName = (p.name ? (p.name + '銆€') : '') +
+                   '#' + (p.capital % N) + ',' + ((p.capital / N) | 0) +
+                   ' 路 ' + p.size + '鏍?;
+        break;
+      }
+    }
+    if (provName !== '鈥?) break;
+  }
+
+  selInfo.innerHTML =
+    '<div class="kv"><span>鍧愭爣</span><span>(' + x + ', ' + y + ')</span></div>' +
+    '<div class="kv"><span>褰掑睘</span><span style="color:rgb(' + col.join(',') + ')">' +
+      countries[o].name + stateTag + '</span></div>' +
+    '<div class="kv"><span>鍦板舰</span><span>' + t.name +
+      ' <span style="color:#6a7a8c">脳' + t.defMul.toFixed(2) + '</span></span></div>' +
+    '<div class="kv"><span>浜哄彛</span><span>' + Math.round(pop[selected]).toLocaleString() + '</span></div>' +
+    '<div class="kv"><span>鍏靛姏</span><span>' + Math.round(troops[selected]).toLocaleString() +
+      ' / ' + Math.round(cap[selected]).toLocaleString() + '</span></div>' +
+    '<div class="kv"><span>鐪佷唤</span><span style="color:#8fa8c4">' + provName + '</span></div>';
+
+  var mine = o === playerId;
+  btnRec.disabled = !mine || pop[selected] < 800;
+  btnBat.disabled = !mine || troops[selected] < 1000 || !canPlaceBattalion(x, y, playerId);
+
+  if (missileMode) {
+    btnMsl.textContent = '閫夋嫨鎵撳嚮鐩爣鈥?;
+  } else {
+    btnMsl.innerHTML = '鍛煎彨 DF-5C銆€<span style="opacity:.7">[Q]</span>';
+  }
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鎸夐挳
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+btnRec.addEventListener('click', function () {
+  if (gameOver || selected < 0) return;
+  if (owner[selected] !== playerId) { toast('鍙兘鍦ㄨ嚜宸辩殑棰嗗湡寰佸叺'); return; }
+  if (pop[selected] < 800) { toast('璇ュ湴鍧椾汉鍙ｄ笉瓒?); return; }
+  if (troops[selected] >= cap[selected] * 2) { toast('鍏靛姏宸茶揪涓婇檺'); return; }
+
+  pop[selected] -= 800;
+  troops[selected] += 1000;
+  miniDirty = true;
+  updatePanel();
+});
+
+btnBat.addEventListener('click', function () {
+  if (gameOver || selected < 0) return;
+  if (owner[selected] !== playerId) { toast('鍙兘鍦ㄨ嚜宸辩殑棰嗗湡寤洪€?); return; }
+
+  var x = selected % N, y = (selected / N) | 0;
+  if (!canPlaceBattalion(x, y, playerId)) {
+    toast('闇€瑕?3脳3 鐨勫繁鏂硅繛缁鍦燂紝涓斾笉鑳戒笌鍏朵粬鍐涘笎閲嶅彔');
+    return;
+  }
+
+  var total = 0;
+  for (var dy = -1; dy <= 1; dy++)
+    for (var dx = -1; dx <= 1; dx++)
+      total += troops[WCell(x+dx, y+dy)];
+
+  if (total < 1000) { toast('璇ュ尯鍩熷叺鍔涗笉瓒?1000'); return; }
+
+  for (var dy2 = -1; dy2 <= 1; dy2++)
+    for (var dx2 = -1; dx2 <= 1; dx2++) {
+      var ni = (y+dy2)*N + (x+dx2);
+      troops[ni] -= troops[ni] / total * 1000;
+    }
+
+  var man = 0;
+  for (var d3 = -1; d3 <= 1; d3++)
+    for (var d4 = -1; d4 <= 1; d4++)
+      man += troops[(y+d3)*N + (x+d4)];
+  barracks.push({
+    owner: playerId,
+    cx: x, cy: y, cell: y * N + x,
+    manpower: man, storedManpower: 0, maxSquads: 25
+  });
+
+  addRing((x + 0.5) * CELL, (y + 0.5) * CELL, countries[playerId].color, 500);
+  toast('鍐涘笎宸插缓绔?鈥?浼氳嚜鍔ㄥ悜澶栨淳鐢熻惀闃?);
+  miniDirty = true;
+  updatePanel();
+});
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鍥藉鏌ヨ寮圭獥锛堝彸閿鍦燂級+ 鎶樼嚎缁熻鍥?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var cqueryEl = document.getElementById('cquery');
+var cqBody = document.getElementById('cq-body');
+var cqClose = document.getElementById('cq-close');
+var cqCurrentOid = -1;
+
+function fmtNum(v) {
+  v = Math.round(v);
+  if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'k';
+  return String(v);
+}
+
+function drawLineChart(canvas, data, color) {
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var w = canvas.clientWidth || 460, h = canvas.clientHeight || 120;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  var cx = canvas.getContext('2d');
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.clearRect(0, 0, w, h);
+
+  var pad = { l: 10, r: 10, t: 10, b: 18 };
+  var iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+
+  var maxV = 1;
+  for (var i = 0; i < data.length; i++) if (data[i] > maxV) maxV = data[i];
+
+  cx.strokeStyle = 'rgba(90,140,200,.25)';
+  cx.lineWidth = 1;
+  cx.beginPath();
+  for (var g = 0; g <= 4; g++) {
+    var gy = pad.t + ih * g / 4;
+    cx.moveTo(pad.l, gy); cx.lineTo(w - pad.r, gy);
+  }
+  cx.stroke();
+
+  if (data.length < 2) {
+    cx.fillStyle = '#5c6b7d';
+    cx.font = '12px -apple-system,sans-serif';
+    cx.textAlign = 'center';
+    cx.fillText('鏁版嵁涓嶈冻', w / 2, h / 2);
+    return;
+  }
+
+  /* 闈㈢Н */
+  cx.beginPath();
+  cx.moveTo(pad.l, pad.t + ih);
+  for (var j = 0; j < data.length; j++) {
+    var x = pad.l + iw * j / (data.length - 1);
+    var y = pad.t + ih * (1 - data[j] / maxV);
+    cx.lineTo(x, y);
+  }
+  cx.lineTo(w - pad.r, pad.t + ih);
+  cx.closePath();
+  cx.fillStyle = 'rgba(143,201,255,.12)';
+  cx.fill();
+
+  /* 鏇茬嚎 */
+  cx.beginPath();
+  cx.strokeStyle = color;
+  cx.lineWidth = 1.8;
+  for (var k = 0; k < data.length; k++) {
+    var xx = pad.l + iw * k / (data.length - 1);
+    var yy = pad.t + ih * (1 - data[k] / maxV);
+    if (k === 0) cx.moveTo(xx, yy); else cx.lineTo(xx, yy);
+  }
+  cx.stroke();
+
+  cx.fillStyle = '#5f7085';
+  cx.font = '10px -apple-system,sans-serif';
+  cx.textAlign = 'left';
+  cx.fillText('宄板€?' + fmtNum(maxV), pad.l, h - 5);
+  cx.textAlign = 'right';
+  cx.fillText('鏈€?' + fmtNum(data[data.length - 1]), w - pad.r, h - 5);
+}
+
+function openCQuery(oid) {
+  var c = countries[oid];
+  if (!c) return;
+  cqCurrentOid = oid;
+
+  /* 鏈€鏂板揩鐓э紙鐢?landCount 鍗虫椂鍊硷級 */
+  var last = {
+    land: landCount[oid] || 0,
+    prov: 0
+  };
+  for (var pi = 0; pi < provinces.length; pi++)
+    if (provinces[pi].owner === oid) last.prov++;
+
+  var relStr = '鈥?;
+  if (oid !== playerId && oid !== 0 && relations[playerId] && relations[playerId][oid] !== undefined) {
+    var rel = relations[playerId][oid];
+    var st;
+    if (atWar[playerId][oid]) st = '<span style="color:#ff9d9d">鎴樹簤涓?/span>';
+    else if (allied[playerId][oid]) st = '<span style="color:#8fc9ff">鍚岀洘</span>';
+    else if (rel > 40) st = '<span style="color:#7ee0a0">鍙嬪ソ</span>';
+    else if (rel < -20) st = '<span style="color:#d0a060">鍐锋贰</span>';
+    else st = '<span>鍜屽钩</span>';
+    relStr = st + ' <span style="color:#6a7a8c">(' + Math.round(rel) + ')</span>';
+  } else if (oid === playerId) {
+    relStr = '<span style="color:#8fc9ff">浣犵殑鍥藉</span>';
+  }
+
+  var bat = 0, sq = 0;
+  for (var b2 = 0; b2 < barracks.length; b2++)
+    if (barracks[b2].owner === oid && barracks[b2].x == null) bat++;
+  for (var s3 = 0; s3 < squads.length; s3++)
+    if (squads[s3].owner === oid) sq++;
+
+  var stateTag = c.alive ? '' : '<span class="cq-tag" style="color:#ff9d9d">宸蹭骸</span>';
+
+  cqBody.innerHTML =
+    '<div class="cq-head">' +
+      '<div class="cq-dot" style="background:rgb(' + c.color.join(',') + ')"></div>' +
+      '<div class="cq-name">' + c.name + '</div>' +
+      (oid === playerId ? '<span class="cq-tag" style="color:#8fc9ff">鎴戝浗</span>' : stateTag) +
+      (relStr !== '鈥? ? '<span class="cq-tag">' + relStr + '</span>' : '') +
+    '</div>' +
+    '<div class="cq-grid">' +
+      '<div class="cq-stat"><div class="lbl">棰嗗湡 (鏍?</div><div class="val">' + last.land.toLocaleString() + '</div></div>' +
+      '<div class="cq-stat"><div class="lbl">鐪佷唤</div><div class="val">' + last.prov + '</div></div>' +
+      '<div class="cq-stat"><div class="lbl">鍐涘笎</div><div class="val">' + bat + '</div></div>' +
+      '<div class="cq-stat"><div class="lbl">钀ラ槦</div><div class="val">' + sq + '</div></div>' +
+    '</div>' +
+    '<div class="cq-chart-title">浜哄彛 路 鏈眬鍘嗗彶</div>' +
+    '<canvas class="cq-chart" id="cq-c-pop"></canvas>' +
+    '<div class="cq-chart-title" style="margin-top:12px">鍏靛姏 路 鏈眬鍘嗗彶</div>' +
+    '<canvas class="cq-chart" id="cq-c-troop"></canvas>' +
+    '<div class="cq-chart-title" style="margin-top:12px">棰嗗湡 路 鏈眬鍘嗗彶</div>' +
+    '<canvas class="cq-chart" id="cq-c-land"></canvas>';
+
+  cqueryEl.style.display = 'flex';
+
+  var popArr = [], troopArr = [], landArr = [];
+  for (var h2 = 0; h2 < history.length; h2++) {
+    var snap = history[h2];
+    popArr.push(snap.pop[oid] || 0);
+    troopArr.push(snap.troop[oid] || 0);
+    landArr.push(snap.land[oid] || 0);
+  }
+  if (popArr.length < 2) {
+    popArr.unshift(0); troopArr.unshift(0); landArr.unshift(last.land);
+  }
+
+  var col = 'rgb(' + c.color.join(',') + ')';
+  drawLineChart(document.getElementById('cq-c-pop'), popArr, col);
+  drawLineChart(document.getElementById('cq-c-troop'), troopArr, col);
+  drawLineChart(document.getElementById('cq-c-land'), landArr, col);
+}
+
+cqClose.addEventListener('click', function () { cqueryEl.style.display = 'none'; cqCurrentOid = -1; });
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   澶栦氦闈㈡澘
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var diploEl = document.getElementById('diplo');
+var diploList = document.getElementById('diplo-list');
+
+document.getElementById('btn-diplo').addEventListener('click', function () {
+  buildDiploPanel();
+  diploEl.style.display = 'flex';
+});
+document.getElementById('diplo-close').addEventListener('click', function () {
+  diploEl.style.display = 'none';
+});
+diploEl.addEventListener('click', function (e) {
+  if (e.target === diploEl) diploEl.style.display = 'none';
+});
+
+function buildDiploPanel() {
+  diploList.innerHTML = '';
+  if (!countries.length) return;
+
+  for (var i = 1; i < countries.length; i++) {
+    if (i === playerId) continue;
+    var c = countries[i];
+    if (!c.alive) continue;
+
+    var rel = relations[playerId][i];
+    var war = atWar[playerId][i];
+    var ally = allied[playerId][i];
+
+    var state, stateColor;
+    if (war) { state = '鎴樹簤'; stateColor = '#ff6b6b'; }
+    else if (ally) { state = '鍚岀洘'; stateColor = '#6fc0ff'; }
+    else if (rel > 40) { state = '鍙嬪ソ'; stateColor = '#7ee0a0'; }
+    else if (rel < -20) { state = '鍐锋贰'; stateColor = '#d0a060'; }
+    else { state = '鍜屽钩'; stateColor = '#8fa8c4'; }
+
+    var row = document.createElement('div');
+    row.className = 'diplo-row';
+
+    var btnHtml = '';
+    if (war) {
+      btnHtml += '<button data-act="peace" data-id="' + i + '">姹傚拰</button>';
+    } else {
+      btnHtml += '<button data-act="war" data-id="' + i + '">瀹ｆ垬</button>';
+    }
+    if (!war && !ally && rel > 55) {
+      btnHtml += '<button data-act="ally" data-id="' + i + '">缁撶洘</button>';
+    }
+    btnHtml += '<button data-act="gift" data-id="' + i + '">璧犵ぜ</button>';
+
+    row.innerHTML =
+      '<div class="dr-color" style="background:rgb(' + c.color.join(',') + ')"></div>' +
+      '<div class="dr-name">' + c.name + '</div>' +
+      '<div class="dr-stat">' +
+        '<span style="color:' + stateColor + '">' + state + '</span>' +
+        '<span>鍏崇郴 ' + Math.round(rel) + '</span>' +
+        '<span>棰嗗湡 ' + (landCount[i] || 0) + '</span>' +
+      '</div>' +
+      '<div class="dr-acts">' + btnHtml + '</div>';
+    diploList.appendChild(row);
+  }
+
+  if (!diploList.children.length) {
+    diploList.innerHTML = '<div style="text-align:center;color:#5c6b7d;padding:24px">鏆傛棤鍏朵粬鍥藉</div>';
+  }
+}
+
+diploList.addEventListener('click', function (e) {
+  var btn = e.target.closest ? e.target.closest('button') : null;
+  if (!btn) return;
+  var id = +btn.dataset.id;
+  var act = btn.dataset.act;
+
+  if (act === 'war') {
+    pushPendingWar(playerId, id);
+    diploEl.style.display = 'none';
+  }
+  else if (act === 'peace') {
+    var rel = relations[playerId][id];
+    var myPower = landCount[playerId] || 1;
+    var theirPower = landCount[id] || 1;
+    /* 姹傚拰鎺ュ彈閫昏緫锛氬娍鍧囧姏鏁屽繀鐒舵帴鍙楋紱鐣ユ湁浼樺娍鎺ュ彈锛涙瀬搴﹀姡鍔垮垯鎷掔粷 */
+    var accept;
+    if (myPower > theirPower * 0.92) accept = true;
+    else if (myPower > theirPower * 0.6) accept = rel > -25;
+    else if (rel > 10) accept = Math.random() < 0.35;
+    else accept = false;
+
+    if (accept) {
+      atWar[playerId][id] = atWar[id][playerId] = false;
+      setRel(playerId, id, Math.max(rel, -18));
+      toast(countries[id].name + ' 鎺ュ彈浜嗗拰骞?);
+    } else {
+      addRel(playerId, id, -5);
+      toast(countries[id].name + ' 鎷掔粷浜嗕綘鐨勬眰鍜?);
+    }
+  }
+  else if (act === 'ally') {
+    var rel2 = relations[playerId][id];
+    var accept2 = rel2 > 65 && !atWar[playerId][id];
+    if (accept2) {
+      allied[playerId][id] = allied[id][playerId] = true;
+      addRel(playerId, id, 10);
+      toast('涓?' + countries[id].name + ' 缁撲负鍚岀洘');
+    } else {
+      toast(countries[id].name + ' 鎷掔粷浜嗙粨鐩?);
+    }
+  }
+  else if (act === 'gift') {
+    var myCells = [];
+    for (var i = 0; i < TOTAL; i++)
+      if (owner[i] === playerId && troops[i] > 40) myCells.push(i);
+    if (myCells.length === 0) { toast('娌℃湁鍙皟鍔ㄧ殑鍏靛姏'); return; }
+
+    var totalG = 0;
+    for (var k = 0; k < myCells.length; k++)
+      totalG += Math.min(troops[myCells[k]], 200);
+    if (totalG < 800) { toast('鍏靛姏涓嶈冻 800'); return; }
+
+    var taken = 0;
+    for (var j = 0; j < myCells.length; j++) {
+      var cell = myCells[j];
+      var t = Math.min(troops[cell] - 20, (800 - taken) * (Math.min(troops[cell], 200) / totalG) + 1);
+      if (t > 0) { troops[cell] -= t; taken += t; }
+      if (taken >= 800) break;
+    }
+
+    addRel(playerId, id, 22);
+    toast('鍚?' + countries[id].name + ' 璧犻€佷簡 800 鍏靛姏');
+  }
+
+  buildDiploPanel();
+  updateHUD();
+});
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   榧犳爣 / 鐩告満
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var dragging = false, dragSX = 0, dragSY = 0, camSX = 0, camSY = 0, moved = 0;
+
+function screenToWorld(sx, sy) {
+  var z = cam.zoom;
+  return { x: (sx - VW/2) / z + cam.x, y: (sy - VH/2) / z + cam.y };
+}
+function worldToCell(wx, wy) {
+  var gx = Math.floor(wx / CELL), gy = Math.floor(wy / CELL);
+  
+  return gy*N + gx;
+}
+
+cv.addEventListener('mousedown', function (e) {
+  if (e.button !== 0) return;
+  dragging = true;
+  dragSX = e.clientX; dragSY = e.clientY;
+  camSX = cam.x; camSY = cam.y;
+  moved = 0;
+});
+
+window.addEventListener('mousemove', function (e) {
+  var w = screenToWorld(e.clientX, e.clientY);
+  mouseWX = w.x; mouseWY = w.y;
+
+  if (dragging) {
+    var dx = e.clientX - dragSX, dy = e.clientY - dragSY;
+    var d = Math.sqrt(dx*dx + dy*dy);
+    if (d > moved) moved = d;
+    cam.x = camSX - dx / cam.zoom;
+    cam.y = camSY - dy / cam.zoom;
+    clampCam();
+  }
+
+  var i = worldToCell(mouseWX, mouseWY);
+  var tip = document.getElementById('tooltip');
+  if (i >= 0 && !gameOver && owner) {
+    var o = owner[i];
+    var c = countries[o].color;
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX + 16) + 'px';
+    tip.style.top  = (e.clientY + 16) + 'px';
+
+    var stateStr = '';
+    if (o !== playerId && o !== 0) {
+      if (atWar[playerId][o]) stateStr = ' <span style="color:#ff9d9d">[鎴樹簤]</span>';
+      else if (allied[playerId][o]) stateStr = ' <span style="color:#8fc9ff">[鍚岀洘]</span>';
+    }
+
+    tip.innerHTML =
+      '<span style="color:rgb(' + c.join(',') + ')">鈻?/span> ' + countries[o].name + stateStr + '銆€' +
+      '<span class="t">' + TERRAIN[terrain[i]].name + '</span><br>' +
+      '<span class="t">瀹堝啗</span> <b style="color:#eaf2ff">' + Math.round(troops[i]) + '</b>' +
+      '銆€<span class="t">浜哄彛</span> ' + Math.round(pop[i]).toLocaleString();
+  } else {
+    tip.style.display = 'none';
+  }
+});
+
+window.addEventListener('mouseup', function (e) {
+  if (e.button !== 0) { dragging = false; return; }
+  var wasDrag = moved >= 5;
+  dragging = false;
+  if (wasDrag) return;
+  if (gameOver || !terrain) return;
+
+  var w = screenToWorld(e.clientX, e.clientY);
+  var i = worldToCell(w.x, w.y);
+  if (i < 0) return;
+
+  if (missileMode) {
+    if (missileCount <= 0) { toggleMissile(); return; }
+    missileCount--;
+    launchMissile((i % N + 0.5) * CELL, ((i / N | 0) + 0.5) * CELL);
+    missileMode = false;
+    cv.style.cursor = 'crosshair';
+    toast('DF-5C 宸插彂灏?);
+    updatePanel();
+    return;
+  }
+
+  selected = i;
+  updatePanel();
+});
+
+cv.addEventListener('mouseleave', function () {
+  dragging = false;
+  document.getElementById('tooltip').style.display = 'none';
+});
+
+cv.addEventListener('contextmenu', function (e) {
+  e.preventDefault();
+  if (missileMode) { toggleMissile(); return; }
+  if (gameOver || !terrain) return;
+  var w = screenToWorld(e.clientX, e.clientY);
+  var i = worldToCell(w.x, w.y);
+  if (i < 0) return;
+  openCQuery(owner[i]);
+});
+
+cv.addEventListener('wheel', function (e) {
+  e.preventDefault();
+  var oldZ = cam.zoom;
+  var factor = Math.exp(-e.deltaY * 0.0013);
+  var newZ = Math.max(0.04, Math.min(3.0, oldZ * factor));
+  if (newZ === oldZ) return;
+
+  var wx = (e.clientX - VW/2) / oldZ + cam.x;
+  var wy = (e.clientY - VH/2) / oldZ + cam.y;
+
+  cam.zoom = newZ;
+  cam.x = wx - (e.clientX - VW/2) / newZ;
+  cam.y = wy - (e.clientY - VH/2) / newZ;
+  clampCam();
+}, { passive: false });
+
+function clampCam() {
+  var m = WORLD * 0.2;
+  cam.x = Math.max(-m, Math.min(WORLD + m, cam.x));
+  cam.y = Math.max(-m, Math.min(WORLD + m, cam.y));
+}
+
+function zoomBy(f) {
+  cam.zoom = Math.max(0.04, Math.min(3.0, cam.zoom * f));
+  clampCam();
+}
+document.getElementById('zin').addEventListener('click', function () { zoomBy(1.35); });
+document.getElementById('zout').addEventListener('click', function () { zoomBy(1/1.35); });
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   瀵煎脊妯″紡
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+function toggleMissile() {
+  if (gameOver) return;
+  if (missileCount <= 0) { toast('DF-5C 宸茶€楀敖'); return; }
+  missileMode = !missileMode;
+  toast(missileMode ? '閫夋嫨鏍告墦鍑荤洰鏍囷紙宸﹂敭鍙戝皠 / 鍙抽敭鍙栨秷锛? : '宸插彇娑堝寮规墦鍑?);
+  updatePanel();
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   閿洏
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+window.addEventListener('keydown', function (e) {
+  /* 鏂瑰悜閿笉鍋?toLowerCase锛堝惁鍒?ArrowLeft 鍙?arrowleft 姘歌繙鍖归厤涓嶅埌锛?*/
+  var k = e.key || '';
+  if (k === 'ArrowLeft') {
+    e.preventDefault();
+    rankingType = (rankingType - 1 + RANK_TITLES.length) % RANK_TITLES.length;
+    updateRankbar();
+    return;
+  }
+  if (k === 'ArrowRight') {
+    e.preventDefault();
+    rankingType = (rankingType + 1) % RANK_TITLES.length;
+    updateRankbar();
+    return;
+  }
+  k = k.toLowerCase();
+  if (k === 'q') { e.preventDefault(); toggleMissile(); }
+  else if (k === 'escape') {
+    if (missileMode) toggleMissile();
+    selected = -1;
+    updatePanel();
+    diploEl.style.display = 'none';
+  }
+  else if (k === 'r') {
+    document.getElementById('start').style.display = 'flex';
+    document.getElementById('over').style.display = 'none';
+    diploEl.style.display = 'none';
+  }
+  else if (k === 'k') {
+    showFlags = !showFlags;   /* K 閿紑鍏虫棗甯滄樉绀?*/
+  }
+  else if (k === 'z') {
+    showDivisions = !showDivisions;  /* Z 閿紑鍏冲笀鏄剧ず */
+  }
+  else if (k === '1') {
+    showAlliances = !showAlliances;  /* 1 閿紑鍏宠仈鐩熼樀钀ユ樉绀?*/
+    toast('鑱旂洘鏄剧ず: ' + (showAlliances ? '寮€' : '鍏?));
+  }
+  else if (k === 'ArrowLeft') {
+    rankingType = (rankingType - 1 + RANK_TITLES.length) % RANK_TITLES.length;
+    updateRankbar();
+  }
+  else if (k === 'ArrowRight') {
+    rankingType = (rankingType + 1) % RANK_TITLES.length;
+    updateRankbar();
+  }
+});
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   Toast / 缁撴潫鐣岄潰
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var toastEl = document.getElementById('toast');
+var toastTimer = null;
+
+function toast(msg) {
+  /* 闈炴ā鎬佹偓娴細澶氭潯娑堟伅鍏ラ槦锛岄€愭潯鏄剧ず锛屼笉閬尅銆佷笉鎷︽埅杈撳叆 */
+  if (!msg) return;
+  if (!document.getElementById('toast-stack')) {
+    var stack = document.createElement('div');
+    stack.id = 'toast-stack';
+    document.body.appendChild(stack);
+  }
+  var stack = document.getElementById('toast-stack');
+  var item = document.createElement('div');
+  item.className = 'toast-item';
+  item.textContent = msg;
+  stack.appendChild(item);
+  item.classList.add('on');
+  if (stack.children.length > 4) stack.removeChild(stack.firstChild);
+  setTimeout(function () {
+    if (item.parentNode) item.parentNode.removeChild(item);
+  }, 2200);
+}
+
+function showOver(title, sub, color) {
+  document.getElementById('over-title').textContent = title;
+  document.getElementById('over-title').style.color = color;
+  document.getElementById('over-sub').textContent = sub;
+  document.getElementById('over').style.display = 'flex';
+}
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   寮€濮嬬晫闈?鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+var chosenN = 500;
+
+/* 缁?seed-input 鑷姩濉叆褰撳墠闅忔満绉嶅瓙锛堢帺瀹舵瘡娆″紑灞€閮戒笉涓€鏍凤級 */
+(function initSeedInput() {
+  var seedEl = document.getElementById('map-seed');
+  if (seedEl) seedEl.value = String(Math.floor(Math.random() * 1e7 + 1));
+})();
+
+var mapBtns = document.querySelectorAll('#map-opts button');
+for (var mb = 0; mb < mapBtns.length; mb++) {
+  mapBtns[mb].addEventListener('click', function () {
+    for (var i = 0; i < mapBtns.length; i++) mapBtns[i].classList.remove('active');
+    this.classList.add('active');
+    chosenN = +this.dataset.n;
+  });
+}
+
+var aiRange = document.getElementById('ai-count');
+var aiVal = document.getElementById('ai-count-v');
+aiRange.addEventListener('input', function () { aiVal.textContent = aiRange.value; });
+
+document.getElementById('start-btn').addEventListener('click', function () {
+  try {
+    var seedEl = document.getElementById('map-seed');
+    var seed = seedEl ? seedEl.value.trim() : '';
+    newGame(chosenN, +aiRange.value, seed);
+  } catch (err) {
+    console.error('newGame error:', err);
+    alert('寮€灞€澶辫触: ' + err.message);
+  }
+});
+
+document.getElementById('over-btn').addEventListener('click', function () {
+  document.getElementById('over').style.display = 'none';
+  document.getElementById('start').style.display = 'flex';
+});
+
+/* 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+   鍚姩
+鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲 */
+requestAnimationFrame(loop);
+
+
+/* 鏆撮湶缁欏叏灞€锛氳В鍐?onclick 鍦?IIFE 澶栭儴鏃犳硶璋冪敤 */
+window.closeWarDecl = closeWarDecl;
+window.alignWar = alignWar;
+window.exitWar = exitWar;
+
+
+</script>
+</body>
+</html>

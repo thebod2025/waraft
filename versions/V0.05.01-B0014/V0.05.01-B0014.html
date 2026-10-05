@@ -1,0 +1,3852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>领土征服 · V0.05.01-B0014 · 10000²</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#05070a;
+    font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    color:#dfe8f3;user-select:none}
+  #cv{display:block;cursor:crosshair;position:fixed;inset:0}
+
+  #topbar{position:fixed;top:0;left:0;right:0;height:44px;z-index:10;
+    display:flex;align-items:center;justify-content:center;gap:22px;
+    background:linear-gradient(180deg,rgba(9,13,19,.97),rgba(9,13,19,.72));
+    border-bottom:1px solid rgba(90,140,200,.18);backdrop-filter:blur(12px);
+    font-size:12.5px;padding:0 16px;overflow-x:auto;white-space:nowrap}
+  .res{display:flex;align-items:center;gap:6px;color:#7d8fa6;white-space:nowrap}
+  .res b{color:#eaf2ff;font-variant-numeric:tabular-nums;font-weight:600;min-width:40px;
+    display:inline-block;text-align:right}
+  .res i{width:8px;height:8px;border-radius:2px;flex:none;display:block}
+
+  #panel{position:fixed;top:58px;right:12px;width:222px;z-index:10;
+    background:rgba(13,18,26,.9);border:1px solid rgba(90,140,200,.22);
+    border-radius:10px;backdrop-filter:blur(10px);padding:12px;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);font-size:13px}
+  #panel .ptitle{color:#8b9cb0;font-size:11px;letter-spacing:1px;margin-bottom:8px}
+  #selinfo{line-height:1.85;font-size:12px;color:#9aabbd;min-height:110px;
+    border-bottom:1px solid rgba(90,140,200,.16);padding-bottom:9px;margin-bottom:10px}
+  #selinfo .kv{display:flex;justify-content:space-between}
+  #selinfo .kv span:last-child{color:#eaf2ff;font-variant-numeric:tabular-nums}
+  #selinfo .none{color:#5c6b7d;font-style:italic}
+  #selinfo .tag{display:inline-block;padding:0 5px;border-radius:3px;font-size:10px;
+    background:rgba(255,255,255,.08);color:#8fa8c4;margin-left:4px}
+
+  .btn{width:100%;padding:8px 0;margin-bottom:7px;border-radius:7px;cursor:pointer;
+    background:rgba(64,158,255,.12);border:1px solid rgba(64,158,255,.38);color:#8fc9ff;
+    font-size:12.5px;font-family:inherit;transition:.14s;letter-spacing:.3px}
+  .btn:hover{background:rgba(64,158,255,.24);color:#cfe8ff}
+  .btn:active{transform:scale(.985)}
+  .btn:disabled{opacity:.32;cursor:not-allowed;background:rgba(80,90,100,.1);
+    border-color:rgba(80,90,100,.25);color:#6a7a8c}
+  .btn.warn{background:rgba(230,90,90,.12);border-color:rgba(230,90,90,.42);color:#ff9d9d}
+  .btn.warn:hover{background:rgba(230,90,90,.24);color:#ffc4c4}
+  .btn.amber{background:rgba(255,180,70,.1);border-color:rgba(255,180,70,.4);color:#ffd08a}
+  .btn.amber:hover{background:rgba(255,180,70,.22)}
+
+  #hint{margin-top:8px;font-size:11px;color:#5f7085;line-height:1.8}
+  #hint kbd{background:rgba(90,140,200,.16);border:1px solid rgba(90,140,200,.3);
+    border-radius:3px;padding:0 4px;font-size:10px;color:#9fc4e8;font-family:inherit}
+
+  #tip{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:8;
+    font-size:11.5px;color:#5d6e83;letter-spacing:.3px;pointer-events:none;
+    white-space:nowrap;background:rgba(8,12,18,.62);padding:5px 14px;border-radius:20px;
+    border:1px solid rgba(90,140,200,.12)}
+
+  #fps{position:fixed;bottom:12px;left:12px;z-index:9;
+    font-size:11px;color:#5a7b9e;font-variant-numeric:tabular-nums;
+    background:rgba(8,12,18,.72);padding:4px 10px;border-radius:6px;
+    border:1px solid rgba(90,140,200,.16);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.5px;
+    pointer-events:none}
+  #fps b{color:#7ee0a0;font-weight:600}
+
+  #tooltip{position:fixed;pointer-events:none;display:none;z-index:20;
+    background:rgba(8,12,18,.95);border:1px solid rgba(90,140,200,.3);
+    border-radius:7px;padding:7px 11px;font-size:12px;line-height:1.7;white-space:nowrap;
+    box-shadow:0 6px 20px rgba(0,0,0,.65)}
+  #tooltip .t{color:#8fa5bb}
+  #toast-stack{position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+  .toast-item{background:rgba(20,26,36,.95);border:1px solid rgba(255,180,80,.35);color:#ffce7a;
+    padding:6px 16px;border-radius:8px;font-size:12.5px;white-space:nowrap;opacity:0;transition:opacity .22s}
+  .toast-item.on{opacity:1}
+
+  #zoomui{position:fixed;bottom:52px;right:14px;z-index:9;display:flex;flex-direction:column;gap:6px}
+  #zoomui button{width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:16px;
+    background:rgba(13,18,26,.86);border:1px solid rgba(90,140,200,.25);color:#8fa8c4;
+    backdrop-filter:blur(8px);transition:.14s;line-height:1}
+  #zoomui button:hover{background:rgba(64,158,255,.2);color:#cfe8ff}
+
+  /* 排行榜 */
+  #rankbar{position:fixed;left:10px;bottom:60px;top:auto;transform:none;max-width:160px
+  z-index:9;display:flex;flex-direction:column;align-items:flex-start;gap:4px;
+  background:rgba(9,13,19,.72);border:1px solid rgba(90,140,200,.15);
+  border-radius:6px;padding:8px 12px;font-size:11px;backdrop-filter:blur(6px);
+  color:#9ab3cc;white-space:nowrap;overflow:hidden;max-height:60vh}
+.rk-title{color:#e7f0ff;font-weight:600;margin-bottom:4px}
+#rk-list{display:flex;flex-direction:column;gap:2px;width:100%}
+#rk-list .rk-item{display:flex;align-items:center;gap:6px;color:#b8cce0;padding:2px 4px;border-radius:3px}
+#rk-list .rk-item:hover{background:rgba(90,140,200,.15)}
+#rk-list .rk-item .rk-flag{width:8px;height:8px;border-radius:2px;flex:none;display:block}
+#rk-list .rk-item b{color:#eaf2ff;font-variant-numeric:tabular-nums;min-width:40px;text-align:right}
+  #rk-list .rk-item{display:flex;align-items:center;gap:4px;color:#b8cce0}
+  #rk-list .rk-item .rk-flag{width:8px;height:8px;border-radius:2px;flex:none;display:block}
+  #rk-list .rk-item b{color:#eaf2ff;font-variant-numeric:tabular-nums}
+  #rk-list .rk-item.me{color:#cfe8ff;font-weight:600;border-bottom:1px solid rgba(64,158,255,.6)}
+
+  .modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;
+    pointer-events:auto}
+  .modal-box{background:rgba(13,18,26,.95);border:1px solid rgba(90,140,200,.25);
+    border-radius:14px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.7);
+    max-height:82vh;pointer-events:auto}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:14px;font-size:14px;letter-spacing:2px;color:#b8cce0}
+  .modal-head button{background:none;border:none;color:#7d8fa6;font-size:16px;cursor:pointer;
+    padding:0 4px;line-height:1}
+  .modal-head button:hover{color:#fff}
+
+  #start .modal-box{width:400px;align-items:stretch;text-align:center}
+  #start h1{margin:0;font-size:32px;letter-spacing:10px;color:#eaf2ff;font-weight:600}
+  #start .sub{margin:6px 0 24px;color:#6d8098;font-size:12.5px;letter-spacing:2px}
+  .field{margin-bottom:20px;text-align:left}
+  .field label{display:block;font-size:12px;color:#8b9cb0;margin-bottom:8px;letter-spacing:1px}
+  .field label b{color:#6fc0ff}
+  .opts{display:flex;gap:8px}
+  .opts button{flex:1;padding:9px 0;border-radius:8px;cursor:pointer;font-size:12px;
+    background:rgba(64,158,255,.08);border:1px solid rgba(64,158,255,.25);color:#7fa8cc;
+    font-family:inherit;transition:.14s}
+  .opts button:hover{background:rgba(64,158,255,.18);color:#b8dcff}
+  .opts button.active{background:rgba(64,158,255,.25);border-color:rgba(64,158,255,.7);
+    color:#cfe8ff;font-weight:600}
+  #ai-count{width:100%;accent-color:#409eff;cursor:pointer}
+  #start-btn{margin-top:8px;padding:12px 0;border-radius:9px;cursor:pointer;font-size:14px;
+    background:rgba(64,158,255,.2);border:1px solid rgba(64,158,255,.55);color:#cfe8ff;
+    font-family:inherit;letter-spacing:3px;transition:.15s}
+  #start-btn:hover{background:rgba(64,158,255,.35)}
+
+  #diplo .modal-box{width:520px}
+  #diplo-list{overflow-y:auto;max-height:60vh;padding-right:4px}
+  #diplo-list::-webkit-scrollbar{width:6px}
+  #diplo-list::-webkit-scrollbar-thumb{background:rgba(90,140,200,.3);border-radius:3px}
+  .diplo-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;
+    margin-bottom:4px;background:rgba(255,255,255,.02);transition:.12s}
+  .diplo-row:hover{background:rgba(64,158,255,.08)}
+  .dr-color{width:12px;height:12px;border-radius:3px;flex:none}
+  .dr-name{font-size:13px;color:#dfe8f3;min-width:56px}
+  .dr-stat{flex:1;display:flex;gap:10px;font-size:11px;color:#7d8fa6}
+  .dr-stat span{white-space:nowrap}
+  .dr-acts{display:flex;gap:5px}
+  .dr-acts button{padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;
+    background:rgba(64,158,255,.1);border:1px solid rgba(64,158,255,.3);color:#8fc9ff;
+    font-family:inherit;transition:.12s;white-space:nowrap}
+  .dr-acts button:hover{background:rgba(64,158,255,.25);color:#cfe8ff}
+  .dr-acts button[data-act="war"]{background:rgba(230,90,90,.12);border-color:rgba(230,90,90,.4);
+    color:#ff9d9d}
+  .dr-acts button[data-act="war"]:hover{background:rgba(230,90,90,.25)}
+  .dr-acts button:disabled{opacity:.3;cursor:not-allowed}
+
+  #cquery .cq-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  #cquery .cq-dot{width:16px;height:16px;border-radius:4px;flex:none}
+  #cquery .cq-name{font-size:18px;font-weight:600;color:#eaf2ff;letter-spacing:1px}
+  #cquery .cq-tag{font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.08);color:#8fa8c4}
+  #cquery .cq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  #cquery .cq-stat{background:rgba(255,255,255,.03);border:1px solid rgba(90,140,200,.18);
+    border-radius:8px;padding:9px 11px}
+  #cquery .cq-stat .lbl{font-size:11px;color:#7d8fa6;margin-bottom:4px;letter-spacing:.5px}
+  #cquery .cq-stat .val{font-size:18px;color:#eaf2ff;font-variant-numeric:tabular-nums;font-weight:600}
+  #cquery .cq-chart-title{font-size:11px;color:#7d8fa6;letter-spacing:1px;margin:4px 0 4px}
+  #cquery canvas.cq-chart{width:100%;height:120px;border-radius:6px;background:rgba(0,0,0,.25);
+    border:1px solid rgba(90,140,200,.14)}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="topbar">
+  <div class="res"><i style="background:#7ee0a0"></i>人口 <b id="r-pop">0</b></div>
+  <div class="res"><i style="background:#6fc0ff"></i>守军 <b id="r-troop">0</b></div>
+  <div class="res"><i style="background:#ff9a7a"></i>现役 <b id="r-active">0</b></div>
+  <div class="res"><i style="background:#8fa8ff"></i>领土 <b id="r-land">0</b></div>
+  <div class="res"><i style="background:#ffc861"></i>军帐/营队 <b id="r-bat">0</b></div>
+  <div class="res"><i style="background:#ff7a7a"></i>DF-5C <b id="r-msl">0</b></div>
+  <div class="res"><i style="background:#c0a8ff"></i>省份 <b id="r-prov">0</b></div>
+  <div class="res"><i style="background:#b8c4d4"></i>天数 <b id="r-day">1</b></div>
+  <div class="res" style="color:#5c6b7d;font-style:italic">V0.05.01-B0014</div>
+</div>
+
+<div id="rankbar">
+  <span class="rk-title" id="rk-title">🏆 领土榜</span>
+  <span id="rk-list"></span>
+  <span class="rk-hint" style="opacity:.4">← → 切换</span>
+</div>
+
+<div id="panel">
+  <div class="ptitle">情 报 面 板</div>
+  <div id="selinfo"><div class="none">未选中地块</div></div>
+  <button class="btn" id="btn-recruit">征 兵　<span style="opacity:.55">-800人口 +1000兵</span></button>
+  <button class="btn" id="btn-bat">建造军帐　<span style="opacity:.55">3×3 · -1000兵 · 自动派营队</span></button>
+  <button class="btn amber" id="btn-diplo">外 交 部</button>
+  <button class="btn warn" id="btn-missile">呼叫 DF-5C　<span style="opacity:.7">[Q]</span></button>
+  <div id="hint">
+    <kbd>拖拽</kbd> 平移 · <kbd>滚轮</kbd> 缩放<br>
+    <kbd>点击</kbd> 选中地块 · <kbd>Q</kbd> 核打击 · <kbd>R</kbd> 重开 · <kbd>X</kbd> 开发者模式<br>
+    <kbd>+/-</kbd> 调速（仅限开发者模式） · <kbd>←→</kbd> 切换榜单 · <kbd>K</kbd> 开关旗帜 · <kbd>Z</kbd> 开关师
+  </div>
+</div>
+
+<div id="zoomui">
+  <button id="zin">+</button>
+  <button id="zout">−</button>
+</div>
+
+<div id="tip">军帐(3×3)会自动派生营队(0.8×0.8) → 营队赶往边疆并洋葱式扩张 · 山地防御极高</div>
+<div id="fps">-- FPS</div>
+<div id="tooltip"></div>
+<div id="toast"></div>
+
+<div id="diplo" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span>外 交 部</span>
+      <button id="diplo-close">✕</button>
+    </div>
+    <div id="diplo-list"></div>
+  </div>
+</div>
+
+<div id="start" class="modal" style="display:flex">
+  <div class="modal-box">
+    <h1>领 土 征 服</h1>
+    <p class="sub">10000 × 10000 世 界</p>
+
+    <div class="field">
+      <label>地图分辨率（世界面积固定 10000²）</label>
+      <div class="opts" id="map-opts">
+        <button data-n="100">100×100</button>
+        <button data-n="150">150×150</button>
+        <button data-n="200">200×200</button>
+        <button data-n="500" class="active">500×500</button>
+        <button data-n="2000">2000×2000</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>AI 国家数量 <b id="ai-count-v">20</b></label>
+      <input type="range" id="ai-count" min="5" max="50" value="20">
+    </div>
+
+    <div class="field">
+      <label>地图种子（留空 = 随机 · 同种子同地形与国家布局）</label>
+      <input type="text" id="map-seed" placeholder="例如 12345" style="width:100%;box-sizing:border-box;
+        padding:8px;border-radius:7px;border:1px solid rgba(90,140,200,.3);
+        background:rgba(8,12,18,.6);color:#cfe4ff;font-family:inherit;font-size:13px">
+    </div>
+
+    <button id="start-btn">开 始 征 战</button>
+  </div>
+</div>
+
+<div id="over" class="modal">
+  <div class="modal-box" style="width:360px;text-align:center;align-items:stretch">
+    <h1 id="over-title" style="margin:0 0 10px;font-size:40px;letter-spacing:8px"></h1>
+    <p id="over-sub" style="margin:0 0 20px;color:#93a5ba;font-size:13.5px"></p>
+    <button id="over-btn" style="padding:11px 0;border-radius:9px;cursor:pointer;font-size:14px;
+      background:rgba(64,158,255,.16);border:1px solid rgba(64,158,255,.5);color:#9ed0ff;
+      font-family:inherit;letter-spacing:2px">再 来 一 局</button>
+  </div>
+</div>
+
+<div id="cquery" style="position:fixed;left:12px;top:72px;z-index:12;display:none;
+  background:rgba(9,13,19,.88);border:1px solid rgba(90,140,200,.25);border-radius:8px;
+  padding:10px 12px;font-size:12px;backdrop-filter:blur(8px);min-width:240px;max-width:320px;
+  color:#b8cce0;box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <span id="cq-head" style="color:#e7f0ff;font-weight:600;font-size:12px;letter-spacing:1px">国 家 查 询</span>
+    <button id="cq-close" style="background:none;border:none;color:#8fa8c4;cursor:pointer;font-size:14px;padding:0 4px">✕</button>
+  </div>
+  <div id="cq-body"></div>
+</div>
+
+<script>
+(function () {
+"use strict";
+
+/* ══════════════════════════════════════════════
+   常量
+══════════════════════════════════════════════ */
+var WORLD    = 10000;
+var TICK_MS  = 250;
+var MAX_AI   = 50;
+
+var N = 100, CELL = 100, TOTAL = 10000;
+
+/* ══ 地圆说：星球表面，x 和 y 方向全部环绕 ══ */
+var WRAP = true;
+function WX(x) { x |= 0; if (WRAP) { x %= N; if (x < 0) x += N; } return x; }
+function WY(y) { y |= 0; if (WRAP) { y %= N; if (y < 0) y += N; } return y; }
+/* cell(x, y) 返回环绕后的 index；不检查是否在范围内 */
+function WCell(x, y) { return WY(y) * N + WX(x); }
+/* dx, dy 的环绕曼哈顿距离 */
+function WDist(ax, ay, bx, by) {
+  var dx = Math.abs(WX(ax) - WX(bx));
+  var dy = Math.abs(WY(ay) - WY(by));
+  if (dx > N/2) dx = N - dx;
+  if (dy > N/2) dy = N - dy;
+  return dx + dy;
+}
+/* dx, dy 的环绕欧几里得距离平方 */
+function WDist2(ax, ay, bx, by) {
+  var dx = Math.abs(WX(ax) - WX(bx));
+  var dy = Math.abs(WY(ay) - WY(by));
+  if (dx > N/2) dx = N - dx;
+  if (dy > N/2) dy = N - dy;
+  return dx*dx + dy*dy;
+}
+
+var T_PLAIN=0, T_FOREST=1, T_HILL=2, T_MOUNTAIN=3, T_WATER=4, T_DESERT=5, T_RUIN=6;
+
+var TERRAIN = [
+  { name:'平原', c:[84,112,74],  popMax:12000, defMul:1.00, pass:true  },
+  { name:'森林', c:[44,80,52],   popMax:6000,  defMul:1.45, pass:true  },
+  { name:'丘陵', c:[98,102,68],  popMax:4000,  defMul:1.70, pass:true  },
+  { name:'山地', c:[92,92,98],   popMax:1500,  defMul:2.20, pass:true  },
+  { name:'水域', c:[32,62,102],  popMax:0,     defMul:1.00, pass:false },
+  { name:'沙漠', c:[128,112,76], popMax:800,   defMul:0.90, pass:true  },
+  { name:'废墟', c:[58,54,52],   popMax:2000,  defMul:1.10, pass:true  },
+];
+
+var DIRS8 = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+var DIRS4 = [[0,-1],[1,0],[0,1],[-1,0]];   /* 营队只用 4 方向（禁斜走） */
+
+/* ══════════════════════════════════════════════
+   全局状态 —— 全部初始化为 null / 空
+══════════════════════════════════════════════ */
+var terrain = null, owner = null, pop = null, troops = null, cap = null;
+var ruinTurn = null;      /* 每格废墟起始回合，到点后复原 */
+
+var countries = [];
+var relations = [], atWar = [], allied = [];
+var landCount = [];
+var provinces = [];
+var prov = null;          /* 每格省份 id 标记 */
+/* 省界分色（循环取用，随省份 id 变化，视觉上更规整） */
+var PROV_EDGE = [
+  'rgba(255,255,255,.5)', 'rgba(255,210,150,.45)',
+  'rgba(180,220,255,.45)', 'rgba(255,180,200,.45)'
+];
+var missiles = [], effects = [];
+var barracks = [];
+var squads = [];
+var divisions = [];       /* 师组织 */
+var squadIdx = 0;         /* 营队全局编号 */
+var history = [];
+var provAdj = {};
+
+var turn = 0;
+var playerId = 1;
+var selected = -1;
+var gameOver = null;
+var missileCount = 3;
+var missileMode = false;
+var miniDirty = false;
+
+var COLOR = [], COLOR_CSS = [];
+
+var cam = { x: WORLD/2, y: WORLD/2, zoom: 0.25 };
+
+var showFlags = true;        /* K 键切换旗帜显示 */
+var showDivisions = true;   /* Z 键切换师显示；缩到全图也强制显示 */
+var showAlliances = false;  /* 1 键切换联盟阵营显示 */
+var alliances = [];          /* 联盟数组：[{name, members:[oid...], color:[r,g,b]}] */
+var ALLIANCE_COLORS = [
+  [90,160,255],[255,140,70],[120,220,140],[230,120,200],
+  [240,220,80],[180,150,255],[100,220,220],[255,100,110]
+];
+var PENDING_WARS = [];      /* 等待倒计时的宣战 */
+var cities = [];            /* 城市：{owner, cx, cy, cell, name} */
+var CITY_SEQ = 0;
+
+var isDevMode = false;     /* X 键切换开发者模式 */
+var gameSpeed = 1;          /* 全局速度倍率 0.5x ~ 20x */
+var SPEED_LEVELS = [0.5, 1, 1.5, 2, 3, 4, 6, 8, 12, 16, 20];
+var speedIdx = 1;           /* 默认 1x */
+var lastSpeedChange = 0;    /* 调速节流时间戳 */
+
+/* ══════════════════════════════════════════════
+   画布
+══════════════════════════════════════════════ */
+var cv = document.getElementById('cv');
+var ctx = cv.getContext('2d', { alpha:false });
+var VW = 0, VH = 0, DPR = 1;
+
+var mini = null, miniCtx = null, miniData = null;
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  VW = window.innerWidth;
+  VH = window.innerHeight;
+  cv.width  = Math.max(1, Math.floor(VW * DPR));
+  cv.height = Math.max(1, Math.floor(VH * DPR));
+  cv.style.width  = VW + 'px';
+  cv.style.height = VH + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ══════════════════════════════════════════════
+   HSL → RGB
+══════════════════════════════════════════════ */
+function hsl2rgb(h, s, l) {
+  h = ((h % 360) + 360) % 360 / 360;
+  var a = s * Math.min(l, 1 - l);
+  function f(n) {
+    var k = (n + h * 12) % 12;
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
+  }
+  return [f(0), f(8), f(4)];
+}
+
+var NAME_POOL = ['赤','橙','金','翠','青','蓝','紫','银','白','黑','灰','墨','苍','玄',
+  '绛','朱','碧','皓','丹','素','翰','霜','雷','风','云','星','月','日','山','河',
+  '海','林','原','曦','曜','辉','焰','涛','崖','谷','漠','泽','岭','渊','垠','辰',
+  '宿','衡','璇','玑'];
+
+/* ── 市 / 省 命名池 ── */
+var PROV_POOL = ['云','洛','淮','陇','荆','豫','秦','晋','齐','楚','燕','魏','赵','卫',
+  '郑','宋','鲁','陈','蔡','许','薛','虢','曹','卫','韩','梁','蜀','汉','吴','越'];
+var CITY_POOL = ['阳','阴','平','安','定','宁','康','泰','昌','丰','华','富','安','顺',
+  '和','广','兴','隆','昌','盛','瑞','祥','吉','嘉','瑞','庆','鸿','飞','鹤','龙',
+  '凤','麒','麟','鹏','霄','霆','震','澜','溪','泉','汀','沅','湘','潇','江','川'];
+
+/* ══════════════════════════════════════════════
+   种子随机数（mulberry32）
+══════════════════════════════════════════════ */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    var r = (t ^ t >>> 14) >>> 0;
+    return (r % 1e9) / 1e9;
+  };
+}
+var RNG = Math.random;   /* 全局随机源，开局可切到种子流 */
+function seedRNG(seed) {
+  if (seed == null || seed === '') RNG = Math.random;
+  else RNG = mulberry32(parseInt(seed, 10) || 0);
+}
+
+/* ══════════════════════════════════════════════
+   颜色表
+══════════════════════════════════════════════ */
+function buildColorTable() {
+  COLOR = []; COLOR_CSS = [];
+  for (var o = 0; o < countries.length; o++) {
+    var byT = [], byCss = [];
+    for (var t = 0; t < TERRAIN.length; t++) {
+      var lv = [], lvCss = [];
+      for (var l = 0; l < 4; l++) {
+        var ter = TERRAIN[t];
+        var col;
+        if (o === 0) {
+          var k = 0.72 + 0.28 * (l / 3);
+          col = [ ter.c[0]*k|0, ter.c[1]*k|0, ter.c[2]*k|0 ];
+        } else {
+          var fc = countries[o].color;
+          var br = (0.62 + 0.38 * (l / 3));
+          var tv = 0.5;
+          col = [
+            Math.min(255, (fc[0] * br * (1-tv) + ter.c[0] * br * tv)) | 0,
+            Math.min(255, (fc[1] * br * (1-tv) + ter.c[1] * br * tv)) | 0,
+            Math.min(255, (fc[2] * br * (1-tv) + ter.c[2] * br * tv)) | 0
+          ];
+        }
+        lv.push(col);
+        lvCss.push('rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')');
+      }
+      byT.push(lv); byCss.push(lvCss);
+    }
+    COLOR.push(byT); COLOR_CSS.push(byCss);
+  }
+}
+
+/* ── 国家旗帜：按国家 id 稳定生成的小旗（含条纹+徽记），缓存 canvas ── */
+var FLAG_CACHE = [];
+function makeFlagCanvas(id) {
+  var c = document.createElement('canvas');
+  c.width = 30; c.height = 30;
+  var g = c.getContext('2d');
+  g.clearRect(0, 0, 30, 30);
+  var base = [64, 158, 255], motif = 'circle';
+  if (id > 0 && countries[id] && countries[id].color) base = countries[id].color;
+  else if (id === 0) { base = [150, 158, 170]; motif = 'circle'; }
+  else {
+    var n = ((id - 1) * 137 + 7) % 9;
+    motif = (n % 2 === 0) ? 'circle' : 'square';
+    var h = (n * 40 + ((id * 53) % 200)) % 360;
+    base = hsl2rgb(h, 0.72, 0.52);
+  }
+  g.fillStyle = 'rgba(255,255,255,.14)';
+  g.fillRect(0, 0, 30, 7);
+  g.fillStyle = 'rgba(255,255,255,.14)';
+  g.fillRect(0, 23, 30, 7);
+  g.fillStyle = 'rgba(' + base[0] + ',' + base[1] + ',' + base[2] + ',.95)';
+  g.fillRect(0, 7, 30, 16);
+  g.strokeStyle = 'rgba(255,255,255,.55)';
+  g.lineWidth = 1;
+  g.strokeRect(0.5, 0.5, 29, 29);
+  g.fillStyle = 'rgba(255,255,255,.95)';
+  if (motif === 'circle') { g.beginPath(); g.arc(15, 15, 5.5, 0, Math.PI * 2); g.fill(); }
+  else { g.fillRect(10, 10, 10, 10); }
+  g.fillStyle = 'rgba(' + base[0] + ',' + base[1] + ',' + base[2] + ',.95)';
+  if (motif === 'circle') { g.beginPath(); g.arc(15, 15, 2.4, 0, Math.PI * 2); g.fill(); }
+  else { g.fillRect(12.5, 12.5, 5, 5); }
+  return c;
+}
+function renderFlags(z) {
+  if (!showFlags) return;
+  var fs = Math.max(15, Math.min(42, z * 70));
+  for (var o = 1; o < countries.length; o++) {
+    if (!countries[o].alive) continue;
+    var i = FLAG_CACHE[o];
+    if (!i) { i = makeFlagCanvas(o); FLAG_CACHE[o] = i; }
+    var fx = countries[o].fx, fy = countries[o].fy;
+    if (fx == null) continue;
+    var px = (fx - cam.x) * z + VW / 2;
+    var py = (fy - cam.y) * z + VH / 2;
+    if (px < -40 || py < -40 || px > VW + 40 || py > VH + 40) continue;
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.drawImage(i, px - fs / 2, py - fs / 2 - 4, fs, fs);
+    ctx.restore();
+  }
+}
+
+/* 联盟阵营渲染：同联盟领土外发光 + 旗帜角标 */
+function renderAlliances(z, cs) {
+  if (!showAlliances || alliances.length === 0) return;
+  /* 按联盟分组绘制领土发光边框 */
+  for (var a = 0; a < alliances.length; a++) {
+    var alliance = alliances[a];
+    var col = alliance.color;
+    /* 给联盟成员领土画外发光边框 */
+    ctx.save();
+    ctx.strokeStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.55)';
+    ctx.lineWidth = Math.max(1, Math.min(4, cs * 0.4));
+    ctx.shadowColor = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.7)';
+    ctx.shadowBlur = 8;
+    for (var oi = 0; oi < alliance.members.length; oi++) {
+      var oid = alliance.members[oi];
+      if (!countries[oid] || !countries[oid].alive) continue;
+      var flag = FLAG_CACHE[oid];
+      if (!flag) { flag = makeFlagCanvas(oid); FLAG_CACHE[oid] = flag; }
+      var fx = countries[oid].fx, fy = countries[oid].fy;
+      if (fx == null) continue;
+      /* 画联盟发光边框围绕国家中心 */
+      var px = (fx - cam.x) * z + VW / 2;
+      var py = (fy - cam.y) * z + VH / 2;
+      var fs = Math.max(20, Math.min(48, z * 85));
+      /* 在旗帜周围画联盟色外框 */
+      ctx.strokeRect(px - fs/2 - 3, py - fs/2 - 7, fs + 6, fs + 6);
+    }
+    ctx.restore();
+  }
+}
+function renderCities(z, cs) {
+  if (cs < 6) return;
+  for (var k = 0; k < cities.length; k++) {
+    var c = cities[k];
+    var px = (c.cx * CELL - cam.x) * z + VW / 2;
+    var py = (c.cy * CELL - cam.y) * z + VH / 2;
+    if (px < -40 || py < -40 || px > VW + 40 || py > VH + 40) continue;
+    var stillOwner = (owner[c.cell] === c.owner);
+
+    /* 精美 emoji 图标 */
+    var icon = stillOwner ? '🏙' : '🏚';
+    var fSize = Math.max(8, Math.min(22, cs * 0.9));
+    ctx.font = fSize + 'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(icon, px + cs / 2, py + cs / 2);
+    ctx.textBaseline = 'alphabetic';
+
+    if (cs > 12) {
+      ctx.font = Math.max(9, cs * 0.45) + 'px sans-serif';
+      ctx.fillStyle = 'rgba(0,0,0,.6)';
+      ctx.fillText(c.name, px + cs / 2 + 5, py + cs / 2 + 3);
+      ctx.fillStyle = stillOwner ? 'rgba(255,255,255,.9)' : 'rgba(255,170,170,.9)';
+      ctx.fillText(c.name, px + cs / 2 + 4, py + cs / 2 + 2);
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════
+   地形生成
+══════════════════════════════════════════════ */
+function fbm(x, y, oct, freq) {
+  var v = 0, a = 0.5, f = freq;
+  for (var o = 0; o < oct; o++) {
+    v += a * Math.sin(x*f + o*13.7) * Math.cos(y*f*1.13 + o*7.3);
+    a *= 0.5; f *= 2.07;
+  }
+  return v;
+}
+function fbm2(x, y, oct, freq) {
+  var v = 0, a = 0.5, f = freq;
+  for (var o = 0; o < oct; o++) {
+    v += a * Math.sin(x*f*0.9 + o*23.1) * Math.sin(y*f*1.3 + o*11.9);
+    a *= 0.5; f *= 2.13;
+  }
+  return v;
+}
+
+function genTerrain() {
+  var scale = 100 / N;
+  /* 种子偏移：从当前 RNG 流里取两个伪随机数做噪声相位 */
+  var sox = RNG() * 7.13 + 1.7;
+  var soy = RNG() * 9.41 + 2.3;
+  for (var y = 0; y < N; y++) {
+    for (var x = 0; x < N; x++) {
+      var v  = fbm(x*scale + sox, y*scale + soy, 5, 0.028);
+      var v2 = fbm2(x*scale + soy, y*scale + sox, 4, 0.060);
+      var t;
+      if      (v < -0.36) t = T_WATER;
+      else if (v >  0.50) t = T_MOUNTAIN;
+      else if (v >  0.28) t = T_HILL;
+      else if (v2 >  0.13) t = T_FOREST;
+      else if (v2 < -0.15) t = T_DESERT;
+      else                 t = T_PLAIN;
+      terrain[y*N + x] = t;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════
+   新游戏
+══════════════════════════════════════════════ */
+function newGame(nVal, aiCount, seed) {
+  N = nVal;
+  CELL = WORLD / N;
+  TOTAL = N * N;
+  seedRNG(seed);   /* 应用地图种子（留空=随机） */
+
+  terrain  = new Uint8Array(TOTAL);
+  owner    = new Uint8Array(TOTAL);
+  pop      = new Float32Array(TOTAL);
+  troops  = new Float32Array(TOTAL);
+  cap      = new Float32Array(TOTAL);
+  prov     = new Int32Array(TOTAL);
+  ruinTurn = new Int32Array(TOTAL);
+  ruinTurn.fill(-1);
+
+  genTerrain();
+
+  for (var i = 0; i < TOTAL; i++) {
+    var pm = TERRAIN[terrain[i]].popMax;
+    pop[i] = pm * (0.50 + RNG() * 0.36);
+    cap[i] = 30 + pop[i] * 0.03;
+    troops[i] = cap[i] * (0.18 + RNG() * 0.24);
+  }
+
+  /* ── 国家 ── */
+  countries = [{ id:0, name:'中立', color:[90,100,115], neutral:true, alive:true }];
+  for (var c2 = 1; c2 <= aiCount + 1; c2++) {
+    var isPlayer = (c2 === 1);
+    var nm;
+    if (isPlayer) {
+      nm = '我国';
+    } else {
+      var idx = (c2 - 2) % NAME_POOL.length;
+      var suffix = (c2 - 2 >= NAME_POOL.length) ? ('-' + (Math.floor((c2-2)/NAME_POOL.length)+1)) : '';
+      nm = NAME_POOL[idx] + '国' + suffix;
+    }
+    countries.push({
+      id: c2,
+      name: nm,
+      color: isPlayer ? [64,158,255] : hsl2rgb((c2 * 137.508) % 360, 0.62, 0.56),
+      neutral: false,
+      alive: true,
+      isPlayer: isPlayer
+    });
+  }
+
+  var NC = countries.length;
+  relations = []; atWar = []; allied = []; landCount = new Array(NC);
+  for (var i2 = 0; i2 < NC; i2++) {
+    relations[i2] = new Array(NC);
+    atWar[i2]    = new Array(NC);
+    allied[i2]   = new Array(NC);
+    landCount[i2] = 0;
+    for (var j2 = 0; j2 < NC; j2++) {
+      relations[i2][j2] = 0;
+      atWar[i2][j2]    = false;
+      allied[i2][j2]   = false;
+    }
+  }
+  for (var i3 = 1; i3 < NC; i3++) {
+    for (var j3 = i3+1; j3 < NC; j3++) {
+      var r = Math.round((RNG() - 0.5) * 30);
+      relations[i3][j3] = relations[j3][i3] = r;
+    }
+  }
+
+  buildColorTable();
+  spawnNations();
+
+  missiles = [];
+  effects = [];
+  provinces = [];
+  barracks = [];
+  squads = [];
+  divisions = [];
+  squadIdx = 0;
+  cities = [];
+  CITY_SEQ = 0;
+  history = [];
+  provAdj = {};
+  turn = 0;
+  missileCount = 3;
+  missileMode = false;
+  selected = -1;
+  gameOver = null;
+  initWarScore();
+  buildAlliances();
+
+  cam.x = WORLD/2; cam.y = WORLD/2;
+  cam.zoom = Math.max(0.05, Math.min(VW, VH) / (WORLD * 1.15));
+
+  /* ── 小地图 ── */
+  mini = document.createElement('canvas');
+  mini.width = N; mini.height = N;
+  miniCtx = mini.getContext('2d');
+  miniData = miniCtx.createImageData(N, N);
+
+  document.getElementById('start').style.display = 'none';
+  document.getElementById('over').style.display = 'none';
+  document.getElementById('diplo').style.display = 'none';
+
+  miniDirty = true;
+  refreshMini();
+  updateProvinces();      /* 初始省份划分 + prov 标记 */
+  updateHUD();
+  updatePanel();
+  recordHistory();
+}
+
+function spawnNations() {
+  var list = [];
+  for (var i = 1; i < countries.length; i++) list.push(i);
+  /* 用 RNG 洗牌，让国家出生顺序也完全随机 */
+  for (var i2 = list.length - 1; i2 > 0; i2--) {
+    var j2 = Math.floor(RNG() * (i2 + 1));
+    var tmp2 = list[i2]; list[i2] = list[j2]; list[j2] = tmp2;
+  }
+  var count = list.length;
+  if (count === 0) return;
+  var cx0 = N / 2, cy0 = N / 2;
+  var baseR = N * 0.34;
+
+  for (var k = 0; k < count; k++) {
+    var fid = list[k];
+    /* 角度完全随机（不再固定等分），每国占据 2π/count 范围，在内部随机 */
+    var sector = 2 * Math.PI / count;
+    var angle = sector * k + RNG() * sector * 0.95;
+    /* 半径更分散：0.15×baseR ~ 1.05×baseR（有的国家靠边、有的居中） */
+    var r = baseR * (0.15 + RNG() * 0.90);
+    var cx = Math.round(cx0 + Math.cos(angle) * r);
+    var cy = Math.round(cy0 + Math.sin(angle) * r);
+    cx = Math.max(4, Math.min(N - 5, cx));
+    cy = Math.max(4, Math.min(N - 5, cy));
+
+    var rad = Math.max(3, Math.round(N * 0.045));
+    var r2 = rad * rad;
+    for (var y = Math.max(0, cy - rad); y <= Math.min(N-1, cy + rad); y++) {
+      for (var x = Math.max(0, cx - rad); x <= Math.min(N-1, cx + rad); x++) {
+        var dx = x - cx, dy = y - cy;
+        if (dx*dx + dy*dy > r2) continue;
+        var i = y*N + x;
+        if (terrain[i] === T_WATER) terrain[i] = T_PLAIN;
+        owner[i] = fid;
+        pop[i] = Math.max(pop[i], TERRAIN[terrain[i]].popMax * 0.55);
+        cap[i] = 30 + pop[i] * 0.03;     /* 守军上限 = 人口 × 10% + 80 */
+        troops[i] = cap[i] * 0.25;        /* 初始守军只占上限的 30% */
+      }
+    }
+    /* 记录国家旗帜中心（世界坐标） */
+    countries[fid].fx = (cx + 0.5) * CELL;
+    countries[fid].fy = (cy + 0.5) * CELL;
+  }
+}
+
+function refreshFlagCenters() {
+  /* 重新计算各国领土质心，用于旗帜位置 */
+  var sx = new Array(countries.length), sy = new Array(countries.length), cnt = new Array(countries.length);
+  for (var i = 0; i < countries.length; i++) { sx[i] = 0; sy[i] = 0; cnt[i] = 0; }
+  for (var j = 0; j < TOTAL; j++) {
+    var o = owner[j]; if (o === 0) continue;
+    var x = j % N, y = (j / N) | 0;
+    sx[o] += x; sy[o] += y; cnt[o]++;
+  }
+  for (var c2 = 1; c2 < countries.length; c2++) {
+    if (cnt[c2] > 0) {
+      countries[c2].fx = (sx[c2] / cnt[c2] + 0.5) * CELL;
+      countries[c2].fy = (sy[c2] / cnt[c2] + 0.5) * CELL;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════
+   小地图刷新
+══════════════════════════════════════════════ */
+function refreshMini() {
+  if (!miniDirty) return;
+  if (!miniData || !COLOR.length) return;
+  var d = miniData.data;
+  for (var i = 0; i < TOTAL; i++) {
+    var o = owner[i], t = terrain[i];
+    var cv2 = cap[i] || 1;
+    var l = (troops[i] / cv2 * 4) | 0;
+    if (l > 3) l = 3; else if (l < 0) l = 0;
+    var c = COLOR[o][t][l];
+    var p = i << 2;
+    d[p] = c[0]; d[p+1] = c[1]; d[p+2] = c[2]; d[p+3] = 255;
+  }
+  miniCtx.putImageData(miniData, 0, 0);
+  miniDirty = false;
+}
+
+/* ══════════════════════════════════════════════
+   回合推进
+══════════════════════════════════════════════ */
+function tick() {
+  turn++;
+
+  for (var i = 0; i < TOTAL; i++) {
+    var pm = TERRAIN[terrain[i]].popMax;
+    if (pm > 0 && pop[i] < pm) {
+      pop[i] += (pm - pop[i]) * 0.0015;
+    }
+    var c = 80 + pop[i] * 0.10;
+      cap[i] = c;
+    if (troops[i] < c * 0.6) {
+      var g = (c * 0.6 - troops[i]) * 0.002;
+      if (g > 1.5) g = 1.5;
+      troops[i] += g;
+    }
+  }
+
+  /* 边疆补兵：边疆格优先获得人力，让守军去守边疆 */
+  if (turn % 4 === 0) {
+    for (var bi = 0; bi < TOTAL; bi++) {
+      if (owner[bi] === 0) continue;
+      var bx2 = bi % N, by2 = (bi / N) | 0;
+      var border = false;
+      for (var bd = 0; bd < 8; bd++) {
+        var nx2 = bx2 + DIRS8[bd][0], ny2 = by2 + DIRS8[bd][1];
+        
+        if (owner[ny2*N + nx2] !== owner[bi]) { border = true; break; }
+      }
+      if (!border) continue;
+      var c2 = cap[bi];
+      /* 边疆补兵强度弱化：只补到上限的 1.1 倍、回补率 0.004，避免边境反复拉锯 */
+      if (troops[bi] < c2 * 0.8) {
+        var gb = (c2 * 0.8 - troops[bi]) * 0.004;
+        if (gb > 2.5) gb = 2.5;
+        troops[bi] += gb;
+      }
+    }
+  }
+
+  /* 守军流动逻辑：从人力密集区（尤其是军营附近）流向人力稀疏区 */
+  if (turn % 6 === 0) {
+    var movePool = [];  /* 存储要搬运的守军 {cell, amount, targetCell} */
+    
+    for (var mi = 0; mi < TOTAL; mi++) {
+      if (owner[mi] === 0) continue;
+      
+      var ownerId = owner[mi];
+      var cMi = cap[mi];
+      var tMi = troops[mi];
+      
+      /* 检查这个格子是否是军营或靠近军营 */
+      var isBarracks = barracksAt(mi) !== null;
+      var nearBarracks = false;
+      if (!isBarracks) {
+        for (var bk = 0; bk < barracks.length; bk++) {
+          var b = barracks[bk];
+          if (b.owner !== ownerId || b.x != null) continue;
+          var distToB = WDist(b.cx, b.cy, mi % N, Math.floor(mi / N));
+          if (distToB <= 3) { nearBarracks = true; break; }
+        }
+      }
+      
+      /* 挑选来源格：人力过高（超过上限 1.2 倍）且不是军营本身 */
+      if (tMi > cMi * 1.2 && !isBarracks) {
+        var moveAmt = Math.min(tMi * 0.05, 300);  /* 每回合搬运不超过 5% 或 300 人 */
+        if (moveAmt >= 10) {
+          movePool.push({ from: mi, amount: moveAmt });
+        }
+      }
+    }
+    
+    /* 为每个搬运源寻找目标格 */
+    for (var mpIdx = movePool.length - 1; mpIdx >= 0; mpIdx--) {
+      var src = movePool[mpIdx];
+      var srcOwner = owner[src.from];
+      var srcX = src.from % N, srcY = Math.floor(src.from / N);
+      
+      /* 在 6 格范围内寻找人力最少的同国可通行格，优先选择军营 */
+      var bestTarget = -1;
+      var bestTroops = Infinity;
+      var bestBarracksTroops = Infinity;  /* 军营优先级：优先选军营 */
+      
+      for (var r = 1; r <= 6; r++) {
+        for (var dx = -r; dx <= r; dx++) {
+          var t1 = WCell(srcX + dx, srcY - r, srcOwner);
+          var t2 = WCell(srcX + dx, srcY + r, srcOwner);
+          var t3 = WCell(srcX - r, srcY, srcOwner);
+          
+          [t1, t2, t3].forEach(function(cellIdx) {
+            if (cellIdx < 0) return;
+            if (owner[cellIdx] !== srcOwner) return;
+            if (!TERRAIN[terrain[cellIdx]].pass) return;
+            
+            var isBarracksCell = barracksAt(cellIdx) !== null;
+            var troopCount = troops[cellIdx];
+            
+            /* 优先选择军营格 */
+            if (isBarracksCell) {
+              if (troopCount < bestBarracksTroops) {
+                bestBarracksTroops = troopCount;
+                bestTarget = cellIdx;
+                bestTroops = troopCount;
+              }
+              return;  /* 直接选中军营，不再比较其他格子 */
+            }
+            
+            if (troopCount < bestTroops) {
+              bestTroops = troopCount;
+              bestTarget = cellIdx;
+            }
+          });
+        }
+      }
+      
+      if (bestTarget >= 0 && bestTroops < troops[src.from] * 0.6) {
+        /* 滑轨搬运：从来得及，从往哪 */
+        var actualMove = Math.min(src.amount, 200);
+        /* 特别鼓励流向军营：增加军营目标的搬运量 */
+        var isBarracksTarget = barracksAt(bestTarget) !== null;
+        if (isBarracksTarget) {
+          actualMove = Math.min(src.amount, 500);  /* 增加军营可接受的额外 300 人 */
+        }
+        troops[src.from] -= actualMove;
+        troops[bestTarget] += actualMove * 0.9;  /* 搬运损失 10% */
+      }
+    }
+  }
+
+  updateBarracks();
+  releaseSquads();
+  updateSquads();
+  checkSquadOverlap();   /* 同格同国营队合并 */
+  updateSquadQuality();  /* 训练场训练 + 衰减 */
+  updateDivisions();     /* 师吸收/解散 */
+
+  /* 战争结束检测：当两国都不再处于战争，需检查是否已停战（由 aiDiplomacy 设 atWar=false，
+     此时根据战争分数自动弹出结算） */
+  for (var i = 1; i < countries.length; i++) {
+    if (!countries[i].alive) continue;
+    for (var j = i + 1; j < countries.length; j++) {
+      if (!countries[j].alive) continue;
+      var wasWar = atWar[i][j];
+      /* 如果刚刚停战 → 结算战争分数 */
+      if (!wasWar && warScore[i] && Math.abs(warScore[i][j]) > 500) {
+        /* 标记已结算（用负分数表示已结算过） */
+        endWar(i, j);
+      }
+    }
+  }
+
+  if (turn % 8 === 0)  aiBuildBattalions();
+  if (turn % 12 === 0) aiDiplomacy();
+  if (turn % 40 === 0) updateProvinces();
+  tickPendingWars();           /* 每回合推进宣战倒计时 */
+  if (turn % 4 === 0) updatePlayerWarPanel();
+  if (turn % 200 === 0 && missileCount < 8) missileCount++;
+  if (turn % 10 === 0) driftRelations();
+  if (turn % 24 === 0) refreshFlagCenters();
+  if (turn % 16 === 0) autoBuildCities();
+  if (turn % 8 === 0)  recoverRuins();
+  if (TOTAL > 400000) {
+    if (turn % 30 === 0)  recountLand();
+    if (turn % 40 === 0)  recordHistory();
+    if (turn % 10 === 0)  checkEnd();
+  } else {
+    if (turn % 6 === 0)  recountLand();
+    if (turn % 10 === 0) recordHistory();
+  }
+
+  miniDirty = true;
+  if (turn % 6 === 0) updateRankbar();
+  if (turn % 4 === 0 && cqCurrentOid >= 0 && cqueryEl.style.display !== 'none') openCQuery(cqCurrentOid);
+  checkEnd();
+}
+
+/* ══════════════════════════════════════════════
+   军营（静态） + 营队（行军）
+══════════════════════════════════════════════ */
+function idx9(cx, cy) {
+  var i = cy * N + cx;
+  if (i < 0 || i >= TOTAL) return -1;
+  return i;
+}
+
+/* 军营查找表：cell索引 -> barracks 对象的映射，使 barracksAt 查找变为 O(1) */
+var barracksLookup = {};
+for (var k = 0; k < barracks.length; k++) {
+  var b = barracks[k];
+  if (b.cell != null) {
+    barracksLookup[b.cell] = b;
+  }
+}
+
+/* 军营单元格查找：基于缓存查找，而非线性遍历 */
+function barracksAt(i) {
+  return barracksLookup[i] || null;
+}
+
+function squadCell(b) {
+  if (b.x == null) return b.cell;
+  return b.y * N + b.x;
+}
+
+/* 军营：主动"抽调"周围守军（75% → storedManpower），上限 50000
+  一次性抽取 9 格存量，守军后续自然补回 → 军帐可持续获得新兵
+  每释放一个营队，实打实从 storedManpower 扣，营队规模 = 消耗 × 2 */
+function updateBarracks() {
+  for (var k = 0; k < barracks.length; k++) {
+    var b = barracks[k];
+    if (b.x != null) continue;
+    if (b.storedManpower == null) b.storedManpower = 0;
+
+    /* 周围 9 格抽调 75% 守军进军帐人力池（上限 50000） */
+    if (b.storedManpower < 50000) {
+      var gathered = 0;
+      for (var dy = -1; dy <= 1; dy++)
+        for (var dx = -1; dx <= 1; dx++) {
+          var ii = idx9(b.cx+dx, b.cy+dy);
+          if (ii < 0) continue;
+          var cellTroops = troops[ii];
+          if (cellTroops <= 10) continue;
+          var take = Math.min(cellTroops * 0.75, 50000 - b.storedManpower - gathered);
+          if (take <= 0) continue;
+          troops[ii] -= take;
+          gathered += take;
+        }
+      b.storedManpower += gathered;
+    }
+    /* 同步 manpower 显示值 */
+    b.manpower = b.storedManpower;
+  }
+}
+
+function releaseSquads() {
+  for (var k = barracks.length - 1; k >= 0; k--) {
+    var b = barracks[k];
+    if (b.x != null) continue;
+    if (b.storedManpower == null) b.storedManpower = 0;
+    if (b.storedManpower < 500) continue;   /* 人力<500：不释放 */
+
+    var active = 0;
+    for (var s2 = 0; s2 < squads.length; s2++)
+      if (squads[s2].fromCell === b.cell && squads[s2].x != null) active++;
+    if (active >= b.maxSquads) continue;
+
+    /* 目标边疆格：复用 checkTile 径向搜索 */
+    var cx = b.cx, cy = b.cy;
+    var maxR = Math.min(16, Math.max(8, Math.round(N * 0.09)));
+    var bt = -1;
+    for (var r = 1; r <= maxR && bt < 0; r++) {
+      for (var dx = -r; dx <= r; dx++) {
+        var ta = checkTile(cx + dx, cy - r, b.owner);
+        if (ta >= 0) { bt = ta; break; }
+        var tc = checkTile(cx + dx, cy + r, b.owner);
+        if (tc >= 0) { bt = tc; break; }
+      }
+      if (bt >= 0) continue;
+      for (var dy2b = -r + 1; dy2b <= r - 1; dy2b++) {
+        var ta2 = checkTile(cx - r, cy + dy2b, b.owner);
+        if (ta2 >= 0) { bt = ta2; break; }
+        var tc2 = checkTile(cx + r, cy + dy2b, b.owner);
+        if (tc2 >= 0) { bt = tc2; break; }
+      }
+    }
+    if (bt < 0) continue;
+
+    /* 一次可释放多个营队，人力够就一直派 */
+    var slots = b.maxSquads - active;
+    var bx = bt % N, by = (bt / N) | 0;
+    for (var si = 0; si < slots; si++) {
+      /* 每个营队消耗 1500 人力 → 派出 3000 人规模的营队（人力转化比 1:2）
+         如果人力不够 1500 也可以派一个小营队（最低 500 人力 → 1000 人） */
+      var pay;
+      if (b.storedManpower >= 1500) pay = 1500;
+      else if (b.storedManpower >= 500) pay = b.storedManpower;
+      else break;
+
+      b.storedManpower -= pay;
+      var sqTroops = Math.round(pay * 2);   /* 人力 1:2 → 营队兵力 */
+
+      var sq = {
+        id: ++squadIdx,
+        owner: b.owner, fromCell: b.cell, cell: bt,
+        x: bx, y: by,
+        troops: sqTroops, maxTroops: Math.round(sqTroops * 3),
+        quality: b.quality || 0.5,
+        phase: (turn >> 2) & 3
+      };
+      squads.push(sq);
+      active++;
+    }
+  }
+}
+
+function updateSquads() {
+  for (var k = squads.length - 1; k >= 0; k--) {
+    var b = squads[k];
+    if (b.quality == null) b.quality = 0.5;
+
+    /* 营队自然补员：maxTroops × 0.5%/回合（规模越大补得越快） */
+    if (b.troops < b.maxTroops) {
+      var regen = Math.max(10, b.maxTroops * 0.005);
+      b.troops = Math.min(b.maxTroops, b.troops + regen);
+    }
+    if ((turn & 3) !== b.phase) continue;
+    if (b.troops < 150) continue;
+
+    var tgt = findNearestTarget(b);
+    if (tgt < 0) continue;
+
+    var ti = tgt;
+    var defMul = TERRAIN[terrain[ti]].defMul;
+    /* 城市防守加成：如果目标格是城市 → 守军 +50% 且守军上限更高 */
+    var isCityTarget = false;
+    for (var cc2 = 0; cc2 < cities.length; cc2++) {
+      if (cities[cc2].cell === ti) { isCityTarget = true; break; }
+    }
+    if (isCityTarget) defMul *= 1.5;
+    /* 质量影响：高训练度营队攻击 +5%/0.1 质量点 */
+    var qualMul = 0.6 + b.quality * 0.8;
+    var attack = b.troops * 0.45 * qualMul;
+    var defense = troops[ti] * defMul;
+    /* 记住目标原属国家，用于战争分数 */
+    var prevOwner = owner[ti];
+
+    if (attack > defense) {
+      owner[ti] = b.owner;
+      troops[ti] = Math.min((attack - defense) * 0.55, 600);
+      b.troops -= attack * 0.75;
+      b.x = ti % N; b.y = (ti / N) | 0; b.cell = ti;
+      miniDirty = true;
+      addRing((ti % N + 0.5) * CELL, ((ti / N | 0) + 0.5) * CELL,
+              countries[b.owner].color, 420);
+      /* 占有时获得战斗经验 + 累积战争分数 + 领土变更记录 */
+      b.quality = Math.min(1.0, b.quality + 0.003);
+      if (prevOwner !== 0) {
+        addWarScore(b.owner, prevOwner, 10 + troops[ti] * 0.02);
+        recordTerritoryChange(b.owner, prevOwner, 1);
+      }
+    } else {
+      troops[ti] -= attack / defMul * 0.55;
+      if (troops[ti] < 0) troops[ti] = 0;
+      b.troops -= attack * 0.9;
+      miniDirty = true;
+      /* 防守方（敌方）掉血多 → 攻击者也得少量战争分 */
+      if (prevOwner !== 0) addWarScore(b.owner, prevOwner, Math.min(8, attack * 0.002));
+    }
+
+    /* 战败营队：找附近最强同国营队吸收自己的残余兵力（保留 60%） */
+    if (b.troops < 40) {
+      var bestTgt = null, bestDist = 999;
+      for (var kk = 0; kk < squads.length; kk++) {
+        var sT = squads[kk];
+        if (sT === b) continue;
+        if (sT.owner !== b.owner) continue;
+        if (sT.troops <= 0) continue;
+        var tdx = Math.abs(sT.x - b.x), tdy = Math.abs(sT.y - b.y);
+        var td = tdx + tdy;
+        if (td < bestDist) { bestDist = td; bestTgt = sT; }
+      }
+      var survivors = Math.round(b.troops * 0.6);
+      if (bestTgt && survivors > 0) {
+        bestTgt.troops += survivors;
+        bestTgt.quality = Math.min(1.0, (bestTgt.quality || 0.5) + 0.002);
+      }
+      squads.splice(k, 1);
+      continue;
+    }
+
+    /* 每 4 回合推进：4 方向 + 先占后进 + 无战争原地待命 + 优先打城市 + 1/4 防守 */
+    if (turn % 4 === 0) {
+      var bx = b.x, by = b.y;
+      var here = owner[by*N + bx];
+      if (here !== b.owner) continue;
+
+      /* ── T5：无战争不瞎逛 ── 只有与他国处于 atWar 才能去打，或者去扩张中立领土 */
+      var hasRealWar = false;
+      for (var eok = 1; eok < countries.length; eok++) {
+        if (eok === b.owner || !countries[eok].alive) continue;
+        if (atWar[b.owner] && atWar[b.owner][eok]) { hasRealWar = true; break; }
+      }
+
+      /* 统计同国营队中多少在前线（边疆格） */
+      var totalSquads = 0, frontlineSquads = 0;
+      for (var sk = 0; sk < squads.length; sk++) {
+        if (squads[sk].owner !== b.owner) continue;
+        totalSquads++;
+        /* 检查这个营队所在格是否在边疆 */
+        var fx2 = squads[sk].x, fy2 = squads[sk].y;
+        var fi2 = WCell(fx2, fy2);
+        var isFront = false;
+        for (var bd2 = 0; bd2 < 8; bd2++) {
+          var bnx = fx2 + DIRS8[bd2][0], bny = fy2 + DIRS8[bd2][1];
+          
+          if (owner[bny*N + bnx] !== b.owner) { isFront = true; break; }
+        }
+        if (isFront) frontlineSquads++;
+      }
+      /* 动态防守比例：1/8 ~ 1/4 之间，越强越敢把更多兵力派出去 */
+      var maxThreatLand = 0;
+      for (var eok2 = 1; eok2 < countries.length; eok2++) {
+        if (eok2 === b.owner || !countries[eok2].alive) continue;
+        if (atWar[b.owner] && atWar[b.owner][eok2]) {
+          if (landCount[eok2] > maxThreatLand) maxThreatLand = landCount[eok2];
+        }
+      }
+      var myLand = landCount[b.owner] || 1;
+      var ratio = maxThreatLand > 0 ? (maxThreatLand / myLand) : 0.5;  /* 威胁比 */
+      /* ratio 越大（敌越强）→ 防守越多；ratio 越小 → 进攻越多 */
+      var defFrac;
+      if (ratio > 1.2) defFrac = 1/4;        /* 敌比我强 → 留 1/4 */
+      else if (ratio > 0.8) defFrac = 7/48;  /* 稍强 → 约 1/7 */
+      else if (ratio > 0.4) defFrac = 5/40;  /* 1/8 */
+      else defFrac = 1/8;                    /* 碾压 → 只留 1/8 */
+      var minDefense = Math.max(1, Math.floor(totalSquads * defFrac));
+      /* 如果当前营队自己在非前线且前线营队 >= 总营队数 - minDefense → 留在国内防守 */
+      var bIsFront = false;
+      for (var bd3 = 0; bd3 < 8; bd3++) {
+        var bnx3 = bx + DIRS8[bd3][0], bny3 = by + DIRS8[bd3][1];
+        
+        if (owner[bny3*N + bnx3] !== b.owner) { bIsFront = true; break; }
+      }
+      if (!bIsFront && frontlineSquads >= totalSquads - minDefense) continue;   /* 后方营队，留下防守 */
+
+      /* ── 推进决策 ── */
+      var bestX = -1, bestY = -1, bestScore = -1e9;
+      for (var d = 0; d < 4; d++) {
+        var nx = bx + DIRS4[d][0], ny = by + DIRS4[d][1];
+        
+        var ni = WCell(nx, ny);
+        if (owner[ni] !== b.owner) continue;
+        if (!TERRAIN[terrain[ni]].pass) continue;
+        var score = 0;
+        for (var dd = 0; dd < 4; dd++) {
+          var ex = nx + DIRS4[dd][0], ey = ny + DIRS4[dd][1];
+          
+          var ei = WCell(ex, ey);
+          var eo = owner[ei];
+          if (eo === b.owner) continue;
+          if (!TERRAIN[terrain[ei]].pass) continue;
+          /* 有战争时可以打敌方；没战争时只扩张中立 */
+          if (eo !== 0) {
+            if (!hasRealWar || !atWar[b.owner][eo]) continue;
+          }
+          /* 敌方城市 = +10，敌方普通 = +2，中立 = +1 */
+          var isCity = false;
+          for (var cid = 0; cid < cities.length; cid++) {
+            if (cities[cid].cell === ei && cities[cid].owner !== b.owner) { isCity = true; break; }
+          }
+          score += (eo === 0 ? 1 : (isCity ? 10 : 2));
+        }
+        if (score > bestScore) { bestScore = score; bestX = nx; bestY = ny; }
+      }
+
+      if (bestX >= 0) {
+        b.x = bestX; b.y = bestY;
+        b.cell = bestY * N + bestX;
+      }
+    }
+  }
+}
+
+function findNearestTarget(b) {
+  var cx = b.x, cy = b.y;
+  var oid = b.owner;
+  var maxR = Math.min(16, Math.max(8, Math.round(N * 0.09)));
+
+  for (var r = 1; r <= maxR; r++) {
+    for (var dx = -r; dx <= r; dx++) {
+      var a = checkTile(cx + dx, cy - r, oid);
+      if (a >= 0) return a;
+      var c = checkTile(cx + dx, cy + r, oid);
+      if (c >= 0) return c;
+    }
+    for (var dy = -r + 1; dy <= r - 1; dy++) {
+      var a2 = checkTile(cx - r, cy + dy, oid);
+      if (a2 >= 0) return a2;
+      var c2 = checkTile(cx + r, cy + dy, oid);
+      if (c2 >= 0) return c2;
+    }
+  }
+  return -1;
+}
+
+function checkTile(x, y, oid) {
+  
+  var i = WCell(x, y);
+  var o = owner[i];
+  if (o === oid) return -1;
+  if (!TERRAIN[terrain[i]].pass) return -1;
+  if (o !== 0 && !atWar[oid][o]) return -1;
+  return i;
+}
+
+/* ══════════════════════════════════════════════
+   师系统（Division）：每师最多 20 营队，自动吸收附近营队
+   师拥有自己的旗帜、训练度、总兵力
+══════════════════════════════════════════════ */
+
+/* 师旗帜缓存（Canvas） */
+var FLAG_CACHE = {};
+
+/* 生成师旗帜 Canvas：底色=国家颜色，中心显示师编号 */
+function makeDivisionFlag(divId, owner) {
+  var key = divId + '_' + owner;
+  if (FLAG_CACHE[key]) return FLAG_CACHE[key];
+  var c = document.createElement('canvas');
+  c.width = 24; c.height = 24;
+  var ctx = c.getContext('2d');
+  var col = countries[owner].color;
+  ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.92)';
+  ctx.fillRect(0, 0, 24, 24);
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(0, 0, 24, 24);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 12px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(String(divId), 12, 12);
+  FLAG_CACHE[key] = c;
+  return c;
+}
+
+/* 创建新师：在指定坐标建立，立即吸收周围 12 格内同国营队 */
+function createDivision(owner, cx, cy) {
+  var div = {
+    id: divisions.length,
+    owner: owner,
+    cx: cx, cy: cy,
+    x: (cx + 0.5) * CELL, y: (cy + 0.5) * CELL,
+    squads: [], manpower: 0, quality: 0.5,
+    flagCanvas: null, flagGeneratedAt: -1,
+    lifetime: turn, lastAbsorb: 0
+  };
+  divisions.push(div);
+  absorbNearbySquads(div);
+  return div;
+}
+
+/* 师吸收附近同国营队（20 营队上限） */
+function absorbNearbySquads(div) {
+  var R = 12;
+  if (div.squads.length >= 20) return;
+  for (var k = squads.length - 1; k >= 0; k--) {
+    if (div.squads.length >= 20) break;
+    var s = squads[k];
+    if (s.owner !== div.owner || s.x == null) continue;
+    var already = false;
+    for (var d = 0; d < divisions.length; d++) {
+      if (divisions[d].squads.indexOf(s) >= 0) { already = true; break; }
+    }
+    if (already) continue;
+    var dx = Math.abs(s.x - div.cx), dy = Math.abs(s.y - div.cy);
+    if (dx > R || dy > R) continue;
+    div.squads.push(s);
+  }
+  recomputeDivisionStats(div);
+  if (div.squads.length >= 20 && div.flagGeneratedAt < 0) {
+    div.flagCanvas = makeDivisionFlag(div.id, div.owner);
+    div.flagGeneratedAt = turn;
+  }
+  div.lastAbsorb = turn;
+}
+
+function recomputeDivisionStats(div) {
+  var m = 0, qSum = 0;
+  for (var k = 0; k < div.squads.length; k++) {
+    m += div.squads[k].troops;
+    qSum += div.squads[k].quality || 0.5;
+  }
+  div.manpower = m;
+  div.quality = div.squads.length > 0 ? qSum / div.squads.length : 0.5;
+}
+
+/* 师每回合更新（由 tick 调用） */
+function updateDivisions() {
+  for (var d = divisions.length - 1; d >= 0; d--) {
+    var div = divisions[d];
+    if (!countries[div.owner].alive) { divisions.splice(d, 1); continue; }
+
+    /* 清理已消失 + 脱离检查：营队周围 5 格内无其他同师营队 → 脱离此师，允许被其他师吸收 */
+    for (var k = div.squads.length - 1; k >= 0; k--) {
+      var sq = div.squads[k];
+      if (squads.indexOf(sq) < 0) { div.squads.splice(k, 1); continue; }
+      var hasNearby = false;
+      for (var k2 = 0; k2 < div.squads.length; k2++) {
+        if (k2 === k) continue;
+        var oq = div.squads[k2];
+        var dx2 = Math.abs((sq.x ?? sq.cell % N) - (oq.x ?? oq.cell % N));
+        var dy2 = Math.abs((sq.y ?? (sq.cell / N | 0)) - (oq.y ?? (oq.cell / N | 0)));
+        if (dx2 + dy2 <= 5) { hasNearby = true; break; }
+      }
+      if (!hasNearby && div.squads.length > 1) {
+        /* 脱离此师，成为游离营队，等待被其他师吸收 */
+        div.squads.splice(k, 1);
+      }
+    }
+
+    if (turn - div.lastAbsorb > 20) absorbNearbySquads(div);
+    if (div.squads.length === 0 && turn - div.lifetime > 40) {
+      divisions.splice(d, 1); continue;
+    }
+    recomputeDivisionStats(div);
+  }
+  if ((turn % 150) === 0) {
+    for (var c = 2; c < countries.length; c++) {
+      if (!countries[c].alive || c === playerId) continue;
+      var count = 0, bx = -1, by = -1;
+      for (var k = 0; k < squads.length; k++) {
+        if (squads[k].owner === c && squads[k].x != null) { count++; bx = squads[k].x; by = squads[k].y; }
+      }
+      if (count >= 8) {
+        var overlap = false;
+        for (var d2 = 0; d2 < divisions.length; d2++) {
+          if (divisions[d2].owner !== c) continue;
+          if (Math.abs(divisions[d2].cx - bx) < 8 && Math.abs(divisions[d2].cy - by) < 8) { overlap = true; break; }
+        }
+        if (!overlap) createDivision(c, bx, by);
+      }
+    }
+  }
+}
+
+/* 检查营队重叠（同格同国即合并） */
+function checkSquadOverlap() {
+  var map = {};
+  for (var k = squads.length - 1; k >= 0; k--) {
+    var s = squads[k];
+    if (s.x == null) continue;
+    var key = s.owner + '_' + s.cell;
+    if (!map[key]) map[key] = [];
+    map[key].push(s);
+  }
+  for (var key in map) {
+    var arr = map[key];
+    if (arr.length <= 1) continue;
+    var main = arr[0];
+    var totalQ = main.quality || 0.5;
+    var totalT = main.troops;
+    for (var i = 1; i < arr.length; i++) {
+      totalT += arr[i].troops * 0.8;
+      totalQ += arr[i].quality || 0.5;
+      var idx = squads.indexOf(arr[i]);
+      if (idx >= 0) squads.splice(idx, 1);
+    }
+    main.troops = totalT;
+    main.quality = totalQ / arr.length;
+  }
+}
+
+/* 检查营队附近是否有训练场 */
+function nearTrainingGround(s) {
+  if (s.x == null) return false;
+  for (var k = 0; k < barracks.length; k++) {
+    var b = barracks[k];
+    if (b.owner !== s.owner || !b.type || b.type !== 'training') continue;
+    var dx = Math.abs(s.x - b.cx), dy = Math.abs(s.y - b.cy);
+    if (dx <= 4 && dy <= 4) return true;
+  }
+  return false;
+}
+
+/* 更新营队质量：训练场 + 自然衰减 */
+function updateSquadQuality() {
+  for (var k = 0; k < squads.length; k++) {
+    var s = squads[k];
+    if (s.quality == null) s.quality = 0.5;
+    if (nearTrainingGround(s)) s.quality = Math.min(1.0, s.quality + 0.01);
+    if ((turn % 100) === 0) s.quality = Math.max(0.5, s.quality - 0.001);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   战争分数系统
+══════════════════════════════════════════════ */
+var warScore = [], warScoreGain = [];
+var gold = [];            /* 每国金币 */
+var warStats = {};         /* 'a_d' 键 → { startTurn, startLandA, startLandD, lossesA, lossesD, capturedA, capturedD } */
+
+function initWarScore() {
+  warScore = []; warScoreGain = []; gold = [];
+  for (var i = 0; i < countries.length; i++) {
+    warScore.push(new Array(countries.length).fill(0));
+    warScoreGain.push(new Array(countries.length).fill(0));
+    gold.push(20000 + Math.floor(Math.random() * 80000));
+  }
+  warStats = {};
+}
+
+/* 战争开始时记录基线（开始领土） */
+function recordWarStart(a, d) {
+  var key = Math.min(a,d) + '_' + Math.max(a,d);
+  if (warStats[key]) return;   /* 已记录 */
+  warStats[key] = {
+    startTurn: turn,
+    startLandA: landCount[a] || 0,
+    startLandD: landCount[d] || 0,
+    startGoldA: gold[a] || 0,
+    startGoldD: gold[d] || 0,
+    lossesA: 0, lossesD: 0,         /* 伤亡累积 */
+    capturedA: 0, capturedD: 0      /* A 夺得 D 的格数 = capturedA，反之 */
+  };
+}
+
+/* 每次 addWarScore 时自动累积领土变化 */
+function addWarScore(attacker, defender, amount) {
+  if (!atWar[attacker] || !atWar[attacker][defender]) return;
+  warScore[attacker][defender] += amount;
+  warScore[defender][attacker] -= amount;
+
+  /* 同时记录伤亡（攻击方损失 ≈ 攻击量 × 0.3，防守方损失 ≈ 攻击量 × 0.25） */
+  var key = Math.min(attacker,defender) + '_' + Math.max(attacker,defender);
+  var stat = warStats[key];
+  if (stat) {
+    stat.lossesA += amount * 0.3;
+    stat.lossesD += amount * 0.25;
+  }
+}
+
+/* 记录领土变更（attacker 从 defender 手中夺取 delta 格） */
+function recordTerritoryChange(attacker, defender, delta) {
+  var key = Math.min(attacker,defender) + '_' + Math.max(attacker,defender);
+  var stat = warStats[key];
+  if (!stat) return;
+  if (attacker < defender) stat.capturedA += delta;
+  else stat.capturedD += delta;
+}
+function endWar(a, d) {
+  atWar[a][d] = atWar[d][a] = false;
+  var sA = warScore[a] ? warScore[a][d] : 0;
+  var sD = warScore[d] ? warScore[d][a] : 0;
+  var w = sA > sD ? a : (sD > sA ? d : -1);
+
+  /* 取战前战后快照 */
+  var key = Math.min(a,d) + '_' + Math.max(a,d);
+  var stat = warStats[key] || { lossesA:0, lossesD:0, capturedA:0, capturedD:0,
+    startTurn: turn, startLandA:landCount[a]||0, startLandD:landCount[d]||0 };
+  var nowLandA = landCount[a] || 0;
+  var nowLandD = landCount[d] || 0;
+
+  /* 赔款：胜者获得败者的金币 × 比例 */
+  var reparA = 0, reparD = 0;
+  if (w > 0) {
+    var loser = (w === a) ? d : a;
+    var winner = w;
+    var penalty = 0.3;             /* 30% 金币作为赔款 */
+    reparA = Math.round(gold[loser] * penalty);
+    reparD = reparA;
+    gold[loser] -= reparA;
+    gold[winner] += reparA;
+    if (loser === d) reparA = 0; else reparD = 0;  /* 简化显示：胜者名对应赔款 */
+  }
+
+  var show = (w === playerId || a === playerId || d === playerId);
+  if (show) {
+    var days = Math.max(1, Math.floor((turn - stat.startTurn) / 14) + 1);
+    var colA = countries[a].color, colD = countries[d].color;
+    var colStrA = 'rgb(' + colA[0] + ',' + colA[1] + ',' + colA[2] + ')';
+    var colStrD = 'rgb(' + colD[0] + ',' + colD[1] + ',' + colD[2] + ')';
+    var loserStr = w > 0 ? countries[loser].name : null;
+    var winnerStr = w > 0 ? countries[winner].name : null;
+
+    var h = '<div class="war-report" style="min-width:360px;max-width:520px">';
+    h += '<div style="font-size:13px;color:#9ab3cc;border-bottom:1px solid rgba(90,140,200,.25);padding-bottom:8px;margin-bottom:10px;letter-spacing:1px">';
+    h += '⚔ 战 争 结 束 · 持 续 ' + days + ' 天';
+    h += '</div>';
+    h += '<table style="width:100%;font-size:12px;border-collapse:collapse">';
+    h += '<tr style="border-bottom:1px solid rgba(90,140,200,.2)">';
+    h += '<th style="text-align:left;padding:4px 6px">' + countries[a].name + '</th>';
+    h += '<th style="text-align:center;padding:4px 6px;color:#7d8fa6">vs</th>';
+    h += '<th style="text-align:right;padding:4px 6px">' + countries[d].name + '</th>';
+    h += '</tr>';
+
+    var dataRows = [
+      ['战争分数', Math.round(sA), Math.round(sD)],
+      ['战前领土', stat.startLandA, stat.startLandD],
+      ['战后领土', nowLandA, nowLandD],
+      ['领土变动', (nowLandA - stat.startLandA), (nowLandD - stat.startLandD)],
+      ['我方夺得', stat.capturedA, stat.capturedD],
+      ['伤亡(估算)', Math.round(stat.lossesA), Math.round(stat.lossesD)],
+      ['战前金币', stat.startGoldA, stat.startGoldD],
+      ['战后金币', gold[a], gold[d]]
+    ];
+    for (var r = 0; r < dataRows.length; r++) {
+      var isRepar = false;
+      h += '<tr style="border-bottom:1px dashed rgba(90,140,200,.12)">';
+      h += '<td style="padding:3px 6px;text-align:left;color:' + colStrA + '">' + dataRows[r][1] + '</td>';
+      h += '<td style="padding:3px 6px;text-align:center;color:#7d8fa6;font-size:11px">' + dataRows[r][0] + '</td>';
+      h += '<td style="padding:3px 6px;text-align:right;color:' + colStrD + '">' + dataRows[r][2] + '</td>';
+      h += '</tr>';
+    }
+
+    h += '</table>';
+    if (w > 0) {
+      h += '<div style="margin-top:10px;padding:8px;border-radius:6px;background:rgba(90,200,120,.12);border:1px solid rgba(90,200,120,.3)">';
+      h += '<div style="color:#8fdf98;font-weight:600">' + winnerStr + ' 胜利！</div>';
+      h += '<div style="color:#b8cce0;font-size:11px;margin-top:4px">';
+      h += '• ' + loserStr + ' 向 ' + winnerStr + ' 支付 <b style="color:#ffc861">' + reparA + '</b> 金币（30%）<br>';
+      h += '• 战争分数差 <b>' + Math.abs(Math.round(sA - sD)) + '</b>';
+      h += '</div></div>';
+    } else {
+      h += '<div style="margin-top:10px;padding:8px;border-radius:6px;background:rgba(180,160,100,.12);border:1px solid rgba(200,180,100,.3)">';
+      h += '<div style="color:#e0cc8f;font-weight:600">双方僵持</div>';
+      h += '<div style="color:#b8cce0;font-size:11px;margin-top:4px">无赔款 · 关系 -20</div></div>';
+    }
+    h += '</div>';
+
+    var modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);' +
+      'z-index:51;max-height:80vh;overflow:auto';
+    modal.innerHTML = h;
+    document.body.appendChild(modal);
+    setTimeout(function () { if (modal.parentNode) modal.parentNode.removeChild(modal); }, 10000);
+  }
+
+  setRel(a, d, relations[a][d] - 20);
+  if (warScore[a]) warScore[a][d] = 0;
+  if (warScore[d]) warScore[d][a] = 0;
+  if (warStats[key]) delete warStats[key];
+}
+
+/* ══════════════════════════════════════════════
+   行政区域
+══════════════════════════════════════════════ */
+var provinceVisited = null;
+var PROV_NAME_SEED = 1;   /* 省/市命名计数 */
+
+function targetProvSize() {
+  return Math.max(30, Math.round(Math.pow(Math.sqrt(TOTAL) / 22, 2)));
+}
+
+/* 给省生成 "省·市" 名：省名取自 PROV_POOL，市名取自 CITY_POOL（用 RNG） */
+function nameProvince(ownerId, idx) {
+  var p = PROV_POOL[(ownerId * 7 + idx * 3 + (PROV_NAME_SEED % 5)) % PROV_POOL.length];
+  var c = CITY_POOL[(ownerId * 5 + idx * 11) % CITY_POOL.length];
+  return p + '·' + c;
+}
+
+function updateProvinces() {
+  if (!provinceVisited || provinceVisited.length !== TOTAL) {
+    provinceVisited = new Uint8Array(TOTAL);
+  } else {
+    provinceVisited.fill(0);
+  }
+
+  prov.fill(-1);
+  provinces = [];
+
+  /* 先按国家统计领土规模，决定每国细分成几省（领土越大越细） */
+  var ownLand = new Array(countries.length);
+  for (var oi = 0; oi < countries.length; oi++) ownLand[oi] = 0;
+  for (var ci = 0; ci < TOTAL; ci++) if (owner[ci] > 0) ownLand[owner[ci]]++;
+  var tgt = targetProvSize();
+
+  var provSeq = {};   /* 每国已用省份序号，用于命名 */
+  for (var gi = 1; gi < countries.length; gi++) provSeq[gi] = 0;
+
+  for (var i = 0; i < TOTAL; i++) {
+    if (provinceVisited[i]) continue;
+    var o = owner[i];
+    provinceVisited[i] = 1;
+    if (o === 0) continue;
+
+    /* 整片国家领土 BFS */
+    var cells = [i];
+    var queue = [i];
+    var head = 0;
+    var totalPop = 0, totalGar = 0;
+    while (head < queue.length) {
+      var c = queue[head++];
+      totalPop += pop[c];
+      totalGar += troops[c];
+      var cx = c % N, cy = (c / N) | 0;
+      for (var d = 0; d < 8; d++) {
+        var nx = cx + DIRS8[d][0], ny = cy + DIRS8[d][1];
+        
+        var ni = WCell(nx, ny);
+        if (provinceVisited[ni]) continue;
+        if (owner[ni] !== o) continue;
+        provinceVisited[ni] = 1;
+        queue.push(ni);
+        cells.push(ni);
+      }
+    }
+
+    /* 决定该国家应细分为几省（面积 >= tgt 就再分） */
+    var wantProvs = Math.max(1, Math.round(ownLand[o] / tgt));
+    wantProvs = Math.min(wantProvs, 60);
+    var chunk = Math.ceil(cells.length / wantProvs);
+
+    /* 把整片领土切成 wantProvs 块 → 每块一个省（市） */
+    var start = 0;
+    while (start < cells.length) {
+      var segEnd = Math.min(cells.length, start + chunk);
+      var subCells = cells.slice(start, segEnd);
+      var subPop = 0, subGar = 0;
+      var capIdx = subCells[0], capPop = pop[subCells[0]];
+      for (var ci2 = 0; ci2 < subCells.length; ci2++) {
+        subPop += pop[subCells[ci2]];
+        subGar += troops[subCells[ci2]];
+        if (pop[subCells[ci2]] > capPop) { capPop = pop[subCells[ci2]]; capIdx = subCells[ci2]; }
+      }
+      var provId = provinces.length;
+      for (var mk = 0; mk < subCells.length; mk++) prov[subCells[mk]] = provId;
+
+      var seq = provSeq[o]++;
+      var obj = {
+        owner: o,
+        cells: subCells,
+        capital: capIdx,
+        pop: subPop,
+        troops: subGar,
+        size: subCells.length,
+        name: nameProvince(o, seq)
+      };
+      provinces.push(obj);
+
+      /* 自动征兵 */
+      if (turn % 40 === 0 && subPop > subCells.length * 400) {
+        var recruits = Math.min(subGar * 0.02 + subCells.length * 8, subPop * 0.02);
+        var per = recruits / subCells.length;
+        for (var cj = 0; cj < subCells.length; cj++) {
+          var cc = subCells[cj];
+          if (pop[cc] > 200) {
+            pop[cc] -= per * 0.9;
+            troops[cc] += per * 1.2;
+          }
+        }
+      }
+      start = segEnd;
+    }
+  }
+
+  /* 自动建军营（静态建筑，负责释放营队） */
+  if (turn % 40 === 0) {
+    for (var pi = 0; pi < provinces.length; pi++) {
+      var prov2 = provinces[pi];
+      if (prov2.size < 12) continue;
+      if (prov2.troops < 1000) continue;
+
+      var myBats = 0;
+      for (var bi = 0; bi < barracks.length; bi++)
+        if (barracks[bi].owner === prov2.owner) myBats++;
+      var maxBats = Math.max(4, Math.round(prov2.size / 40));
+      if (myBats >= maxBats) continue;
+
+      var shuffled = prov2.cells.slice();
+      for (var s = 0; s < Math.min(30, shuffled.length); s++) {
+        var idx = s + ((Math.random() * (shuffled.length - s)) | 0);
+        var tmp = shuffled[s]; shuffled[s] = shuffled[idx]; shuffled[idx] = tmp;
+      }
+
+      for (var s2 = 0; s2 < Math.min(30, shuffled.length); s2++) {
+        var c2 = shuffled[s2];
+        var x = c2 % N, y = (c2 / N) | 0;
+        if (x < 2 || y < 2 || x >= N-2 || y >= N-2) continue;
+        if (!canPlaceBattalion(x, y, prov2.owner)) continue;
+
+        var ok = true;
+        for (var dy2 = -1; dy2 <= 1; dy2++)
+          for (var dx2 = -1; dx2 <= 1; dx2++) {
+            var ni2 = (y+dy2)*N + (x+dx2);
+            if (troops[ni2] < 1000/9 + 30) { ok = false; break; }
+          }
+        if (!ok) continue;
+
+        for (var dy3 = -1; dy3 <= 1; dy3++)
+          for (var dx3 = -1; dx3 <= 1; dx3++)
+            troops[(y+dy3)*N + (x+dx3)] -= 1000/9;
+
+        var ci = y * N + x;
+        var man = 0;
+        for (var dy4 = -1; dy4 <= 1; dy4++)
+          for (var dx4 = -1; dx4 <= 1; dx4++)
+            man += troops[(y+dy4)*N + (x+dx4)];
+        barracks.push({
+          owner: prov2.owner,
+          cx: x, cy: y, cell: ci,
+          manpower: man, storedManpower: 0,
+          maxSquads: 25
+        });
+        break;
+      }
+    }
+  }
+}
+
+function canPlaceBattalion(cx, cy, oid) {
+  for (var dy = -1; dy <= 1; dy++)
+    for (var dx = -1; dx <= 1; dx++) {
+      var x = cx + dx, y = cy + dy;
+      
+      var i = y*N + x;
+      if (owner[i] !== oid) return false;
+      if (!TERRAIN[terrain[i]].pass) return false;
+    }
+  for (var k = 0; k < barracks.length; k++) {
+    var bb = barracks[k];
+    if (bb.x != null) continue;       /* 行军营队不阻挡 */
+    if (Math.abs(bb.cx - cx) <= 2 && Math.abs(bb.cy - cy) <= 2)
+      return false;
+  }
+  return true;
+}
+
+/* ══════════════════════════════════════════════
+   AI 建营
+══════════════════════════════════════════════ */
+function aiBuildBattalions() {
+  for (var f = 2; f < countries.length; f++) {
+    if (!countries[f].alive) continue;
+
+    var myBats = 0;
+    for (var bi = 0; bi < barracks.length; bi++)
+      if (barracks[bi].owner === f) myBats++;
+    if (myBats >= 12) continue;
+
+    var best = -1;
+    for (var s = 0; s < 120; s++) {
+      var i = (Math.random() * TOTAL) | 0;
+      if (owner[i] !== f) continue;
+      var x = i % N, y = (i / N) | 0;
+      if (x < 2 || y < 2 || x >= N-2 || y >= N-2) continue;
+
+      var border = false;
+      for (var d = 0; d < 8; d++) {
+        var nx = x + DIRS8[d][0], ny = y + DIRS8[d][1];
+        
+        if (owner[ny*N + nx] !== f) { border = true; break; }
+      }
+      if (!border) continue;
+      if (!canPlaceBattalion(x, y, f)) continue;
+
+      var g = 0;
+      for (var dy = -1; dy <= 1; dy++)
+        for (var dx = -1; dx <= 1; dx++)
+          g += troops[WCell(x+dx, y+dy)];
+      if (g < 1000) continue;
+      best = i; break;
+    }
+
+    if (best < 0) continue;
+    var bx = best % N, by = (best / N) | 0;
+
+    for (var dy2 = -1; dy2 <= 1; dy2++)
+      for (var dx2 = -1; dx2 <= 1; dx2++)
+        troops[(by+dy2)*N + (bx+dx2)] -= 111;
+
+    var bcell = by * N + bx;
+    var man = 0;
+    for (var d3 = -1; d3 <= 1; d3++)
+      for (var d4 = -1; d4 <= 1; d4++)
+        man += troops[(by+d3)*N + (bx+d4)];
+    barracks.push({
+      owner: f, cx: bx, cy: by, cell: bcell,
+      manpower: man, maxSquads: 25
+    });
+  }
+}
+
+/* ══════════════════════════════════════════════
+   城市系统：自动建城；城市沦陷则占领其一部分领土
+══════════════════════════════════════════════ */
+function autoBuildCities() {
+  /* 每国按领土规模自动建若干城市（位于人口高点） */
+  var wantLand = new Array(countries.length), wantCities = new Array(countries.length);
+  for (var oi = 0; oi < countries.length; oi++) { wantLand[oi] = 0; wantCities[oi] = 0; }
+  for (var ci = 0; ci < TOTAL; ci++) if (owner[ci] > 0) wantLand[owner[ci]]++;
+  for (var o = 1; o < countries.length; o++) {
+    if (!countries[o].alive) continue;
+    /* 领土越大建城越多：更激进 → 领土/20 开平方，封顶 50 */
+    wantCities[o] = Math.round(Math.sqrt(wantLand[o] / 5));
+    var have = 0;
+    for (var c2i = 0; c2i < cities.length; c2i++)
+      if (cities[c2i].owner === o) have++;
+    if (have >= wantCities[o]) continue;
+
+    /* 随机尝试在人口高点建城（避开已有城市） */
+    var tries = wantCities[o] - have;
+    for (var t = 0; t < tries; t++) {
+      var placed = false;
+      for (var s = 0; s < 60 && !placed; s++) {
+        var i = (Math.random() * TOTAL) | 0;
+        if (owner[i] !== o) continue;
+        if (TERRAIN[terrain[i]].defMul < 0.9) continue;   /* 必须可通行且不是水域 */
+        if (pop[i] < 250) continue;                        /* 降低人口门槛 */
+        var x = i % N, y = (i / N) | 0;
+        var nearCity = false;
+        for (var c3 = 0; c3 < cities.length; c3++) {
+          if (Math.abs(cities[c3].cx - x) < 3 && Math.abs(cities[c3].cy - y) < 3) { nearCity = true; break; }
+        }
+        if (nearCity) continue;
+        /* 建城需一定守军支撑（降低门槛） */
+        var g = 0;
+        for (var dy = -1; dy <= 1; dy++)
+          for (var dx = -1; dx <= 1; dx++)
+            if (dx === 0 && dy === 0) continue;
+            g += troops[WCell(x+dx, y+dy)];
+        if (g < 300) continue;
+        cities.push({
+          owner: o, cx: x, cy: y, cell: i,
+          name: CITY_POOL[(o * 11 + CITY_SEQ * 7) % CITY_POOL.length] + '城',
+          seq: CITY_SEQ++
+        });
+        placed = true;
+      }
+    }
+  }
+
+  /* 城市聚集人口：城市半径 2 内，周围格人口慢慢流入城市格（每格流出 0.2% → 城市 +0.4%） */
+  for (var cc = 0; cc < cities.length; cc++) {
+    var ctd = cities[cc];
+    if (ctd.cell < 0 || ctd.cell >= TOTAL) continue;
+    var rad = 2;
+    var accum = 0;
+    for (var dy = -rad; dy <= rad; dy++)
+      for (var dx = -rad; dx <= rad; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        if (dx*dx + dy*dy > rad*rad) continue;
+        var nx = ctd.cx + dx, ny = ctd.cy + dy;
+        
+        var ni = WCell(nx, ny);
+        if (owner[ni] !== ctd.owner) continue;
+        var pm2 = TERRAIN[terrain[ni]].popMax;
+        var outflow = pop[ni] * 0.002;
+        if (outflow > 2) outflow = 2;
+        pop[ni] -= outflow;
+        accum += outflow;
+      }
+    pop[ctd.cell] = Math.min(TERRAIN[terrain[ctd.cell]].popMax * 1.8, pop[ctd.cell] + accum);
+  }
+
+  /* 城市沦陷：城市格被敌国占领 → 占领该城所辖区域（城市半径内改归属） */
+  var cityMap = {};
+  for (var c4 = 0; c4 < cities.length; c4++) {
+    var ctd = cities[c4];
+    var cur = owner[ctd.cell];
+    if (cur === ctd.owner) continue;       /* 仍属原主 */
+    if (cur === 0 || cur === ctd.owner) continue;
+    /* 城市被 cur 占领：将城市半径内本属 ctd.owner 的格转给 cur */
+    var rad = 3;
+    for (var dy = -rad; dy <= rad; dy++)
+      for (var dx = -rad; dx <= rad; dx++) {
+        var nx = ctd.cx + dx, ny = ctd.cy + dy;
+        
+        if (dx*dx + dy*dy > rad*rad) continue;
+        var ni = WCell(nx, ny);
+        if (owner[ni] === ctd.owner) { owner[ni] = cur; miniDirty = true; }
+      }
+    ctd.owner = cur;   /* 城市归属更新 */
+  }
+}
+
+/* 废墟复原：到达 80 回合后，废墟恢复为原地形（草原/山地依噪声近似） */
+function recoverRuins() {
+  for (var i = 0; i < TOTAL; i++) {
+    if (terrain[i] !== T_RUIN) continue;
+    if (ruinTurn[i] < 0) ruinTurn[i] = turn;
+    if (turn - ruinTurn[i] < 80) continue;
+    /* 简单按邻近取一个非废墟可通行地形复原 */
+    var t = T_PLAIN;
+    var found = false;
+    var cx = i % N, cy = (i / N) | 0;
+    for (var d = 0; d < 8 && !found; d++) {
+      var nx = cx + DIRS8[d][0], ny = cy + DIRS8[d][1];
+      
+      var nt = terrain[ny*N + nx];
+      if (nt !== T_RUIN && nt !== T_WATER) { t = nt; found = true; }
+    }
+    terrain[i] = t;
+    ruinTurn[i] = -1;
+    cap[i] = TERRAIN[t].popMax * 0.4;
+    if (pop[i] < cap[i] * 0.5) pop[i] = cap[i] * 0.5;
+    miniDirty = true;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   外交
+══════════════════════════════════════════════ */
+function setRel(a, b, v) {
+  v = Math.max(-100, Math.min(100, v));
+  relations[a][b] = v;
+  relations[b][a] = v;
+}
+function addRel(a, b, d) { setRel(a, b, relations[a][b] + d); }
+
+function driftRelations() {
+  for (var i = 1; i < countries.length; i++) {
+    for (var j = i+1; j < countries.length; j++) {
+      var d = (Math.random() - 0.5) * 2.2;
+      if (adjacent(i, j)) d -= 0.6;
+      if (allied[i][j]) d += 0.4;
+      addRel(i, j, d);
+    }
+  }
+}
+
+function adjacent(a, b) {
+  var found = false;
+  for (var s = 0; s < 160 && !found; s++) {
+    var i = (Math.random() * TOTAL) | 0;
+    if (owner[i] !== a) continue;
+    var x = i % N, y = (i / N) | 0;
+    for (var d = 0; d < 8; d++) {
+      var nx = x + DIRS8[d][0], ny = y + DIRS8[d][1];
+      
+      if (owner[ny*N + nx] === b) { found = true; break; }
+    }
+  }
+  return found;
+}
+
+/* ── 联盟阵营：按关系聚类，2-4 个联盟，同联盟成员互相保护 ── */
+function buildAlliances() {
+  alliances = [];
+  var alive = [];
+  for (var i = 1; i < countries.length; i++)
+    if (countries[i].alive) alive.push(i);
+  if (alive.length < 3) { alliances.push({ name:'自由邦', members: alive.slice(), color:ALLIANCE_COLORS[0].slice() }); return; }
+
+  /* 随机决定联盟数量：2~min(4, 国家数/2) */
+  var nAll = 2 + ((RNG() * Math.min(3, Math.floor(alive.length / 2) - 1)) | 0);
+  nAll = Math.max(2, Math.min(4, nAll));
+
+  /* 简单聚类：按关系得分高的抱团 */
+  var assigned = {};
+  /* 先选 nAll 个种子国家 */
+  var shuffled = alive.slice();
+  for (var s = 0; s < shuffled.length; s++) {
+    var idx = s + ((RNG() * (shuffled.length - s)) | 0);
+    var tmp = shuffled[s]; shuffled[s] = shuffled[idx]; shuffled[idx] = tmp;
+  }
+  var seeds = shuffled.slice(0, nAll);
+  for (var ai = 0; ai < nAll; ai++) {
+    alliances.push({
+      name: ['天枢','玄黄','赤潮','碧落'][ai] + '联盟',
+      members: [seeds[ai]],
+      color: ALLIANCE_COLORS[ai % ALLIANCE_COLORS.length].slice()
+    });
+    assigned[seeds[ai]] = ai;
+  }
+
+  /* 剩余国家：加入关系最好的种子所在联盟 */
+  for (var ri = 0; ri < alive.length; ri++) {
+    var oid = alive[ri];
+    if (assigned[oid] !== undefined) continue;
+    var bestA = -1, bestRel = -999;
+    for (var a2 = 0; a2 < nAll; a2++) {
+      var seed = seeds[a2];
+      var r = relations[oid][seed] || 0;
+      if (r > bestRel) { bestRel = r; bestA = a2; }
+    }
+    if (bestA >= 0) {
+      alliances[bestA].members.push(oid);
+      assigned[oid] = bestA;
+      /* 自动建立 allied 关系 */
+      for (var mi = 0; mi < alliances[bestA].members.length; mi++) {
+        var m2 = alliances[bestA].members[mi];
+        allied[oid][m2] = allied[m2][oid] = true;
+      }
+    }
+  }
+}
+
+/* 获取某国所属联盟（返回联盟对象或 null） */
+function getAllianceOf(oid) {
+  for (var i = 0; i < alliances.length; i++)
+    if (alliances[i].members.indexOf(oid) >= 0) return alliances[i];
+  return null;
+}
+
+/* aiDiplomacy 改为通过 PENDING_WARS 宣战 */
+function aiDiplomacy() {
+  for (var f = 2; f < countries.length; f++) {
+    if (!countries[f].alive) continue;
+    for (var g = 1; g < countries.length; g++) {
+      if (g === f || !countries[g].alive) continue;
+      var rel = relations[f][g];
+
+      if (atWar[f][g]) {
+        /* AI 处于劣势时会主动求和 */
+        if (landCount[f] < landCount[g] * 0.35 || rel > -20) {
+          if (Math.random() < 0.5) {
+            exitWar(f, g);  /* AI 退出战争 */
+            setRel(f, g, Math.max(rel, -12));
+            if (g === playerId) toast(countries[f].name + ' 向你求和');
+          }
+        }
+      } else if (!allied[f][g]) {
+        if (rel < -45 && landCount[f] > landCount[g] * 1.35 && Math.random() < 0.35) {
+          pushPendingWar(f, g);
+        } else if (rel > 72 && Math.random() < 0.25) {
+          allied[f][g] = allied[g][f] = true;
+          if (g === playerId) toast(countries[f].name + ' 与你结盟');
+        }
+      }
+    }
+  }
+}
+
+function recountLand() {
+  for (var i = 0; i < landCount.length; i++) landCount[i] = 0;
+  for (var k = 0; k < TOTAL; k++) landCount[owner[k]]++;
+  for (var c = 1; c < countries.length; c++) {
+    if (landCount[c] === 0) countries[c].alive = false;
+  }
+}
+
+/* ── 宣战系统：弹窗 + 倒计时 + 玩家站队 ── */
+var WAR_COMMENTS = [
+  '「这场战争早该爆发，是时候让他们付出代价了。」—— 军事评论员',
+  '「外交已死，枪炮将替我们说话。」—— 某国大臣',
+  '「我们不追求战争，但我们不怕战争。」—— 国会声明',
+  '「邻国的贪婪永无止境，必须以暴制暴。」—— 主战派领袖',
+  '「愿上帝站在正义一方——当然是我们这方。」—— 随军神父',
+  '「战争？又是战争？这一代人还没打够吗？」—— 街面路人',
+  '「宣战书已拟好，墨迹未干，箭已在弦。」—— 史官笔记',
+  '「别问我为什么，问问他们在边境做了什么。」—— 前线指挥官',
+  '「两国之间的恩怨已非一日之寒，今天终于破冰。」—— 战地记者'
+];
+
+/* 玩家站队选择记录：pending war 里 playerSide = 'attacker'|'defender'|'neutral' */
+
+/* 检查 fromOid 能否对 toOid 出兵（4 方向任一方向可达：直接接壤 to 国，
+   或隔 1~2 格中立领土可到达；被第三国挡住 → 不可达） */
+function canReachEnemy(fromOid, toOid) {
+  for (var y = 0; y < N; y++) {
+    for (var x = 0; x < N; x++) {
+      if (owner[y*N + x] !== fromOid) continue;
+      /* 这个 from 格的 4 方向 */
+      for (var d = 0; d < 4; d++) {
+        var nx = x + DIRS4[d][0], ny = y + DIRS4[d][1];
+        
+        /* 方向链最多看 3 格深：0→1→2 */
+        for (var step = 0; step < 3; step++) {
+          var ni = WCell(nx, ny);
+          var eo = owner[ni];
+          if (eo === toOid) return true;         /* 找到敌国 → 可达 */
+          if (eo === fromOid) break;              /* 回到自己领土 → 停下 */
+          if (eo !== 0) break;                    /* 第三国挡住 → 换方向 */
+          /* 中立 → 继续往前 */
+          nx += DIRS4[d][0]; ny += DIRS4[d][1];
+          
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function aiChooseSide(pw) {
+  var a = pw.a, d = pw.d;
+  for (var c = 1; c < countries.length; c++) {
+    if (!countries[c].alive || c === playerId) continue;
+    if (c === a || c === d) continue;
+    /* 检查是否与攻防双方有联盟或良好关系 */
+    var relA = relations[c][a] || 0;
+    var relD = relations[c][d] || 0;
+    var alliedA = allied[c][a];
+    var alliedD = allied[c][d];
+    var landA = landCount[a] || 0;
+    var landD = landCount[d] || 0;
+    
+    var side = 'neutral';
+    if (alliedA || (relA > 50 && relA > relD)) {
+      side = 'attacker';
+    } else if (alliedD || (relD > 50 && relD > relA)) {
+      side = 'defender';
+    } else if (landA > landD * 1.5) {
+      side = 'attacker';  /* 支持强者 */
+    } else if (landD > landA * 1.5) {
+      side = 'defender';
+    }
+    
+    if (side !== 'neutral') {
+      /* AI 作为第三方加入战争 */
+      if (side === 'attacker') {
+        atWar[c][d] = atWar[d][c] = true;
+        recordWarStart(c, d);
+        setRel(c, d, (relations[c][d] || 0) - 20);
+      } else {
+        atWar[c][a] = atWar[a][c] = true;
+        recordWarStart(c, a);
+        setRel(c, a, (relations[c][a] || 0) - 20);
+      }
+      toast(countries[c].name + ' 选择支持 ' + (side === 'attacker' ? countries[a].name : countries[d].name));
+    }
+  }
+}
+
+function pushPendingWar(attacker, defender) {
+  /* 防止重复 push */
+  for (var pi = 0; pi < PENDING_WARS.length; pi++) {
+    var pw = PENDING_WARS[pi];
+    if ((pw.a === attacker && pw.d === defender) || (pw.a === defender && pw.d === attacker)) return;
+  }
+  /* 也防止已经在战争中 */
+  if (atWar[attacker][defender]) return;
+
+  /* ── N2：检查是否对敌方有可达路径（4 方向任一方向可达即可） ── */
+  if (!canReachEnemy(attacker, defender)) {
+    if (attacker === playerId || defender === playerId) {
+      toast('无法宣战：' + countries[defender].name + ' 的领土被其他国家挡住了！');
+    }
+    return;   /* AI 也直接放弃 */
+  }
+
+  var p = {
+    a: attacker, d: defender,
+    startTurn: turn,
+    countdown: 60,  /* 固定 60 回合后正式宣战 */
+    playerSide: 'neutral',
+    comments: [],
+    resolved: false
+  };
+  /* 预写 2-3 条评论 */
+  var nc = 2 + ((RNG() * 2) | 0);
+  for (var ci = 0; ci < nc; ci++)
+    p.comments.push(WAR_COMMENTS[((RNG() * WAR_COMMENTS.length) | 0)]);
+  PENDING_WARS.push(p);
+
+  /* ── AI 自动选择站边 ── */
+  aiChooseSide(p);
+
+  /* 如果玩家涉及其中 → 弹出窗口 */
+  if (attacker === playerId || defender === playerId) {
+    showWarDeclaration(p);
+  } else {
+    toast(countries[attacker].name + ' 即将向 ' + countries[defender].name + ' 宣战');
+  }
+}
+
+/* 每回合推进 PENDING_WARS 倒计时 */
+function tickPendingWars() {
+  for (var i = PENDING_WARS.length - 1; i >= 0; i--) {
+    var pw = PENDING_WARS[i];
+    if (pw.resolved) { PENDING_WARS.splice(i, 1); continue; }
+    pw.countdown--;
+    if (pw.countdown <= 0) {
+      /* 正式宣战 */
+      launchWar(pw);
+      PENDING_WARS.splice(i, 1);
+    }
+  }
+}
+
+/* 正式宣战：设置 atWar、记录战争、弹窗 */
+function launchWar(pw) {
+  var a = pw.a, d = pw.d;
+  atWar[a][d] = atWar[d][a] = true;
+  setRel(a, d, (relations[a][d] || 0) - 25);
+  recordWarStart(a, d);
+
+  /* 玩家站队生效 */
+  if (pw.playerSide === 'attacker' && playerId !== a && playerId !== d) {
+    /* 玩家选择支持 attacker → 加入 attacker 方对 d 宣战 */
+    atWar[playerId][d] = atWar[d][playerId] = true;
+    recordWarStart(playerId, d);
+  } else if (pw.playerSide === 'defender' && playerId !== a && playerId !== d) {
+    atWar[playerId][a] = atWar[a][playerId] = true;
+    recordWarStart(playerId, a);
+  }
+
+  /* 弹窗展示正式宣战 */
+  if (a === playerId || d === playerId || pw.playerSide !== 'neutral') {
+    showWarLaunched(a, d, pw);
+  } else {
+    toast('⚔ ' + countries[a].name + ' 正式向 ' + countries[d].name + ' 宣战！');
+  }
+}
+
+/* 弹窗：宣战声明（persistent，不自动关闭） */
+function showWarDeclaration(pw) {
+  var a = pw.a, d = pw.d;
+  var aCol = 'rgb(' + countries[a].color.join(',') + ')';
+  var dCol = 'rgb(' + countries[d].color.join(',') + ')';
+  var isPlayer = (a === playerId || d === playerId);
+
+  var h = '<div class="war-decl" style="min-width:440px;max-width:560px">';
+  h += '<div style="font-size:14px;color:#ffce7a;border-bottom:1px solid rgba(255,180,80,.3);padding-bottom:10px;margin-bottom:12px;letter-spacing:3px;text-align:center">';
+  h += '⚔ 战 争 预 告 ⚔';
+  h += '</div>';
+
+  h += '<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px">';
+  h += '<div style="text-align:center"><div style="color:' + aCol + ';font-size:16px;font-weight:600">' + countries[a].name + '</div><div style="font-size:11px;color:#7d8fa6;margin-top:2px">进攻方</div></div>';
+  h += '<div style="color:#7d8fa6;font-size:18px">→ 宣 战 →</div>';
+  h += '<div style="text-align:center"><div style="color:' + dCol + ';font-size:16px;font-weight:600">' + countries[d].name + '</div><div style="font-size:11px;color:#7d8fa6;margin-top:2px">防御方</div></div>';
+  h += '</div>';
+
+  /* 倒计时 */
+  h += '<div style="text-align:center;margin-bottom:14px;font-size:12px;color:#8fa5bb">距离正式宣战还有 <b style="color:#ffce7a;font-size:14px">' + pw.countdown + '</b> 回合（约 ' + Math.max(1, Math.round(pw.countdown/14)) + ' 天）</div>';
+
+  /* 预写评论 */
+  h += '<div style="border:1px solid rgba(90,140,200,.2);border-radius:6px;padding:10px;margin-bottom:14px;font-size:11.5px;color:#a5b8cc;line-height:1.8;max-height:140px;overflow-y:auto">';
+  h += '<div style="color:#7d8fa6;margin-bottom:6px;letter-spacing:1px">— 各方评论 —</div>';
+  for (var ci = 0; ci < pw.comments.length; ci++)
+    h += '<div style="margin-bottom:4px">' + pw.comments[ci] + '</div>';
+  h += '</div>';
+
+  /* 玩家站队选项（只有当玩家不直接参与时显示站队；否则只显示旁观） */
+  if (!isPlayer) {
+    h += '<div style="display:flex;gap:8px;margin-bottom:10px">';
+    h += '<button class="btn" style="flex:1;background:rgba(255,100,100,.12);border-color:rgba(255,100,100,.35);color:#ffb0b0" onclick="alignWar(' + pw.a + ',' + pw.d + ',\'attacker\')">支持 ' + countries[a].name + '</button>';
+    h += '<button class="btn" style="flex:1;background:rgba(100,150,255,.12);border-color:rgba(100,150,255,.35);color:#b0c8ff" onclick="alignWar(' + pw.a + ',' + pw.d + ',\'defender\')">支持 ' + countries[d].name + '</button>';
+    h += '<button class="btn amber" style="flex:1" onclick="alignWar(' + pw.a + ',' + pw.d + ',\'neutral\')">保持中立</button>';
+    h += '</div>';
+  } else {
+    h += '<div style="text-align:center;color:#ffce7a;font-size:12px;margin-bottom:10px">你是交战方，请做好战争准备！</div>';
+    h += '<div style="display:flex;gap:6px;margin-top:6px">';
+    h += '<button class="btn" style="flex:1" onclick="alignWar(' + a + ',' + d + ',\'attacker\')">进攻</button>';
+    h += '<button class="btn" style="flex:1" onclick="alignWar(' + a + ',' + d + ',\'defender\')">防御</button>';
+    h += '</div>';
+  }
+
+  h += '<div style="display:flex;gap:8px">';
+  h += '<button class="btn" style="flex:1" onclick="closeWarDecl()">关闭窗口（战争继续）</button>';
+  h += '</div>';
+  h += '</div>';
+
+  openModal('war-decl', h);
+}
+
+function alignWar(a, d, side) {
+  for (var i = 0; i < PENDING_WARS.length; i++) {
+    var pw = PENDING_WARS[i];
+    if (pw.a === a && pw.d === d) {
+      pw.playerSide = side;
+      if (side === 'attacker') toast('你选择支持 ' + countries[a].name);
+      else if (side === 'defender') toast('你选择支持 ' + countries[d].name);
+      else toast('你选择保持中立');
+      break;
+    }
+  }
+  closeWarDecl();
+}
+
+/* ── 退出战争功能 ── */
+function exitWar(playerId, enemyId) {
+  if (!atWar[playerId] || !atWar[playerId][enemyId]) return;
+  atWar[playerId][enemyId] = atWar[enemyId][playerId] = false;
+  setRel(playerId, enemyId, Math.max((relations[playerId][enemyId] || 0), -15));
+  if (playerId === window.playerId) {
+    toast('你退出了与 ' + countries[enemyId].name + ' 的战争');
+  } else {
+    toast(countries[playerId].name + ' 退出了与 ' + countries[enemyId].name + ' 的战争');
+  }
+}
+
+function closeWarDecl() {
+  var m = document.getElementById('war-decl');
+  if (m) { m.style.display = 'none'; var ov=document.getElementById('war-decl-overlay'); if(ov) ov.style.display='none'; }
+  // 同时也能通过ESC关闭
+  document.addEventListener('keydown', closeWarEsc, { once: true });
+}
+function closeWarEsc(e) {
+  if (e.key === 'Escape') {
+    closeWarDecl();
+    document.removeEventListener('keydown', closeWarEsc);
+  }
+}
+
+/* 弹窗：正式宣战 */
+function showWarLaunched(a, d, pw) {
+  var aCol = 'rgb(' + countries[a].color.join(',') + ')';
+  var dCol = 'rgb(' + countries[d].color.join(',') + ')';
+  var h = '<div class="war-decl" style="min-width:380px;max-width:480px">';
+  h += '<div style="font-size:15px;color:#ff8a8a;border-bottom:1px solid rgba(255,120,120,.35);padding-bottom:10px;margin-bottom:14px;letter-spacing:4px;text-align:center">';
+  h += '⚔ 战 争 爆 发 ⚔';
+  h += '</div>';
+  h += '<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px">';
+  h += '<div style="text-align:center"><div style="color:' + aCol + ';font-size:17px;font-weight:600">' + countries[a].name + '</div></div>';
+  h += '<div style="color:#ff8a8a;font-size:22px;font-weight:700">⚔</div>';
+  h += '<div style="text-align:center"><div style="color:' + dCol + ';font-size:17px;font-weight:600">' + countries[d].name + '</div></div>';
+  h += '</div>';
+  h += '<div style="text-align:center;color:#9ab3cc;font-size:12px;margin-bottom:14px">战争已经打响！营队正在集结开往前线……</div>';
+  if (pw && pw.playerSide !== 'neutral' && pw.playerSide) {
+    h += '<div style="text-align:center;color:#ffce7a;font-size:12px;margin-bottom:14px">你选择了' + (pw.playerSide === 'attacker' ? '进攻方' : '防御方') + '阵营</div>';
+  }
+  h += '<button class="btn" onclick="closeWarDecl()">确认</button>';
+  h += '</div>';
+  openModal('war-decl', h);
+}
+
+/* 弹窗基础设施 */
+function openModal(id, html) {
+  var m = document.getElementById(id);
+  if (!m) {
+    m = document.createElement('div');
+    m.id = id;
+    m.className = 'modal';
+    m.style.cssText = 'position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center';
+    document.body.appendChild(m);
+  }
+  m.innerHTML = '<div class="modal-box" style="pointer-events:auto">' + html + '</div>';
+  m.style.display = 'flex';
+}
+
+/* 玩家参战时右下角战争数据面板 */
+function updatePlayerWarPanel() {
+  var panel = document.getElementById('player-war-panel');
+  var activeWars = [];
+  for (var i = 1; i < countries.length; i++) {
+    if (!countries[i].alive) continue;
+    if (atWar[playerId] && atWar[playerId][i]) activeWars.push(i);
+  }
+  if (activeWars.length === 0) {
+    if (panel) panel.style.display = 'none';
+    return;
+  }
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'player-war-panel';
+    panel.style.cssText = 'position:fixed;bottom:60px;right:12px;z-index:10;background:rgba(20,26,36,.94);border:1px solid rgba(255,120,120,.3);border-radius:8px;padding:10px 14px;font-size:12px;box-shadow:0 4px 20px rgba(0,0,0,.6);min-width:200px;max-width:280px;max-height:200px;overflow-y:auto';
+    document.body.appendChild(panel);
+  }
+  var h = '<div style="color:#ff8a8a;font-weight:600;margin-bottom:6px;letter-spacing:1px">⚔ 你的战争</div>';
+  for (var wi = 0; wi < activeWars.length; wi++) {
+    var enemy = activeWars[wi];
+    var key = Math.min(playerId,enemy) + '_' + Math.max(playerId,enemy);
+    var stat = warStats[key];
+    var ws = warScore[playerId] ? warScore[playerId][enemy] : 0;
+    h += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#dfe8f3">';
+    h += '<span>' + countries[enemy].name + '</span>';
+    h += '<span style="color:' + (ws >= 0 ? '#7ee0a0' : '#ff8a8a') + '">分:' + Math.round(ws) + '</span>';
+    h += '</div>';
+    if (stat) {
+      h += '<div style="color:#7d8fa6;font-size:11px;padding-left:6px">';
+      h += '领土差:' + ((landCount[playerId]||0) - (landCount[enemy]||0));
+      h += ' · 我方损失:' + Math.round(playerId < enemy ? stat.lossesA : stat.lossesD);
+      h += '</div>';
+    }
+    /* 退出战争按钮 */
+    h += '<button class="btn warn" style="margin-top:4px;font-size:11px;padding:4px 8px" onclick="exitWar(' + playerId + ',' + enemy + ')">退出战争</button>';
+  }
+  panel.innerHTML = h;
+  panel.style.display = 'block';
+}
+
+/* ══════════════════════════════════════════════
+   本局历史统计
+══════════════════════════════════════════════ */
+function recordHistory() {
+  recountLand();
+  var snap = {
+    turn: turn,
+    day: Math.floor(turn / 14) + 1,
+    pop: new Array(countries.length),
+    troop: new Array(countries.length),
+    land: new Array(countries.length),
+    prov: new Array(countries.length)
+  };
+  var pSum = new Array(countries.length),
+      gSum = new Array(countries.length);
+  for (var i = 0; i < TOTAL; i++) {
+    var o = owner[i];
+    if (o === 0) continue;
+    pSum[o] = (pSum[o] || 0) + pop[i];
+    gSum[o] = (gSum[o] || 0) + troops[i];
+  }
+  var pv = {};
+  for (var pi = 0; pi < provinces.length; pi++)
+    pv[provinces[pi].owner] = (pv[provinces[pi].owner] || 0) + 1;
+  for (var c2 = 0; c2 < countries.length; c2++) {
+    snap.pop[c2]   = Math.round(pSum[c2] || 0);
+    snap.troop[c2] = Math.round(gSum[c2] || 0);
+    snap.land[c2]  = landCount[c2] || 0;
+    snap.prov[c2]  = pv[c2] || 0;
+  }
+  history.push(snap);
+  if (history.length > 600) history.shift();
+}
+
+/* ══════════════════════════════════════════════
+   核打击
+══════════════════════════════════════════════ */
+function launchMissile(tx, ty) {
+  var sx = WORLD/2, sy = WORLD/2;
+  var best = -1, bestPop = 0;
+  for (var i = 0; i < TOTAL; i++) {
+    if (owner[i] === playerId && pop[i] > bestPop) { bestPop = pop[i]; best = i; }
+  }
+  if (best >= 0) {
+    sx = (best % N + 0.5) * CELL;
+    sy = ((best / N | 0) + 0.5) * CELL;
+  }
+  missiles.push({ sx: sx, sy: sy, tx: tx, ty: ty, t: 0, dur: 1400 });
+}
+
+function explode(tx, ty) {
+  var R = Math.max(900, CELL * 9);
+  var R2 = R * R;
+
+  var gx0 = Math.max(0, Math.floor((tx - R) / CELL));
+  var gx1 = Math.min(N-1, Math.ceil((tx + R) / CELL));
+  var gy0 = Math.max(0, Math.floor((ty - R) / CELL));
+  var gy1 = Math.min(N-1, Math.ceil((ty + R) / CELL));
+
+  for (var gy = gy0; gy <= gy1; gy++) {
+    for (var gx = gx0; gx <= gx1; gx++) {
+      var cx = (gx + 0.5) * CELL, cy = (gy + 0.5) * CELL;
+      var dx = cx - tx, dy = cy - ty;
+      var d2 = dx*dx + dy*dy;
+      if (d2 > R2) continue;
+      var i = gy*N + gx;
+      var fall = 1 - Math.sqrt(d2) / R;
+      troops[i] = 0;
+      pop[i] *= (1 - 0.85 * fall);
+      if (terrain[i] !== T_WATER) {
+        terrain[i] = T_RUIN;
+        ruinTurn[i] = turn;   /* 记录废墟起始回合，到点复原 */
+      }
+    }
+  }
+
+  for (var k = barracks.length - 1; k >= 0; k--) {
+    var b = barracks[k];
+    var bx = b.cx*CELL - tx, by = b.cy*CELL - ty;
+    if (bx*bx + by*by < R2) barracks.splice(k, 1);
+  }
+  for (var k2 = squads.length - 1; k2 >= 0; k2--) {
+    var s2 = squads[k2];
+    var sc = squadCell(s2);
+    var sx2 = (sc % N) * CELL - tx, sy2 = ((sc / N) | 0) * CELL - ty;
+    if (sx2*sx2 + sy2*sy2 < R2) squads.splice(k2, 1);
+  }
+
+  effects.push({ type:'nuke', x:tx, y:ty, t:0, dur:1700, r:R });
+  miniDirty = true;
+}
+
+function addRing(x, y, color, dur) {
+  effects.push({ type:'ring', x: x, y: y, t:0, dur: dur || 460, color: color });
+}
+
+/* ══════════════════════════════════════════════
+   胜负
+══════════════════════════════════════════════ */
+function checkEnd() {
+  if (gameOver) return;
+  var mine = 0, enemies = 0;
+  var alive = new Uint8Array(countries.length);
+  for (var i = 0; i < TOTAL; i++) {
+    var o = owner[i];
+    if (o === playerId) mine++;
+    else if (o !== 0) alive[o] = 1;
+  }
+  for (var f = 2; f < countries.length; f++) if (alive[f]) enemies++;
+
+  if (mine === 0) {
+    gameOver = 'lose';
+    showOver('亡　国', '你的所有领土均已失守。', '#ff6b6b');
+  } else if (enemies === 0) {
+    gameOver = 'win';
+    showOver('天 下 一 统', '所有敌对势力已被消灭。', '#6fc0ff');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   渲染 —— 带严格守卫
+══════════════════════════════════════════════ */
+function render() {
+  /* 清屏 */
+  ctx.fillStyle = '#05070a';
+  ctx.fillRect(0, 0, VW, VH);
+
+  /* 没有数据时直接返回（保留黑屏） */
+  if (!terrain || !owner || !cap || !countries.length) return;
+
+  var z = cam.zoom;
+  if (!(z > 0) || !isFinite(z)) z = cam.zoom = 0.25;
+
+  var cs = CELL * z;
+
+  if (cs < 5.5) {
+    renderCached(z);
+  } else {
+    renderDirect(z, cs);
+  }
+
+  /* 选中框 */
+  if (selected >= 0 && selected < TOTAL && owner[selected] === playerId) {
+    var sgx = selected % N, sgy = (selected / N) | 0;
+    var spx = (sgx * CELL - cam.x) * z + VW/2;
+    var spy = (sgy * CELL - cam.y) * z + VH/2;
+    ctx.strokeStyle = 'rgba(255,255,255,.95)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(spx + 1, spy + 1, Math.max(2, cs - 2), Math.max(2, cs - 2));
+  }
+
+  renderBattalions(z);
+  renderFlags(z);
+  renderAlliances(z, cs);
+  renderCities(z, cs);
+  renderMissiles(z);
+  renderEffects(z);
+  renderDivisions(z);   /* 师图层最顶层（地图之上） */
+
+  if (missileMode) renderAim(z);
+}
+
+function renderCached(z) {
+  if (!mini) return;
+  refreshMini();
+  var scale = CELL * z;
+  if (!(scale > 0)) return;
+  var w = VW / scale, h = VH / scale;
+  var cx = cam.x / CELL, cy = cam.y / CELL;
+  var sx = cx - w/2, sy = cy - h/2;
+
+  ctx.imageSmoothingEnabled = true;
+  try {
+    ctx.drawImage(mini, sx, sy, w, h, 0, 0, VW, VH);
+  } catch (e) {
+    /* 忽略 — 极端缩放下的裁剪错误 */
+  }
+}
+
+function renderDirect(z, cs) {
+  var halfW = VW / (2*z), halfH = VH / (2*z);
+  if (!isFinite(halfW) || !isFinite(halfH)) return;
+
+  var gx0 = Math.max(0, Math.floor((cam.x - halfW) / CELL));
+  var gx1 = Math.min(N-1, Math.ceil((cam.x + halfW) / CELL));
+  var gy0 = Math.max(0, Math.floor((cam.y - halfH) / CELL));
+  var gy1 = Math.min(N-1, Math.ceil((cam.y + halfH) / CELL));
+
+  if (gx0 > gx1 || gy0 > gy1) return;
+
+  /* 地块 */
+  var px0 = VW/2 - cam.x * z;
+  var py0 = VH/2 - cam.y * z;
+  var sz = cs + 0.6;
+
+  for (var gy = gy0; gy <= gy1; gy++) {
+    var py = gy * CELL * z + py0;
+    var rowBase = gy * N;
+    for (var gx = gx0; gx <= gx1; gx++) {
+      var i = rowBase + gx;
+      var oi = owner[i];
+      var ti = terrain[i];
+      var c = cap[i] || 1;
+      var l = (troops[i] / c * 4) | 0;
+      if (l > 3) l = 3; else if (l < 0) l = 0;
+      ctx.fillStyle = COLOR_CSS[oi][ti][l];
+      ctx.fillRect(gx * CELL * z + px0, py, sz, sz);
+    }
+  }
+
+  /* 国界 */
+  if (cs > 6) {
+    ctx.lineWidth = Math.max(1, cs * 0.055);
+    ctx.strokeStyle = 'rgba(0,0,0,.45)';
+    ctx.beginPath();
+    for (var gy2 = gy0; gy2 <= gy1; gy2++) {
+      var py2 = gy2 * CELL * z + py0;
+      var rb = gy2 * N;
+      for (var gx2 = gx0; gx2 <= gx1; gx2++) {
+        var i2 = rb + gx2;
+        var o2 = owner[i2];
+        var px2 = gx2 * CELL * z + px0;
+        if (gx2 === 0 || owner[i2-1] !== o2) {
+          ctx.moveTo(px2, py2); ctx.lineTo(px2, py2 + cs);
+        }
+        if (gy2 === 0 || owner[i2-N] !== o2) {
+          ctx.moveTo(px2, py2); ctx.lineTo(px2 + cs, py2);
+        }
+      }
+    }
+    ctx.stroke();
+  }
+
+  /* 省/市边界：放大时（cs > 11）才绘制；仅在同一国家内部绘制，
+     按省分色描边，避免与国界重叠造成杂乱 */
+  if (cs > 11 && prov) {
+    ctx.lineWidth = Math.max(1, cs * 0.035);
+    var drawnSeg = 0;
+    for (var gy3 = gy0; gy3 <= gy1; gy3++) {
+      var py3 = gy3 * CELL * z + py0;
+      var rb3 = gy3 * N;
+      for (var gx3 = gx0; gx3 <= gx1; gx3++) {
+        var i3 = rb3 + gx3;
+        var o3 = owner[i3];
+        var p3 = prov[i3];
+        if (p3 < 0) continue;
+        var px3 = gx3 * CELL * z + px0;
+        /* 右邻：同国家、不同省 → 画省界 */
+        if (gx3 < N-1) {
+          var ir = i3 + 1;
+          if (owner[ir] === o3 && o3 > 0 && prov[ir] !== p3) {
+            ctx.strokeStyle = PROV_EDGE[p3 % PROV_EDGE.length];
+            ctx.beginPath();
+            ctx.moveTo(px3 + cs, py3); ctx.lineTo(px3 + cs, py3 + cs);
+            ctx.stroke(); drawnSeg++;
+          }
+        }
+        /* 下邻：同国家、不同省 → 画省界 */
+        if (gy3 < N-1) {
+          var id = i3 + N;
+          if (owner[id] === o3 && o3 > 0 && prov[id] !== p3) {
+            ctx.strokeStyle = PROV_EDGE[p3 % PROV_EDGE.length];
+            ctx.beginPath();
+            ctx.moveTo(px3, py3 + cs); ctx.lineTo(px3 + cs, py3 + cs);
+            ctx.stroke(); drawnSeg++;
+          }
+        }
+      }
+    }
+  }
+}
+
+function fmtMan(v) {
+  v = Math.round(v);
+  if (v >= 1000) return (v / 1000).toFixed(1) + 'k';
+  return String(v);
+}
+function renderBattalions(z) {
+  var cs = CELL * z;
+
+  /* 静态军营：国家色方块 + emoji 图标 + 人力数字 */
+  for (var k = 0; k < barracks.length; k++) {
+    var b = barracks[k];
+    if (b.x != null) continue;
+    var px = (b.cx * CELL - cam.x) * z + VW/2;
+    var py = (b.cy * CELL - cam.y) * z + VH/2;
+    if (px < -60 || py < -60 || px > VW + 60 || py > VH + 60) continue;
+
+    var s = Math.max(6, cs * 0.62);
+    var col = countries[b.owner].color;
+
+    ctx.fillStyle = 'rgba(0,0,0,.45)';
+    ctx.fillRect(px - s/2 + 1.5, py - s/2 + 1.5, s, s);
+    ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.85)';
+    ctx.fillRect(px - s/2, py - s/2, s, s);
+    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px - s/2, py - s/2, s, s);
+
+    /* emoji 图标：type 区分建筑类型 */
+    if (cs > 9) {
+      var icon = '⛺';
+      if (b.type === 'large') icon = '🎪';
+      else if (b.type === 'training') icon = '🏋';
+      ctx.font = Math.max(9, Math.min(18, cs * 0.6)) + 'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(icon, px, py);
+      ctx.textBaseline = 'alphabetic';
+    } else if (cs > 5) {
+      /* 小一点也给简单文字标识 */
+      ctx.fillStyle = '#fff';
+      ctx.font = Math.min(10, cs*0.7) + 'px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(fmtMan(b.manpower), px, py);
+      ctx.textBaseline = 'alphabetic';
+    }
+  }
+
+  /* 行军营队：0.8×0.8 方块，显示兵力 + 编号 + 质量（放大时） */
+  for (var q = 0; q < squads.length; q++) {
+    var s2 = squads[q];
+    var ci = squadCell(s2);
+    var qx = ci % N, qy = (ci / N) | 0;
+    var qpx = ((qx + 0.5) * CELL - cam.x) * z + VW/2;
+    var qpy = ((qy + 0.5) * CELL - cam.y) * z + VH/2;
+    if (qpx < -40 || qpy < -40 || qpx > VW + 40 || qpy > VH + 40) continue;
+
+    var qs = Math.max(4, cs * 0.8);
+    var qcol = countries[s2.owner].color;
+
+    ctx.fillStyle = 'rgba(0,0,0,.4)';
+    ctx.fillRect(qpx - qs/2 + 1, qpy - qs/2 + 1, qs, qs);
+
+    /* 根据质量改变亮度（质量越高越亮） */
+    var qq = (s2.quality != null ? s2.quality : 0.5);
+    var bright = 0.6 + qq * 0.4;
+    ctx.fillStyle = 'rgba(' + Math.min(255, Math.floor(qcol[0] * bright)) + ',' +
+      Math.min(255, Math.floor(qcol[1] * bright)) + ',' +
+      Math.min(255, Math.floor(qcol[2] * bright)) + ',.85)';
+    ctx.fillRect(qpx - qs/2, qpy - qs/2, qs, qs);
+
+    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(qpx - qs/2, qpy - qs/2, qs, qs);
+
+    if (cs > 8) {
+      ctx.fillStyle = '#fff';
+      ctx.font = Math.min(9, cs*0.5) + 'px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      /* 兵力在方块上方 */
+      ctx.fillText(fmtMan(s2.troops), qpx, qpy - qs/2 - 2);
+    }
+    if (cs > 14 && s2.id != null) {
+      /* 放大到足够大时显示营队编号 */
+      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      ctx.font = Math.min(7, cs*0.35) + 'px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('#' + s2.id, qpx, qpy);
+      ctx.textBaseline = 'alphabetic';
+    }
+  }
+}
+
+/* 师旗帜渲染：showDivisions 开启就显示，缩到全图时也能看到小图标 */
+function renderDivisions(z) {
+  if (!showDivisions) return;
+  var cs = CELL * z;
+  if (cs < 2) return;   /* 缩到比 2px 还小就不画了（根本看不到） */
+  var iconSize;          /* 根据缩放动态选师图标大小 */
+  if (cs > 20) iconSize = Math.max(10, cs * 0.45);      /* 放大时：较大 */
+  else if (cs > 6) iconSize = Math.max(8, cs * 0.35);   /* 中等：适中 */
+  else iconSize = Math.max(4, cs * 0.5);               /* 缩小时：相对更大 */
+
+  for (var d = 0; d < divisions.length; d++) {
+    var div = divisions[d];
+    var px = (div.cx + 0.5) * CELL - cam.x; px *= z; px += VW/2;
+    var py = (div.cy + 0.5) * CELL - cam.y; py *= z; py += VH/2;
+    if (px < -40 || py < -40 || px > VW + 40 || py > VH + 40) continue;
+
+    var size = iconSize;
+    /* 阴影 */
+    ctx.fillStyle = 'rgba(0,0,0,.5)';
+    ctx.fillRect(px - size/2 + 1, py - size/2 + 1, size, size);
+
+    var col = countries[div.owner].color;
+    /* 师方块底色（国家色） */
+    ctx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',.95)';
+    ctx.fillRect(px - size/2, py - size/2, size, size);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = Math.max(0.5, size * 0.1);
+    ctx.strokeRect(px - size/2, py - size/2, size, size);
+
+    /* 师编号（缩到够大才显示） */
+    if (size > 10) {
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold ' + Math.max(7, Math.min(size * 0.7, 14)) + 'px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(div.id), px, py);
+      ctx.textBaseline = 'alphabetic';
+    }
+
+    /* 师 ≥20 营队时绘制师旗帜 canvas */
+    if (div.flagCanvas && size > 6) {
+      var fs = Math.max(6, size * 1.2);
+      ctx.drawImage(div.flagCanvas, px + size*0.5 + 2, py - fs/2, fs, fs);
+    }
+
+    /* 放大时显示师规模 */
+    if (cs > 18) {
+      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      ctx.font = Math.min(9, cs*0.35) + 'px -apple-system,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(div.squads.length + '/20', px, py + size/2 + 10);
+    }
+  }
+}
+
+function renderMissiles(z) {
+  for (var k = 0; k < missiles.length; k++) {
+    var m = missiles[k];
+    var p = Math.min(1, m.t / m.dur);
+    var ax = (m.sx - cam.x) * z + VW/2;
+    var ay = (m.sy - cam.y) * z + VH/2;
+    var bx = (m.tx - cam.x) * z + VW/2;
+    var by = (m.ty - cam.y) * z + VH/2;
+
+    ctx.strokeStyle = 'rgba(255,120,70,.26)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+
+    var arc = Math.sin(p * Math.PI) * Math.min(VH * 0.6, 340);
+    var hx = ax + (bx - ax) * p;
+    var hy = ay + (by - ay) * p - arc;
+
+    ctx.fillStyle = 'rgba(255,200,130,.32)';
+    ctx.beginPath(); ctx.arc(hx, hy, 13, 0, Math.PI*2); ctx.fill();
+
+    ctx.fillStyle = '#ffb060';
+    ctx.beginPath(); ctx.arc(hx, hy, 5, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+function renderEffects(z) {
+  for (var k = 0; k < effects.length; k++) {
+    var e = effects[k];
+    var px = (e.x - cam.x) * z + VW/2;
+    var py = (e.y - cam.y) * z + VH/2;
+
+    if (e.type === 'nuke') {
+      var p = e.t / e.dur;
+
+      if (p < 0.16) {
+        ctx.globalAlpha = (0.16 - p) / 0.16 * 0.92;
+        ctx.fillStyle = '#fff8e8';
+        ctx.beginPath();
+        ctx.arc(px, py, e.r * z * (0.5 + p * 5), 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      var rr = e.r * z * (0.25 + p * 1.25);
+      ctx.globalAlpha = (1 - p) * 0.85;
+      ctx.strokeStyle = '#ff9a4a';
+      ctx.lineWidth = 4 * (1 - p) + 1;
+      ctx.beginPath(); ctx.arc(px, py, Math.max(1, rr), 0, Math.PI*2); ctx.stroke();
+
+      ctx.globalAlpha = (1 - p) * 0.45;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2 * (1 - p) + 0.6;
+      ctx.beginPath(); ctx.arc(px, py, Math.max(1, rr * 0.66), 0, Math.PI*2); ctx.stroke();
+
+      ctx.globalAlpha = 1;
+    } else {
+      var p2 = e.t / e.dur;
+      ctx.globalAlpha = (1 - p2) * 0.9;
+      ctx.strokeStyle = 'rgb(' + e.color[0] + ',' + e.color[1] + ',' + e.color[2] + ')';
+      ctx.lineWidth = 2.2 * (1 - p2) + 0.6;
+      ctx.beginPath();
+      ctx.arc(px, py, Math.max(1, CELL * z * (0.45 + p2 * 1.7)), 0, Math.PI*2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+var mouseWX = 0, mouseWY = 0;
+
+function renderAim(z) {
+  var gx = Math.floor(mouseWX / CELL), gy = Math.floor(mouseWY / CELL);
+  
+  var px = (gx * CELL - cam.x) * z + VW/2;
+  var py = (gy * CELL - cam.y) * z + VH/2;
+  var cs = CELL * z;
+
+  ctx.strokeStyle = 'rgba(255,120,80,.85)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 5]);
+  ctx.beginPath();
+  ctx.arc(px + cs/2, py + cs/2, Math.max(900, CELL*9) * z, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = 'rgba(255,255,255,.55)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(px + cs/2 - 14, py + cs/2); ctx.lineTo(px + cs/2 + 14, py + cs/2);
+  ctx.moveTo(px + cs/2, py + cs/2 - 14); ctx.lineTo(px + cs/2, py + cs/2 + 14);
+  ctx.stroke();
+}
+
+/* ══════════════════════════════════════════════
+   主循环 + FPS
+══════════════════════════════════════════════ */
+var lastT = performance.now();
+var acc = 0, hudTimer = 0;
+
+var fpsEl = document.getElementById('fps');
+var fpsAcc = 0, fpsFrames = 0, fpsMin = 999, fpsMax = 0;
+
+function loop(now) {
+  var dt = now - lastT;
+  if (!isFinite(dt) || dt < 0) dt = 16;
+  if (dt > 100) dt = 100;
+  lastT = now;
+
+  /* ── FPS 统计 ── */
+  fpsAcc += dt;
+  fpsFrames++;
+  if (fpsAcc >= 500) {
+    var fps = Math.round(fpsFrames * 1000 / fpsAcc);
+    if (fps < fpsMin) fpsMin = fps;
+    if (fps > fpsMax) fpsMax = fps;
+    fpsEl.innerHTML = '<b>' + fps + '</b> FPS · ' + fpsFrames + '帧 · dt ' +
+      (fpsAcc/fpsFrames).toFixed(1) + 'ms · ' +
+      (terrain ? (N + '×' + N) : '---');
+    fpsAcc = 0; fpsFrames = 0;
+  }
+
+  /* ── 回合推进 ── */
+  acc += dt;
+  var guard = 0;
+  var step = (TOTAL > 400000) ? TICK_MS * 2 : TICK_MS;
+  while (acc >= step * gameSpeed && guard++ < 5) {
+    if (!gameOver && terrain) {
+      try { tick(); } catch (err) { console.error('tick error:', err); }
+    }
+    acc -= step * gameSpeed;
+  }
+
+  /* ── 特效 ── */
+  for (var i = effects.length - 1; i >= 0; i--) {
+    effects[i].t += dt;
+    if (effects[i].t >= effects[i].dur) effects.splice(i, 1);
+  }
+  for (var j = missiles.length - 1; j >= 0; j--) {
+    var m = missiles[j];
+    m.t += dt;
+    if (m.t >= m.dur) {
+      try { explode(m.tx, m.ty); } catch (e) { console.error('explode error:', e); }
+      missiles.splice(j, 1);
+    }
+  }
+
+  /* ── 渲染 ── */
+  try { render(); } catch (err) { console.error('render error:', err); }
+
+  /* ── HUD ── */
+  hudTimer += dt;
+  if (hudTimer > 220) {
+    hudTimer = 0;
+    try { updateHUD(); updatePanel(); } catch (e) { console.error('hud error:', e); }
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* ══════════════════════════════════════════════
+   HUD
+══════════════════════════════════════════════ */
+var rPop   = document.getElementById('r-pop');
+var rTroop = document.getElementById('r-troop');
+var rActive= document.getElementById('r-active');
+var rLand  = document.getElementById('r-land');
+var rBat   = document.getElementById('r-bat');
+var rMsl   = document.getElementById('r-msl');
+var rProv  = document.getElementById('r-prov');
+var rDay   = document.getElementById('r-day');
+
+function updateHUD() {
+  if (!owner) return;
+  var land = 0, tp = 0, pp = 0, bat = 0, prov = 0;
+  for (var i = 0; i < TOTAL; i++) {
+    if (owner[i] === playerId) {
+      land++;
+      tp += troops[i];
+      pp += pop[i];
+    }
+  }
+  var bat = 0, sqd = 0, sqT = 0;
+  for (var k = 0; k < barracks.length; k++)
+    if (barracks[k].owner === playerId && barracks[k].x == null) bat++;
+  for (var s2 = 0; s2 < squads.length; s2++)
+    if (squads[s2].owner === playerId) { sqd++; sqT += squads[s2].troops; }
+  for (var p = 0; p < provinces.length; p++)
+    if (provinces[p].owner === playerId) prov++;
+
+  rPop.textContent   = Math.round(pp).toLocaleString();
+  rTroop.textContent = Math.round(tp).toLocaleString();
+  rActive.textContent = Math.round(sqT).toLocaleString();
+  rLand.textContent  = land.toLocaleString();
+  rBat.textContent   = bat + ' / ' + sqd;
+  rMsl.textContent   = missileCount;
+  rProv.textContent  = prov;
+  rDay.textContent   = '第 ' + (Math.floor(turn / 14) + 1) + ' 天';
+}
+
+/* ══════════════════════════════════════════════
+   排行榜（← → 切换 5 种榜）
+══════════════════════════════════════════════ */
+var RANK_TITLES = ['🏆 领土榜', '👥 人口榜', '⚔ 现役榜', '📋 营队榜', '🏙 城市榜'];
+var RANK_KEYS   = ['land', 'pop', 'active', 'squad', 'city'];
+var rankingType = 0;   /* 当前榜类型 */
+
+var rkTitle = document.getElementById('rk-title');
+var rkList  = document.getElementById('rk-list');
+
+function updateRankbar() {
+  if (!rkList || !owner) return;
+  var key = RANK_KEYS[rankingType];
+
+  /* 收集所有存活国家数据 */
+  var arr = [];
+  for (var ci = 1; ci < countries.length; ci++) {
+    if (!countries[ci].alive) continue;
+    var val = 0;
+    if (key === 'land') {
+      val = landCount[ci] || 0;
+    } else if (key === 'pop') {
+      for (var i = 0; i < TOTAL; i++)
+        if (owner[i] === ci) val += pop[i];
+    } else if (key === 'active') {
+      for (var s = 0; s < squads.length; s++)
+        if (squads[s].owner === ci) val += squads[s].troops;
+    } else if (key === 'squad') {
+      for (var s2 = 0; s2 < squads.length; s2++)
+        if (squads[s2].owner === ci) val++;
+    } else if (key === 'city') {
+      val = 0;
+      for (var c3 = 0; c3 < cities.length; c3++)
+        if (cities[c3].owner === ci) val++;
+    }
+    arr.push({ id: ci, name: countries[ci].name, color: countries[ci].color, val: Math.round(val) });
+  }
+  arr.sort(function (a, b) { return b.val - a.val; });
+
+  rkTitle.textContent = RANK_TITLES[rankingType];
+  var html = '';
+  var max = Math.max(1, arr[0] ? arr[0].val : 1);
+  for (var r = 0; r < Math.min(5, arr.length); r++) {
+    var item = arr[r];
+    var cls = item.id === playerId ? 'rk-item me' : 'rk-item';
+    var flag = 'background:rgb(' + item.color[0] + ',' + item.color[1] + ',' + item.color[2] + ')';
+    var num = r + 1;
+    html += '<span class="' + cls + '">';
+    html += '<span style="color:#7d8fa6">' + num + '.</span>';
+    html += '<span class="rk-flag" style="' + flag + '"></span>';
+    html += '<span>' + item.name + '</span>';
+    html += '<b>' + item.val.toLocaleString() + '</b>';
+    html += '</span>';
+  }
+  rkList.innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════
+   信息面板
+══════════════════════════════════════════════ */
+var selInfo = document.getElementById('selinfo');
+var btnRec  = document.getElementById('btn-recruit');
+var btnBat  = document.getElementById('btn-bat');
+var btnMsl  = document.getElementById('btn-missile');
+
+function updatePanel() {
+  if (!owner) return;
+
+  if (selected < 0 || selected >= TOTAL) {
+    selInfo.innerHTML = '<div class="none">未选中地块</div>';
+    btnRec.disabled = true;
+    btnBat.disabled = true;
+    return;
+  }
+
+  var o = owner[selected];
+  var t = TERRAIN[terrain[selected]];
+  var x = selected % N, y = (selected / N) | 0;
+  var col = countries[o].color;
+
+  var stateTag = '';
+  if (o !== playerId && o !== 0) {
+    if (atWar[playerId][o]) stateTag = '<span class="tag" style="color:#ff9d9d">战争中</span>';
+    else if (allied[playerId][o]) stateTag = '<span class="tag" style="color:#8fc9ff">同盟</span>';
+    else stateTag = '<span class="tag">和平</span>';
+  }
+
+  var provName = '—';
+  for (var pi = 0; pi < provinces.length; pi++) {
+    var p = provinces[pi];
+    if (p.owner !== o) continue;
+    for (var ci = 0; ci < p.cells.length; ci++) {
+      if (p.cells[ci] === selected) {
+        provName = (p.name ? (p.name + '　') : '') +
+                   '#' + (p.capital % N) + ',' + ((p.capital / N) | 0) +
+                   ' · ' + p.size + '格';
+        break;
+      }
+    }
+    if (provName !== '—') break;
+  }
+
+  selInfo.innerHTML =
+    '<div class="kv"><span>坐标</span><span>(' + x + ', ' + y + ')</span></div>' +
+    '<div class="kv"><span>归属</span><span style="color:rgb(' + col.join(',') + ')">' +
+      countries[o].name + stateTag + '</span></div>' +
+    '<div class="kv"><span>地形</span><span>' + t.name +
+      ' <span style="color:#6a7a8c">×' + t.defMul.toFixed(2) + '</span></span></div>' +
+    '<div class="kv"><span>人口</span><span>' + Math.round(pop[selected]).toLocaleString() + '</span></div>' +
+    '<div class="kv"><span>兵力</span><span>' + Math.round(troops[selected]).toLocaleString() +
+      ' / ' + Math.round(cap[selected]).toLocaleString() + '</span></div>' +
+    '<div class="kv"><span>省份</span><span style="color:#8fa8c4">' + provName + '</span></div>';
+
+  var mine = o === playerId;
+  btnRec.disabled = !mine || pop[selected] < 800;
+  btnBat.disabled = !mine || troops[selected] < 1000 || !canPlaceBattalion(x, y, playerId);
+
+  if (missileMode) {
+    btnMsl.textContent = '选择打击目标…';
+  } else {
+    btnMsl.innerHTML = '呼叫 DF-5C　<span style="opacity:.7">[Q]</span>';
+  }
+}
+
+/* ══════════════════════════════════════════════
+   按钮
+══════════════════════════════════════════════ */
+btnRec.addEventListener('click', function () {
+  if (gameOver || selected < 0) return;
+  if (owner[selected] !== playerId) { toast('只能在自己的领土征兵'); return; }
+  if (pop[selected] < 800) { toast('该地块人口不足'); return; }
+  if (troops[selected] >= cap[selected] * 2) { toast('兵力已达上限'); return; }
+
+  pop[selected] -= 800;
+  troops[selected] += 1000;
+  miniDirty = true;
+  updatePanel();
+});
+
+btnBat.addEventListener('click', function () {
+  if (gameOver || selected < 0) return;
+  if (owner[selected] !== playerId) { toast('只能在自己的领土建造'); return; }
+
+  var x = selected % N, y = (selected / N) | 0;
+  if (!canPlaceBattalion(x, y, playerId)) {
+    toast('需要 3×3 的己方连续领土，且不能与其他军帐重叠');
+    return;
+  }
+
+  var total = 0;
+  for (var dy = -1; dy <= 1; dy++)
+    for (var dx = -1; dx <= 1; dx++)
+      total += troops[WCell(x+dx, y+dy)];
+
+  if (total < 1000) { toast('该区域兵力不足 1000'); return; }
+
+  for (var dy2 = -1; dy2 <= 1; dy2++)
+    for (var dx2 = -1; dx2 <= 1; dx2++) {
+      var ni = (y+dy2)*N + (x+dx2);
+      troops[ni] -= troops[ni] / total * 1000;
+    }
+
+  var man = 0;
+  for (var d3 = -1; d3 <= 1; d3++)
+    for (var d4 = -1; d4 <= 1; d4++)
+      man += troops[(y+d3)*N + (x+d4)];
+  barracks.push({
+    owner: playerId,
+    cx: x, cy: y, cell: y * N + x,
+    manpower: man, storedManpower: 0, maxSquads: 25
+  });
+
+  addRing((x + 0.5) * CELL, (y + 0.5) * CELL, countries[playerId].color, 500);
+  toast('军帐已建立 — 会自动向外派生营队');
+  miniDirty = true;
+  updatePanel();
+});
+
+/* ══════════════════════════════════════════════
+   国家查询弹窗（右键领土）+ 折线统计图
+══════════════════════════════════════════════ */
+var cqueryEl = document.getElementById('cquery');
+var cqBody = document.getElementById('cq-body');
+var cqClose = document.getElementById('cq-close');
+var cqCurrentOid = -1;
+
+function fmtNum(v) {
+  v = Math.round(v);
+  if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'k';
+  return String(v);
+}
+
+function drawLineChart(canvas, data, color) {
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var w = canvas.clientWidth || 460, h = canvas.clientHeight || 120;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  var cx = canvas.getContext('2d');
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.clearRect(0, 0, w, h);
+
+  var pad = { l: 10, r: 10, t: 10, b: 18 };
+  var iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+
+  var maxV = 1;
+  for (var i = 0; i < data.length; i++) if (data[i] > maxV) maxV = data[i];
+
+  cx.strokeStyle = 'rgba(90,140,200,.25)';
+  cx.lineWidth = 1;
+  cx.beginPath();
+  for (var g = 0; g <= 4; g++) {
+    var gy = pad.t + ih * g / 4;
+    cx.moveTo(pad.l, gy); cx.lineTo(w - pad.r, gy);
+  }
+  cx.stroke();
+
+  if (data.length < 2) {
+    cx.fillStyle = '#5c6b7d';
+    cx.font = '12px -apple-system,sans-serif';
+    cx.textAlign = 'center';
+    cx.fillText('数据不足', w / 2, h / 2);
+    return;
+  }
+
+  /* 面积 */
+  cx.beginPath();
+  cx.moveTo(pad.l, pad.t + ih);
+  for (var j = 0; j < data.length; j++) {
+    var x = pad.l + iw * j / (data.length - 1);
+    var y = pad.t + ih * (1 - data[j] / maxV);
+    cx.lineTo(x, y);
+  }
+  cx.lineTo(w - pad.r, pad.t + ih);
+  cx.closePath();
+  cx.fillStyle = 'rgba(143,201,255,.12)';
+  cx.fill();
+
+  /* 曲线 */
+  cx.beginPath();
+  cx.strokeStyle = color;
+  cx.lineWidth = 1.8;
+  for (var k = 0; k < data.length; k++) {
+    var xx = pad.l + iw * k / (data.length - 1);
+    var yy = pad.t + ih * (1 - data[k] / maxV);
+    if (k === 0) cx.moveTo(xx, yy); else cx.lineTo(xx, yy);
+  }
+  cx.stroke();
+
+  cx.fillStyle = '#5f7085';
+  cx.font = '10px -apple-system,sans-serif';
+  cx.textAlign = 'left';
+  cx.fillText('峰值 ' + fmtNum(maxV), pad.l, h - 5);
+  cx.textAlign = 'right';
+  cx.fillText('末值 ' + fmtNum(data[data.length - 1]), w - pad.r, h - 5);
+}
+
+function openCQuery(oid) {
+  var c = countries[oid];
+  if (!c) return;
+  cqCurrentOid = oid;
+
+  /* 最新快照（用 landCount 即时值） */
+  var last = {
+    land: landCount[oid] || 0,
+    prov: 0
+  };
+  for (var pi = 0; pi < provinces.length; pi++)
+    if (provinces[pi].owner === oid) last.prov++;
+
+  var relStr = '—';
+  if (oid !== playerId && oid !== 0 && relations[playerId] && relations[playerId][oid] !== undefined) {
+    var rel = relations[playerId][oid];
+    var st;
+    if (atWar[playerId][oid]) st = '<span style="color:#ff9d9d">战争中</span>';
+    else if (allied[playerId][oid]) st = '<span style="color:#8fc9ff">同盟</span>';
+    else if (rel > 40) st = '<span style="color:#7ee0a0">友好</span>';
+    else if (rel < -20) st = '<span style="color:#d0a060">冷淡</span>';
+    else st = '<span>和平</span>';
+    relStr = st + ' <span style="color:#6a7a8c">(' + Math.round(rel) + ')</span>';
+  } else if (oid === playerId) {
+    relStr = '<span style="color:#8fc9ff">你的国家</span>';
+  }
+
+  var bat = 0, sq = 0;
+  for (var b2 = 0; b2 < barracks.length; b2++)
+    if (barracks[b2].owner === oid && barracks[b2].x == null) bat++;
+  for (var s3 = 0; s3 < squads.length; s3++)
+    if (squads[s3].owner === oid) sq++;
+
+  var stateTag = c.alive ? '' : '<span class="cq-tag" style="color:#ff9d9d">已亡</span>';
+
+  cqBody.innerHTML =
+    '<div class="cq-head">' +
+      '<div class="cq-dot" style="background:rgb(' + c.color.join(',') + ')"></div>' +
+      '<div class="cq-name">' + c.name + '</div>' +
+      (oid === playerId ? '<span class="cq-tag" style="color:#8fc9ff">我国</span>' : stateTag) +
+      (relStr !== '—' ? '<span class="cq-tag">' + relStr + '</span>' : '') +
+    '</div>' +
+    '<div class="cq-grid">' +
+      '<div class="cq-stat"><div class="lbl">领土 (格)</div><div class="val">' + last.land.toLocaleString() + '</div></div>' +
+      '<div class="cq-stat"><div class="lbl">省份</div><div class="val">' + last.prov + '</div></div>' +
+      '<div class="cq-stat"><div class="lbl">军帐</div><div class="val">' + bat + '</div></div>' +
+      '<div class="cq-stat"><div class="lbl">营队</div><div class="val">' + sq + '</div></div>' +
+    '</div>' +
+    '<div class="cq-chart-title">人口 · 本局历史</div>' +
+    '<canvas class="cq-chart" id="cq-c-pop"></canvas>' +
+    '<div class="cq-chart-title" style="margin-top:12px">兵力 · 本局历史</div>' +
+    '<canvas class="cq-chart" id="cq-c-troop"></canvas>' +
+    '<div class="cq-chart-title" style="margin-top:12px">领土 · 本局历史</div>' +
+    '<canvas class="cq-chart" id="cq-c-land"></canvas>';
+
+  cqueryEl.style.display = 'flex';
+
+  var popArr = [], troopArr = [], landArr = [];
+  for (var h2 = 0; h2 < history.length; h2++) {
+    var snap = history[h2];
+    popArr.push(snap.pop[oid] || 0);
+    troopArr.push(snap.troop[oid] || 0);
+    landArr.push(snap.land[oid] || 0);
+  }
+  if (popArr.length < 2) {
+    popArr.unshift(0); troopArr.unshift(0); landArr.unshift(last.land);
+  }
+
+  var col = 'rgb(' + c.color.join(',') + ')';
+  drawLineChart(document.getElementById('cq-c-pop'), popArr, col);
+  drawLineChart(document.getElementById('cq-c-troop'), troopArr, col);
+  drawLineChart(document.getElementById('cq-c-land'), landArr, col);
+}
+
+cqClose.addEventListener('click', function () { cqueryEl.style.display = 'none'; cqCurrentOid = -1; });
+
+/* ══════════════════════════════════════════════
+   外交面板
+══════════════════════════════════════════════ */
+var diploEl = document.getElementById('diplo');
+var diploList = document.getElementById('diplo-list');
+
+document.getElementById('btn-diplo').addEventListener('click', function () {
+  buildDiploPanel();
+  diploEl.style.display = 'flex';
+});
+document.getElementById('diplo-close').addEventListener('click', function () {
+  diploEl.style.display = 'none';
+});
+diploEl.addEventListener('click', function (e) {
+  if (e.target === diploEl) diploEl.style.display = 'none';
+});
+
+function buildDiploPanel() {
+  diploList.innerHTML = '';
+  if (!countries.length) return;
+
+  for (var i = 1; i < countries.length; i++) {
+    if (i === playerId) continue;
+    var c = countries[i];
+    if (!c.alive) continue;
+
+    var rel = relations[playerId][i];
+    var war = atWar[playerId][i];
+    var ally = allied[playerId][i];
+
+    var state, stateColor;
+    if (war) { state = '战争'; stateColor = '#ff6b6b'; }
+    else if (ally) { state = '同盟'; stateColor = '#6fc0ff'; }
+    else if (rel > 40) { state = '友好'; stateColor = '#7ee0a0'; }
+    else if (rel < -20) { state = '冷淡'; stateColor = '#d0a060'; }
+    else { state = '和平'; stateColor = '#8fa8c4'; }
+
+    var row = document.createElement('div');
+    row.className = 'diplo-row';
+
+    var btnHtml = '';
+    if (war) {
+      btnHtml += '<button data-act="peace" data-id="' + i + '">求和</button>';
+    } else {
+      btnHtml += '<button data-act="war" data-id="' + i + '">宣战</button>';
+    }
+    if (!war && !ally && rel > 55) {
+      btnHtml += '<button data-act="ally" data-id="' + i + '">结盟</button>';
+    }
+    btnHtml += '<button data-act="gift" data-id="' + i + '">赠礼</button>';
+
+    row.innerHTML =
+      '<div class="dr-color" style="background:rgb(' + c.color.join(',') + ')"></div>' +
+      '<div class="dr-name">' + c.name + '</div>' +
+      '<div class="dr-stat">' +
+        '<span style="color:' + stateColor + '">' + state + '</span>' +
+        '<span>关系 ' + Math.round(rel) + '</span>' +
+        '<span>领土 ' + (landCount[i] || 0) + '</span>' +
+      '</div>' +
+      '<div class="dr-acts">' + btnHtml + '</div>';
+    diploList.appendChild(row);
+  }
+
+  if (!diploList.children.length) {
+    diploList.innerHTML = '<div style="text-align:center;color:#5c6b7d;padding:24px">暂无其他国家</div>';
+  }
+}
+
+diploList.addEventListener('click', function (e) {
+  var btn = e.target.closest ? e.target.closest('button') : null;
+  if (!btn) return;
+  var id = +btn.dataset.id;
+  var act = btn.dataset.act;
+
+  if (act === 'war') {
+    pushPendingWar(playerId, id);
+    diploEl.style.display = 'none';
+  }
+  else if (act === 'peace') {
+    var rel = relations[playerId][id];
+    var myPower = landCount[playerId] || 1;
+    var theirPower = landCount[id] || 1;
+    /* 求和接受逻辑：势均力敌必然接受；略有优势接受；极度劣势则拒绝 */
+    var accept;
+    if (myPower > theirPower * 0.92) accept = true;
+    else if (myPower > theirPower * 0.6) accept = rel > -25;
+    else if (rel > 10) accept = Math.random() < 0.35;
+    else accept = false;
+
+    if (accept) {
+      atWar[playerId][id] = atWar[id][playerId] = false;
+      setRel(playerId, id, Math.max(rel, -18));
+      toast(countries[id].name + ' 接受了和平');
+    } else {
+      addRel(playerId, id, -5);
+      toast(countries[id].name + ' 拒绝了你的求和');
+    }
+  }
+  else if (act === 'ally') {
+    var rel2 = relations[playerId][id];
+    var accept2 = rel2 > 65 && !atWar[playerId][id];
+    if (accept2) {
+      allied[playerId][id] = allied[id][playerId] = true;
+      addRel(playerId, id, 10);
+      toast('与 ' + countries[id].name + ' 结为同盟');
+    } else {
+      toast(countries[id].name + ' 拒绝了结盟');
+    }
+  }
+  else if (act === 'gift') {
+    var myCells = [];
+    for (var i = 0; i < TOTAL; i++)
+      if (owner[i] === playerId && troops[i] > 40) myCells.push(i);
+    if (myCells.length === 0) { toast('没有可调动的兵力'); return; }
+
+    var totalG = 0;
+    for (var k = 0; k < myCells.length; k++)
+      totalG += Math.min(troops[myCells[k]], 200);
+    if (totalG < 800) { toast('兵力不足 800'); return; }
+
+    var taken = 0;
+    for (var j = 0; j < myCells.length; j++) {
+      var cell = myCells[j];
+      var t = Math.min(troops[cell] - 20, (800 - taken) * (Math.min(troops[cell], 200) / totalG) + 1);
+      if (t > 0) { troops[cell] -= t; taken += t; }
+      if (taken >= 800) break;
+    }
+
+    addRel(playerId, id, 22);
+    toast('向 ' + countries[id].name + ' 赠送了 800 兵力');
+  }
+
+  buildDiploPanel();
+  updateHUD();
+});
+
+/* ══════════════════════════════════════════════
+   鼠标 / 相机
+══════════════════════════════════════════════ */
+var dragging = false, dragSX = 0, dragSY = 0, camSX = 0, camSY = 0, moved = 0;
+
+function screenToWorld(sx, sy) {
+  var z = cam.zoom;
+  return { x: (sx - VW/2) / z + cam.x, y: (sy - VH/2) / z + cam.y };
+}
+function worldToCell(wx, wy) {
+  var gx = Math.floor(wx / CELL), gy = Math.floor(wy / CELL);
+  
+  return gy*N + gx;
+}
+
+cv.addEventListener('mousedown', function (e) {
+  if (e.button !== 0) return;
+  dragging = true;
+  dragSX = e.clientX; dragSY = e.clientY;
+  camSX = cam.x; camSY = cam.y;
+  moved = 0;
+});
+
+window.addEventListener('mousemove', function (e) {
+  var w = screenToWorld(e.clientX, e.clientY);
+  mouseWX = w.x; mouseWY = w.y;
+
+  if (dragging) {
+    var dx = e.clientX - dragSX, dy = e.clientY - dragSY;
+    var d = Math.sqrt(dx*dx + dy*dy);
+    if (d > moved) moved = d;
+    cam.x = camSX - dx / cam.zoom;
+    cam.y = camSY - dy / cam.zoom;
+    clampCam();
+  }
+
+  var i = worldToCell(mouseWX, mouseWY);
+  var tip = document.getElementById('tooltip');
+  if (i >= 0 && !gameOver && owner) {
+    var o = owner[i];
+    var c = countries[o].color;
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX + 16) + 'px';
+    tip.style.top  = (e.clientY + 16) + 'px';
+
+    var stateStr = '';
+    if (o !== playerId && o !== 0) {
+      if (atWar[playerId][o]) stateStr = ' <span style="color:#ff9d9d">[战争]</span>';
+      else if (allied[playerId][o]) stateStr = ' <span style="color:#8fc9ff">[同盟]</span>';
+    }
+
+    tip.innerHTML =
+      '<span style="color:rgb(' + c.join(',') + ')">■</span> ' + countries[o].name + stateStr + '　' +
+      '<span class="t">' + TERRAIN[terrain[i]].name + '</span><br>' +
+      '<span class="t">守军</span> <b style="color:#eaf2ff">' + Math.round(troops[i]) + '</b>' +
+      '　<span class="t">人口</span> ' + Math.round(pop[i]).toLocaleString();
+  } else {
+    tip.style.display = 'none';
+  }
+});
+
+window.addEventListener('mouseup', function (e) {
+  if (e.button !== 0) { dragging = false; return; }
+  var wasDrag = moved >= 5;
+  dragging = false;
+  if (wasDrag) return;
+  if (gameOver || !terrain) return;
+
+  var w = screenToWorld(e.clientX, e.clientY);
+  var i = worldToCell(w.x, w.y);
+  if (i < 0) return;
+
+  if (missileMode) {
+    if (missileCount <= 0) { toggleMissile(); return; }
+    missileCount--;
+    launchMissile((i % N + 0.5) * CELL, ((i / N | 0) + 0.5) * CELL);
+    missileMode = false;
+    cv.style.cursor = 'crosshair';
+    toast('DF-5C 已发射');
+    updatePanel();
+    return;
+  }
+
+  selected = i;
+  updatePanel();
+});
+
+cv.addEventListener('mouseleave', function () {
+  dragging = false;
+  document.getElementById('tooltip').style.display = 'none';
+});
+
+cv.addEventListener('contextmenu', function (e) {
+  e.preventDefault();
+  if (missileMode) { toggleMissile(); return; }
+  if (gameOver || !terrain) return;
+  var w = screenToWorld(e.clientX, e.clientY);
+  var i = worldToCell(w.x, w.y);
+  if (i < 0) return;
+  openCQuery(owner[i]);
+});
+
+cv.addEventListener('wheel', function (e) {
+  e.preventDefault();
+  var oldZ = cam.zoom;
+  var factor = Math.exp(-e.deltaY * 0.0013);
+  var newZ = Math.max(0.04, Math.min(3.0, oldZ * factor));
+  if (newZ === oldZ) return;
+
+  var wx = (e.clientX - VW/2) / oldZ + cam.x;
+  var wy = (e.clientY - VH/2) / oldZ + cam.y;
+
+  cam.zoom = newZ;
+  cam.x = wx - (e.clientX - VW/2) / newZ;
+  cam.y = wy - (e.clientY - VH/2) / newZ;
+  clampCam();
+}, { passive: false });
+
+function clampCam() {
+  var m = WORLD * 0.2;
+  cam.x = Math.max(-m, Math.min(WORLD + m, cam.x));
+  cam.y = Math.max(-m, Math.min(WORLD + m, cam.y));
+}
+
+function zoomBy(f) {
+  cam.zoom = Math.max(0.04, Math.min(3.0, cam.zoom * f));
+  clampCam();
+}
+document.getElementById('zin').addEventListener('click', function () { zoomBy(1.35); });
+document.getElementById('zout').addEventListener('click', function () { zoomBy(1/1.35); });
+
+/* ══════════════════════════════════════════════
+   导弹模式
+══════════════════════════════════════════════ */
+function toggleMissile() {
+  if (gameOver) return;
+  if (missileCount <= 0) { toast('DF-5C 已耗尽'); return; }
+  missileMode = !missileMode;
+  toast(missileMode ? '选择核打击目标（左键发射 / 右键取消）' : '已取消导弹打击');
+  updatePanel();
+}
+
+/* ══════════════════════════════════════════════
+   键盘
+══════════════════════════════════════════════ */
+window.addEventListener('keydown', function (e) {
+  /* 方向键不做 toLowerCase（否则 ArrowLeft 变 arrowleft 永远匹配不到） */
+  var k = e.key || '';
+  if (k === 'ArrowLeft') {
+    e.preventDefault();
+    rankingType = (rankingType - 1 + RANK_TITLES.length) % RANK_TITLES.length;
+    updateRankbar();
+    return;
+  }
+  if (k === 'ArrowRight') {
+    e.preventDefault();
+    rankingType = (rankingType + 1) % RANK_TITLES.length;
+    updateRankbar();
+    return;
+  }
+  k = k.toLowerCase();
+  if (k === 'q') { e.preventDefault(); toggleMissile(); }
+  else if (k === 'escape') {
+    if (missileMode) toggleMissile();
+    selected = -1;
+    updatePanel();
+    diploEl.style.display = 'none';
+  }
+  else if (k === 'r') {
+    document.getElementById('start').style.display = 'flex';
+    document.getElementById('over').style.display = 'none';
+    diploEl.style.display = 'none';
+  }
+  else if (k === 'k') {
+    showFlags = !showFlags;   /* K 键开关旗帜显示 */
+  }
+  else if (k === 'z') {
+    showDivisions = !showDivisions;  /* Z 键开关师显示 */
+  }
+  else if (k === '1') {
+    showAlliances = !showAlliances;  /* 1 键开关联盟阵营显示 */
+    toast('联盟显示: ' + (showAlliances ? '开' : '关'));
+  }
+  else if (k === 'ArrowLeft') {
+    rankingType = (rankingType - 1 + RANK_TITLES.length) % RANK_TITLES.length;
+    updateRankbar();
+  }
+  else if (k === 'ArrowRight') {
+    rankingType = (rankingType + 1) % RANK_TITLES.length;
+    updateRankbar();
+  }
+  // X 键：切换开发者模式 / 开发者模式下调速
+  else if (k === 'x') {
+    isDevMode = !isDevMode;
+    if (isDevMode) toast('开发者模式已开启，+/- 调速 0.5x-20x，当前 ' + gameSpeed + 'x');
+    else toast('已退出开发者模式');
+  }
+  else if (isDevMode && (k === '=' || k === '+')) {
+    if (performance.now() - lastSpeedChange >= 200) {
+      speedIdx = Math.min(SPEED_LEVELS.length - 1, speedIdx + 1);
+      gameSpeed = SPEED_LEVELS[speedIdx];
+      toast('速度调节：' + gameSpeed + 'x');
+      lastSpeedChange = performance.now();
+    }
+  }
+  else if (isDevMode && (k === '-' || k === '_')) {
+    if (performance.now() - lastSpeedChange >= 200) {
+      speedIdx = Math.max(0, speedIdx - 1);
+      gameSpeed = SPEED_LEVELS[speedIdx];
+      toast('速度调节：' + gameSpeed + 'x');
+      lastSpeedChange = performance.now();
+    }
+  }
+});
+
+/* ══════════════════════════════════════════════
+   Toast / 结束界面
+══════════════════════════════════════════════ */
+var toastEl = document.getElementById('toast');
+var toastTimer = null;
+
+function toast(msg) {
+  /* 非模态悬浮：多条消息入队，逐条显示，不遮挡、不拦截输入 */
+  if (!msg) return;
+  if (!document.getElementById('toast-stack')) {
+    var stack = document.createElement('div');
+    stack.id = 'toast-stack';
+    document.body.appendChild(stack);
+  }
+  var stack = document.getElementById('toast-stack');
+  var item = document.createElement('div');
+  item.className = 'toast-item';
+  item.textContent = msg;
+  stack.appendChild(item);
+  item.classList.add('on');
+  if (stack.children.length > 4) stack.removeChild(stack.firstChild);
+  setTimeout(function () {
+    if (item.parentNode) item.parentNode.removeChild(item);
+  }, 2200);
+}
+
+function showOver(title, sub, color) {
+  document.getElementById('over-title').textContent = title;
+  document.getElementById('over-title').style.color = color;
+  document.getElementById('over-sub').textContent = sub;
+  document.getElementById('over').style.display = 'flex';
+}
+
+/* ══════════════════════════════════════════════
+   开始界面
+══════════════════════════════════════════════ */
+var chosenN = 500;
+
+/* 给 seed-input 自动填入当前随机种子（玩家每次开局都不一样） */
+(function initSeedInput() {
+  var seedEl = document.getElementById('map-seed');
+  if (seedEl) seedEl.value = String(Math.floor(Math.random() * 1e7 + 1));
+})();
+
+var mapBtns = document.querySelectorAll('#map-opts button');
+for (var mb = 0; mb < mapBtns.length; mb++) {
+  mapBtns[mb].addEventListener('click', function () {
+    for (var i = 0; i < mapBtns.length; i++) mapBtns[i].classList.remove('active');
+    this.classList.add('active');
+    chosenN = +this.dataset.n;
+  });
+}
+
+var aiRange = document.getElementById('ai-count');
+var aiVal = document.getElementById('ai-count-v');
+aiRange.addEventListener('input', function () { aiVal.textContent = aiRange.value; });
+
+document.getElementById('start-btn').addEventListener('click', function () {
+  try {
+    var seedEl = document.getElementById('map-seed');
+    var seed = seedEl ? seedEl.value.trim() : '';
+    newGame(chosenN, +aiRange.value, seed);
+  } catch (err) {
+    console.error('newGame error:', err);
+    alert('开局失败: ' + err.message);
+  }
+});
+
+document.getElementById('over-btn').addEventListener('click', function () {
+  document.getElementById('over').style.display = 'none';
+  document.getElementById('start').style.display = 'flex';
+});
+
+/* ══════════════════════════════════════════════
+   启动
+══════════════════════════════════════════════ */
+requestAnimationFrame(loop);
+
+/* 暴露给全局：解决 onclick 在 IIFE 外部无法调用 */
+window.closeWarDecl = closeWarDecl;
+window.alignWar = alignWar;
+window.exitWar = exitWar;
+
+})();
+</script>
+</body>
+</html>
